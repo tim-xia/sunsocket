@@ -42,7 +42,7 @@ namespace SunSocket.Framework.Protocol
         {
             this.loger = loger;
             if (BufferPool == null)
-                BufferPool = new FixedBufferPool(bufferPoolSize);
+                BufferPool = new FixedBufferPool(bufferSize,bufferPoolSize);
             ReceiveBuffers = new Queue<IFixedBuffer>();
             SendBuffer = new FixedBuffer(bufferPoolSize);
         }

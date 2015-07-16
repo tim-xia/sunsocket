@@ -42,7 +42,7 @@ namespace SunSocket.Framework.Protocol
         {
             this.loger = loger;
             if(BufferPool==null)
-                BufferPool = new FixedBufferPool(bufferPoolSize);
+                BufferPool = new FixedBufferPool(bufferSize,bufferPoolSize);
             ReceiveBuffers = new Queue<IFixedBuffer>();
             SendBuffer = new FixedBuffer(bufferPoolSize);
         }
@@ -250,17 +250,14 @@ namespace SunSocket.Framework.Protocol
         public void ReceiveComplate(object sender, SocketAsyncEventArgs receiveEventArgs)
         {
             Session.ActiveDateTime = DateTime.Now;
-            if (receiveEventArgs.SocketError == SocketError.Success)
+            if (receiveEventArgs.BytesTransferred > 0 && receiveEventArgs.SocketError == SocketError.Success)
             {
-                if (receiveEventArgs.BytesTransferred > 0) //处理接收数据
-                {
-                    if (!ProcessReceiveBuffer(receiveEventArgs.Buffer, receiveEventArgs.Offset, receiveEventArgs.BytesTransferred))
-                    { //如果处理数据返回失败，则断开连接
-                        lock (closeLock)
-                        {
-                            if (Session.Server != null)
-                                Session.Server.CloseSession(Session);
-                        }
+                if (!ProcessReceiveBuffer(receiveEventArgs.Buffer, receiveEventArgs.Offset, receiveEventArgs.BytesTransferred))
+                { //如果处理数据返回失败，则断开连接
+                    lock (closeLock)
+                    {
+                        if (Session.Server != null)
+                            Session.Server.CloseSession(Session);
                     }
                 }
                 Session.StartReceiveAsync();//再次等待接收数据
