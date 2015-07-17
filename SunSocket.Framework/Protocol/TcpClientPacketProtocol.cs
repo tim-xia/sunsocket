@@ -146,10 +146,19 @@ namespace SunSocket.Framework.Protocol
         {
             cmdQueue.Enqueue(cmd);
             if (Interlocked.Increment(ref isSend) == 1)
-                Task.Run(() =>
+            {
+                if (Session.ConnectSocket != null)
                 {
-                    SendProcess();
-                });
+                    Task.Run(() =>
+                    {
+                        SendProcess();
+                    });
+                }
+                else
+                {
+                    return false;
+                }
+            }
             else
             {
                 Interlocked.Decrement(ref isSend);
@@ -217,10 +226,17 @@ namespace SunSocket.Framework.Protocol
             if (surplus < SendBuffer.Buffer.Length)
             {
                 Session.SendEventArgs.SetBuffer(SendBuffer.Buffer, 0, SendBuffer.DataSize);
-                bool willRaiseEvent = Session.ConnectSocket.SendAsync(Session.SendEventArgs);
-                if (!willRaiseEvent)
+                if (Session.ConnectSocket != null)
                 {
-                    SendComplate(null, Session.SendEventArgs);
+                    bool willRaiseEvent = Session.ConnectSocket.SendAsync(Session.SendEventArgs);
+                    if (!willRaiseEvent)
+                    {
+                        SendComplate(null, Session.SendEventArgs);
+                    }
+                }
+                else
+                {
+                    Interlocked.Decrement(ref isSend);
                 }
             }
             else
