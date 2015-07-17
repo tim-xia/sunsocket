@@ -234,7 +234,8 @@ namespace SunSocket.Framework.Protocol
             if (sendEventArgs.SocketError == SocketError.Success)
             {
                 SendBuffer.Clear(); //清除已发送的包
-                SendProcess();//继续发送
+                if (Session.ConnectSocket != null)
+                    SendProcess();//继续发送
             }
             else
             {
