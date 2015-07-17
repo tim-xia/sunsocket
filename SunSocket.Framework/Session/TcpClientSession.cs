@@ -13,6 +13,7 @@ namespace SunSocket.Framework.Session
         EndPoint remoteEndPoint;
         byte[] receiveBuffer;
         ILoger loger;
+        bool isDis;
         public TcpClientSession(EndPoint remoteEndPoint, int bufferPoolSize, int bufferSize, ILoger loger)
         {
             this.loger = loger;
@@ -105,7 +106,8 @@ namespace SunSocket.Framework.Session
         public void DisConnect()
         {
             OnDisConnect(null, this);
-            
+            //释放引用，并清理缓存，包括释放协议对象等资源
+            PacketProtocol.Clear();
             if (ConnectSocket != null)
             try
             {
@@ -117,8 +119,6 @@ namespace SunSocket.Framework.Session
             }
             ConnectSocket.Close();
             ConnectSocket = null;
-            //释放引用，并清理缓存，包括释放协议对象等资源
-            PacketProtocol.Clear();
         }
         public void ReceiveCommond(ITcpClientSession session, ReceiveCommond cmd)
         {

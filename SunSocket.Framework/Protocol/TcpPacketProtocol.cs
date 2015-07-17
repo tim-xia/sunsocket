@@ -147,10 +147,19 @@ namespace SunSocket.Framework.Protocol
         {
             cmdQueue.Enqueue(cmd);
             if (Interlocked.Increment(ref isSend) == 1)
-                Task.Run(() =>
+            {
+                if (Session.ConnectSocket != null)
                 {
-                    SendProcess();
-                });
+                    Task.Run(() =>
+                    {
+                        SendProcess();
+                    });
+                }
+                else
+                {
+                    return false;
+                }
+            }
             else
             {
                 Interlocked.Decrement(ref isSend);
@@ -218,10 +227,17 @@ namespace SunSocket.Framework.Protocol
             if (surplus < SendBuffer.Buffer.Length)
             {
                 Session.SendEventArgs.SetBuffer(SendBuffer.Buffer, 0, SendBuffer.DataSize);
-                bool willRaiseEvent = Session.ConnectSocket.SendAsync(Session.SendEventArgs);
-                if (!willRaiseEvent)
+                if (Session.ConnectSocket != null)
                 {
-                    SendComplate(null,Session.SendEventArgs);
+                    bool willRaiseEvent = Session.ConnectSocket.SendAsync(Session.SendEventArgs);
+                    if (!willRaiseEvent)
+                    {
+                        SendComplate(null, Session.SendEventArgs);
+                    }
+                }
+                else
+                {
+                    Interlocked.Decrement(ref isSend);
                 }
             }
             else
@@ -250,9 +266,9 @@ namespace SunSocket.Framework.Protocol
 
         public void ReceiveComplate(object sender, SocketAsyncEventArgs receiveEventArgs)
         {
-            Session.ActiveDateTime = DateTime.Now;
             if (receiveEventArgs.BytesTransferred > 0 && receiveEventArgs.SocketError == SocketError.Success)
             {
+                Session.ActiveDateTime = DateTime.Now;
                 if (!ProcessReceiveBuffer(receiveEventArgs.Buffer, receiveEventArgs.Offset, receiveEventArgs.BytesTransferred))
                 { //如果处理数据返回失败，则断开连接
                     lock (closeLock)
@@ -274,33 +290,25 @@ namespace SunSocket.Framework.Protocol
         }
         public void Clear()
         {
-            while (true)
+            lock (clearLock)
             {
-                if (isSend == 0)
+                if (InterimPacketBuffer != null)
                 {
-                    lock (clearLock)
-                    {
-                        if (InterimPacketBuffer != null)
-                        {
-                            InterimPacketBuffer.Clear();
-                            BufferPool.Push(InterimPacketBuffer);
-                            InterimPacketBuffer = null;
-                        }
-                        while (ReceiveBuffers.Count > 0)
-                        {
-                            var packetBuffer = ReceiveBuffers.Dequeue();
-                            packetBuffer.Clear();
-                            BufferPool.Push(packetBuffer);
-                        }
-                    }
-                    SendBuffer.Clear();
-                    NoComplateCmd = null;
-                    alreadyReceivePacketLength = 0;
-                    needReceivePacketLenght = 0;
-                    break;
+                    InterimPacketBuffer.Clear();
+                    BufferPool.Push(InterimPacketBuffer);
+                    InterimPacketBuffer = null;
                 }
-                Thread.Sleep(10);
+                while (ReceiveBuffers.Count > 0)
+                {
+                    var packetBuffer = ReceiveBuffers.Dequeue();
+                    packetBuffer.Clear();
+                    BufferPool.Push(packetBuffer);
+                }
             }
+            SendBuffer.Clear();
+            NoComplateCmd = null;
+            alreadyReceivePacketLength = 0;
+            needReceivePacketLenght = 0;
         }
     }
 }

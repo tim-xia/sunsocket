@@ -92,6 +92,7 @@ namespace SunSocket.Framework.Session
         {
             try
             {
+                isDis = false;
                 bool willRaiseEvent = ConnectSocket.ReceiveAsync(ReceiveEventArgs); //投递接收请求
                 if (!willRaiseEvent)
                 {
