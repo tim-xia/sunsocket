@@ -105,10 +105,8 @@ namespace SunSocket.Framework.Session
         public void DisConnect()
         {
             OnDisConnect(null, this);
-            //释放引用，并清理缓存，包括释放协议对象等资源
-            PacketProtocol.Clear();
-            if (ConnectSocket == null)
-                return;
+            
+            if (ConnectSocket != null)
             try
             {
                 ConnectSocket.Shutdown(SocketShutdown.Both);
@@ -119,6 +117,8 @@ namespace SunSocket.Framework.Session
             }
             ConnectSocket.Close();
             ConnectSocket = null;
+            //释放引用，并清理缓存，包括释放协议对象等资源
+            PacketProtocol.Clear();
         }
         public void ReceiveCommond(ITcpClientSession session, ReceiveCommond cmd)
         {
