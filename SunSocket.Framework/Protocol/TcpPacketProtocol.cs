@@ -299,6 +299,7 @@ namespace SunSocket.Framework.Protocol
                     needReceivePacketLenght = 0;
                     break;
                 }
+                Thread.Sleep(10);
             }
         }
     }
