@@ -235,7 +235,8 @@ namespace SunSocket.Framework.Protocol
             if (sendEventArgs.SocketError == SocketError.Success)
             {
                 SendBuffer.Clear(); //清除已发送的包
-                SendProcess();//继续发送
+                if (Session.ConnectSocket != null)
+                    SendProcess();//继续发送
             }
             else
             {
@@ -273,25 +274,32 @@ namespace SunSocket.Framework.Protocol
         }
         public void Clear()
         {
-            SendBuffer.Clear();
-            lock (clearLock)
+            while (true)
             {
-                if (InterimPacketBuffer != null)
+                if (isSend == 0)
                 {
-                    InterimPacketBuffer.Clear();
-                    BufferPool.Push(InterimPacketBuffer);
-                    InterimPacketBuffer = null;
-                }
-                while (ReceiveBuffers.Count > 0)
-                {
-                    var packetBuffer = ReceiveBuffers.Dequeue();
-                    packetBuffer.Clear();
-                    BufferPool.Push(packetBuffer);
+                    lock (clearLock)
+                    {
+                        if (InterimPacketBuffer != null)
+                        {
+                            InterimPacketBuffer.Clear();
+                            BufferPool.Push(InterimPacketBuffer);
+                            InterimPacketBuffer = null;
+                        }
+                        while (ReceiveBuffers.Count > 0)
+                        {
+                            var packetBuffer = ReceiveBuffers.Dequeue();
+                            packetBuffer.Clear();
+                            BufferPool.Push(packetBuffer);
+                        }
+                    }
+                    SendBuffer.Clear();
+                    NoComplateCmd = null;
+                    alreadyReceivePacketLength = 0;
+                    needReceivePacketLenght = 0;
+                    break;
                 }
             }
-            NoComplateCmd = null;
-            alreadyReceivePacketLength = 0;
-            needReceivePacketLenght = 0;
         }
     }
 }
