@@ -37,7 +37,7 @@ namespace SunSocket
         {
             TcpSession session = sender as TcpSession;
             string msg = Encoding.UTF8.GetString(cmd.Data);
-            Console.WriteLine("sessionId:{0},cmdId:{1},msg:{2}", session.SessionId, cmd.CommondId, msg);
+           // Console.WriteLine("sessionId:{0},cmdId:{1},msg:{2}", session.SessionId, cmd.CommondId, msg);
             session.SendAsync(sdata);
         }
     }
