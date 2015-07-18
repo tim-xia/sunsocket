@@ -48,7 +48,7 @@ namespace SunSocket.Framework.Session
             ITcpSession session;
             if (!pool.TryPop(out session))
             {
-                if(count <= maxSessions)
+                if(count < maxSessions)
                 {
                     Interlocked.Increment(ref count);
                     session = new TcpSession(loger);

@@ -42,7 +42,7 @@ namespace SunSocket.Framework
             SocketAsyncEventArgs result;
             if (!pool.TryPop(out result))
             {
-                if (Interlocked.Increment(ref allCount) <= maxCount)
+                if (Interlocked.Increment(ref allCount) < maxCount)
                 {
                     result = new SocketAsyncEventArgs();
                     result.SetBuffer(new byte[bufferSize], 0, bufferSize);

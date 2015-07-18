@@ -270,15 +270,19 @@ namespace SunSocket.Framework.Protocol
             {
                 if (!ProcessReceiveBuffer(receiveEventArgs.Buffer, receiveEventArgs.Offset, receiveEventArgs.BytesTransferred))
                 { //如果处理数据返回失败，则断开连接
-                    lock (closeLock)
-                    {
-                        if (Session.ConnectSocket != null)
-                            Session.DisConnect();
-                    }
+                    DisConnect();
                 }
                 Session.StartReceiveAsync();//再次等待接收数据
             }
             else
+            {
+                DisConnect();
+            }
+        }
+        //断开连接
+        private void DisConnect()
+        {
+            if (Session.ConnectSocket != null)
             {
                 lock (closeLock)
                 {

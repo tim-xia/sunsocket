@@ -44,14 +44,21 @@ namespace SunSocket.Framework
         private void ProcessAccept(SocketAsyncEventArgs acceptEventArgs)
         {
             ITcpSession session = sessionPool.Pop();
-            session.Server = this;
-            OnlineList.TryAdd(session.SessionId, session);
-            session.ConnectSocket = acceptEventArgs.AcceptSocket;
-            session.ConnectDateTime = DateTime.Now;
-            session.ActiveDateTime = session.ConnectDateTime;
-            if (OnConnected != null)
-                OnConnected(this, session);//启动连接请求通过事件
-            session.StartReceiveAsync();//开始接收数据
+            if (session != null)
+            {
+                session.Server = this;
+                OnlineList.TryAdd(session.SessionId, session);
+                session.ConnectSocket = acceptEventArgs.AcceptSocket;
+                session.ConnectDateTime = DateTime.Now;
+                session.ActiveDateTime = session.ConnectDateTime;
+                if (OnConnected != null)
+                    OnConnected(this, session);//启动连接请求通过事件
+                session.StartReceiveAsync();//开始接收数据
+            }
+            else
+            {
+                acceptEventArgs.AcceptSocket.Disconnect(true);
+            }
             StartAccept(acceptEventArgs); //把当前异步事件释放，等待下次连接
         }
         public void ReceiveCommond(ITcpSession session, ReceiveCommond cmd)

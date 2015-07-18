@@ -21,7 +21,8 @@ namespace SunSocket.Client
             AsyncClient client = new AsyncClient(1024, 1024 * 4, new Loger());
             client.OnReceived+= ReceiveCommond;
             client.OnConnected += Connected;
-            client.Connect(new IPEndPoint(IPAddress.Parse("127.0.0.1"),9989));
+            client.OnDisConnect += DisConnected;
+            client.Connect(new IPEndPoint(IPAddress.Parse("127.0.0.1"),8088));
             Console.ReadLine();
             short i =0;
             while (i<5)
@@ -32,6 +33,10 @@ namespace SunSocket.Client
                 Session.SendAsync(new SendCommond() { CommondId = i, Buffer = data });
             }
             Console.ReadLine();
+        }
+        public static void DisConnected(object sender, ITcpClientSession session)
+        {
+            Console.WriteLine("与服务器断开连接");
         }
         public static void Connected(object sender, ITcpClientSession session)
         {

@@ -21,14 +21,14 @@ namespace SunSocket
             var loger = new Loger();
             var config = new TcpServerConfig();
             config.BufferSize = 1024 * 4;
-            config.MaxConnections = 100000;
+            config.MaxConnections = 0;
             Framework.Listener listener = new Framework.Listener(config,new ServerEndPoint() {Name="one",IP="127.0.0.1",Port=8088 }, loger);
             listener.AsyncServer.OnReceived += ReceiveCommond;
             listener.Start();
-            //Framework.Listener listenerOne = new Framework.Listener(config, new ServerEndPoint() { Name = "one", IP = "127.0.0.1", Port = 9988 }, loger);
-            //listenerOne.AsyncServer.OnReceived += ReceiveCommond;
-            //listenerOne.Start();
-            //Console.WriteLine("服务器已启动");
+            Framework.Listener listenerOne = new Framework.Listener(config, new ServerEndPoint() { Name = "one", IP = "127.0.0.1", Port = 9988 }, loger);
+            listenerOne.AsyncServer.OnReceived += ReceiveCommond;
+            listenerOne.Start();
+            Console.WriteLine("服务器已启动");
             Console.ReadLine();
         }
         static byte[] data = Encoding.UTF8.GetBytes("测试数据服务器返回");

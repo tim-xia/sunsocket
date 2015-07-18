@@ -271,20 +271,24 @@ namespace SunSocket.Framework.Protocol
                 Session.ActiveDateTime = DateTime.Now;
                 if (!ProcessReceiveBuffer(receiveEventArgs.Buffer, receiveEventArgs.Offset, receiveEventArgs.BytesTransferred))
                 { //如果处理数据返回失败，则断开连接
-                    lock (closeLock)
-                    {
-                        if (Session.Server != null)
-                            Session.Server.CloseSession(Session);
-                    }
+                    DisConnect();
                 }
                 Session.StartReceiveAsync();//再次等待接收数据
             }
             else
             {
+                DisConnect();
+            }
+        }
+        //断开连接
+        private void DisConnect()
+        {
+            if (Session.Server != null)
+            {
                 lock (closeLock)
                 {
                     if (Session.Server != null)
-                        Session.Server.CloseSession(Session);//断开连接
+                        Session.Server.CloseSession(Session);
                 }
             }
         }

@@ -105,7 +105,8 @@ namespace SunSocket.Framework.Session
         }
         public void DisConnect()
         {
-            OnDisConnect(null, this);
+            if (OnDisConnect != null)
+                OnDisConnect(null, this);
             //释放引用，并清理缓存，包括释放协议对象等资源
             PacketProtocol.Clear();
             if (ConnectSocket != null)
