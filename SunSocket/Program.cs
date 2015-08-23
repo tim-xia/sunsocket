@@ -21,8 +21,8 @@ namespace SunSocket
             var loger = new Loger();
             var config = new TcpServerConfig();
             config.BufferSize = 1024 * 4;
-            config.MaxConnections = 0;
-            Framework.Listener listener = new Framework.Listener(config,new ServerEndPoint() {Name="one",IP="127.0.0.1",Port=8088 }, loger);
+            config.MaxConnections = 40000;
+            Framework.Listener listener = new Framework.Listener(config,new ServerEndPoint() {Name="one",IP="127.0.0.1",Port=8088}, loger);
             listener.AsyncServer.OnReceived += ReceiveCommond;
             listener.Start();
             Framework.Listener listenerOne = new Framework.Listener(config, new ServerEndPoint() { Name = "one", IP = "127.0.0.1", Port = 9988 }, loger);

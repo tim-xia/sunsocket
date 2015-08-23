@@ -68,6 +68,8 @@ namespace SunSocket.Framework.Session
             set {
                 packetProtocol = value;
                 packetProtocol.Session = this;
+                SendEventArgs.Completed += packetProtocol.SendComplate;//数据发送完成事件
+                ReceiveEventArgs.Completed += packetProtocol.ReceiveComplate;
             }
         }
 

@@ -146,7 +146,7 @@ namespace SunSocket.Framework.Protocol
         public bool SendAsync(SendCommond cmd)
         {
             cmdQueue.Enqueue(cmd);
-            if (Interlocked.Increment(ref isSend) == 1)
+            if (Interlocked.Increment(ref isSend) >0)
             {
                 if (Session.ConnectSocket != null)
                 {
@@ -229,10 +229,17 @@ namespace SunSocket.Framework.Protocol
                 Session.SendEventArgs.SetBuffer(SendBuffer.Buffer, 0, SendBuffer.DataSize);
                 if (Session.ConnectSocket != null)
                 {
-                    bool willRaiseEvent = Session.ConnectSocket.SendAsync(Session.SendEventArgs);
-                    if (!willRaiseEvent)
+                    try
                     {
-                        SendComplate(null, Session.SendEventArgs);
+                        bool willRaiseEvent = Session.ConnectSocket.SendAsync(Session.SendEventArgs);
+                        if (!willRaiseEvent)
+                        {
+                            SendComplate(null, Session.SendEventArgs);
+                        }
+                    }
+                    catch
+                    {
+                        DisConnect();
                     }
                 }
                 else
@@ -258,8 +265,7 @@ namespace SunSocket.Framework.Protocol
             {
                 lock(closeLock)
                 {
-                    if (Session.Server != null)
-                        Session.Server.CloseSession(Session);
+                    DisConnect();
                 }
             }
         }
@@ -296,6 +302,8 @@ namespace SunSocket.Framework.Protocol
         {
             lock (clearLock)
             {
+                isSend = 0;
+                cmdQueue.Clear();//清空未发送命令
                 if (InterimPacketBuffer != null)
                 {
                     InterimPacketBuffer.Clear();
