@@ -22,10 +22,10 @@ namespace SunSocket
             var config = new TcpServerConfig();
             config.BufferSize = 1024 * 4;
             config.MaxConnections = 40000;
-            Framework.Listener listener = new Framework.Listener(config,new ServerEndPoint() {Name="one",IP="127.0.0.1",Port=8088}, loger);
+            Framework.Listener listener = new Framework.Listener(config,new ServerEndPoint() {Name="one",IP="192.168.199.236",Port=8088}, loger);
             listener.AsyncServer.OnReceived += ReceiveCommond;
             listener.Start();
-            Framework.Listener listenerOne = new Framework.Listener(config, new ServerEndPoint() { Name = "one", IP = "127.0.0.1", Port = 9988 }, loger);
+            Framework.Listener listenerOne = new Framework.Listener(config, new ServerEndPoint() { Name = "one", IP = "192.168.199.236", Port = 9988 }, loger);
             listenerOne.AsyncServer.OnReceived += ReceiveCommond;
             listenerOne.Start();
             Console.WriteLine("服务器已启动");
@@ -36,9 +36,12 @@ namespace SunSocket
         public static void ReceiveCommond(object sender, ReceiveCommond cmd)
         {
             TcpSession session = sender as TcpSession;
-            string msg = Encoding.UTF8.GetString(cmd.Data);
-           // Console.WriteLine("sessionId:{0},cmdId:{1},msg:{2}", session.SessionId, cmd.CommondId, msg);
-            session.SendAsync(sdata);
+            //string msg = Encoding.UTF8.GetString(cmd.Data);
+            //Console.WriteLine("sessionId:{0},cmdId:{1},msg:{2}", session.SessionId, cmd.CommondId, msg);
+            for (int i = 0; i < 5; i++)
+            {
+                session.SendAsync(sdata);
+            }
         }
     }
     public class Loger : ILoger

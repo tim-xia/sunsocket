@@ -36,7 +36,7 @@ namespace SunSocket.Framework.Protocol
         }
 
         private SendCommond NoComplateCmd = null;//未完全发送指令
-        int isSend = 0;//发送状态
+        bool isSend = false;//发送状态
         private Queue<SendCommond> cmdQueue = new Queue<SendCommond>();//指令发送队列
         public TcpPacketProtocol(int bufferSize,int bufferPoolSize,ILoger loger)
         {
@@ -142,27 +142,30 @@ namespace SunSocket.Framework.Protocol
            
             return count == 0;
         }
-
+        object lockObj = new object();
         public bool SendAsync(SendCommond cmd)
         {
             cmdQueue.Enqueue(cmd);
-            if (Interlocked.Increment(ref isSend) >0)
+            if (!isSend)
             {
-                if (Session.ConnectSocket != null)
+                lock(lockObj)
                 {
-                    Task.Run(() =>
+                    if (!isSend)
                     {
-                        SendProcess();
-                    });
+                        isSend = true;
+                        if (Session.ConnectSocket != null)
+                        {
+                            Task.Run(() =>
+                            {
+                                SendProcess();
+                            });
+                        }
+                        else
+                        {
+                            return false;
+                        }
+                    }
                 }
-                else
-                {
-                    return false;
-                }
-            }
-            else
-            {
-                Interlocked.Decrement(ref isSend);
             }
             return true;
         }
@@ -244,12 +247,12 @@ namespace SunSocket.Framework.Protocol
                 }
                 else
                 {
-                    Interlocked.Decrement(ref isSend);
+                    isSend = false;
                 }
             }
             else
             {
-                Interlocked.Decrement(ref isSend);
+                isSend = false;
             }
         }
         public void SendComplate(object sender, SocketAsyncEventArgs sendEventArgs)
@@ -259,7 +262,9 @@ namespace SunSocket.Framework.Protocol
             {
                 SendBuffer.Clear(); //清除已发送的包
                 if (Session.ConnectSocket != null)
+                {
                     SendProcess();//继续发送
+                }
             }
             else
             {
@@ -302,7 +307,7 @@ namespace SunSocket.Framework.Protocol
         {
             lock (clearLock)
             {
-                isSend = 0;
+                isSend = false;
                 cmdQueue.Clear();//清空未发送命令
                 if (InterimPacketBuffer != null)
                 {
