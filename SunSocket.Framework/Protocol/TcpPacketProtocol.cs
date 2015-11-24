@@ -312,9 +312,9 @@ namespace SunSocket.Framework.Protocol
             lock (clearLock)
             {
                 isSend = false;
-                SendCommond cmd;
                 if (cmdQueue.Count > 0)
                 {
+                    SendCommond cmd;
                     while (cmdQueue.TryDequeue(out cmd))
                     {
                     }
