@@ -4,17 +4,16 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{A93A33A2-C87B-46BC-B30B-3CA7931C374B}</ProjectGuid>
-    <OutputType>Exe</OutputType>
+    <ProjectGuid>{4F9ABB08-20FD-4592-A1FD-C8B99B5A850A}</ProjectGuid>
+    <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>SunSocket.Client</RootNamespace>
     <AssemblyName>SunSocket.Client</AssemblyName>
     <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
-    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
@@ -24,7 +23,6 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
@@ -43,20 +41,18 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Program.cs" />
+    <Compile Include="AsyncClient.cs" />
+    <Compile Include="Interface\IAsyncClient.cs" />
+    <Compile Include="Interface\ITcpClientPacketProtocol.cs" />
+    <Compile Include="Interface\ITcpClientSession.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="App.config" />
+    <Compile Include="Protocol\TcpClientPacketProtocol.cs" />
+    <Compile Include="TcpClientSession.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\SunSocket.Core\SunSocket.Core.csproj">
       <Project>{4f79dd3a-608b-4422-8689-f36849978477}</Project>
       <Name>SunSocket.Core</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\SunSocket.Framework\SunSocket.Framework.csproj">
-      <Project>{1c5a17aa-3fbe-4c65-b148-28a2bfd35c21}</Project>
-      <Name>SunSocket.Framework</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

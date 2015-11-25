@@ -4,15 +4,17 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{4F79DD3A-608B-4422-8689-F36849978477}</ProjectGuid>
-    <OutputType>Library</OutputType>
+    <ProjectGuid>{D71E1FF0-869E-450C-8AA6-93E044D4EF7E}</ProjectGuid>
+    <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>SunSocket.Core</RootNamespace>
-    <AssemblyName>SunSocket.Core</AssemblyName>
+    <RootNamespace>SunSocket</RootNamespace>
+    <AssemblyName>SunSocket</AssemblyName>
     <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
@@ -22,20 +24,19 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>x64</PlatformTarget>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Autofac, Version=3.5.0.0, Culture=neutral, PublicKeyToken=17863af14b0044da, processorArchitecture=MSIL">
-      <HintPath>..\packages\Autofac.3.5.2\lib\net40\Autofac.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.ServiceModel" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -44,24 +45,21 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Buffer\DynamicBuffer.cs" />
-    <Compile Include="Buffer\FixedBuffer.cs" />
-    <Compile Include="Buffer\FixedBufferPool.cs" />
-    <Compile Include="Interface\IFixedBuffer.cs" />
-    <Compile Include="DI\CoreIoc.cs" />
-    <Compile Include="Interface\IDynamicBuffer.cs" />
-    <Compile Include="Interface\ILoger.cs" />
-    <Compile Include="Interface\IPool.cs" />
-    <Compile Include="ObjectId.cs" />
-    <Compile Include="Protocol\SendCommond.cs" />
-    <Compile Include="Interface\ICmdOperation.cs" />
-    <Compile Include="Protocol\ReceiveCommond.cs" />
+    <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Session\DataContainer.cs" />
   </ItemGroup>
-  <ItemGroup />
   <ItemGroup>
-    <None Include="packages.config" />
+    <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\SunSocket.Core\SunSocket.Core.csproj">
+      <Project>{4f79dd3a-608b-4422-8689-f36849978477}</Project>
+      <Name>SunSocket.Core</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\SunSocket.Server\SunSocket.Server.csproj">
+      <Project>{1c5a17aa-3fbe-4c65-b148-28a2bfd35c21}</Project>
+      <Name>SunSocket.Server</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
