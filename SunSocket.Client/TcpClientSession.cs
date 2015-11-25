@@ -15,7 +15,6 @@ namespace SunSocket.Client
         EndPoint remoteEndPoint;
         byte[] receiveBuffer;
         ILoger loger;
-        bool isDis;
         public TcpClientSession(EndPoint remoteEndPoint, int bufferPoolSize, int bufferSize, ILoger loger)
         {
             this.loger = loger;

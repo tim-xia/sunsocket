@@ -1,38 +1,60 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
+using System.Collections.Concurrent;
 using System.Net;
-using System.Net.Sockets;
 using SunSocket.Client;
 using SunSocket.Core.Interface;
 using SunSocket.Core.Protocol;
 using SunSocket.Client.Interface;
-using SunSocket.Core.Session;
 
-namespace SunSocket.Client
+namespace TcpClient
 {
     class Program
     {
         static ITcpClientSession Session;
+        static ConcurrentQueue<ReceiveCommond> CmdList = new ConcurrentQueue<ReceiveCommond>();
+        static CancellationTokenSource cancelSource;
         static void Main(string[] args)
         {
             AsyncClient client = new AsyncClient(1024, 1024 * 4, new Loger());
-            client.OnReceived+= ReceiveCommond;
+            client.OnReceived += ReceiveCommond;
             client.OnConnected += Connected;
             client.OnDisConnect += DisConnected;
-            client.Connect(new IPEndPoint(IPAddress.Parse("127.0.0.1"),8088));
+            client.Connect(new IPEndPoint(IPAddress.Parse("127.0.0.1"), 8088));
             Console.ReadLine();
-            short i =0;
-            while (i<5)
+            short i = 0;
+            while (i < 5)
             {
                 Task.Delay(1).Wait();
                 i++;
-                var data = Encoding.UTF8.GetBytes("测试数据"+i);
-                Session.SendAsync(new SendCommond() { CommondId = i, Buffer = data });
+                var data = Encoding.UTF8.GetBytes("测试数据" + i);
+                try
+                {
+                    var result = SendAsync(data).Result;
+                    //Console.WriteLine(Encoding.UTF8.GetString(result.Data));
+                }
+                catch
+                {
+                    Console.WriteLine("请求超时");
+                }        
             }
+            Console.WriteLine("处理完成");
             Console.ReadLine();
+        }
+        static TaskCompletionSource<ReceiveCommond> tSource;
+        public static async Task<ReceiveCommond> SendAsync(byte[] data)
+        {
+            tSource = new TaskCompletionSource<ReceiveCommond>();
+            cancelSource = new CancellationTokenSource(5000);
+            Session.SendAsync(new SendCommond() { CommondId = 1, Buffer = data });
+            //if (!tSource.Task.IsCompleted)
+            //{
+            //    return null;
+            //}
+            tSource.Task.Wait(cancelSource.Token);
+            return await tSource.Task;
         }
         public static void DisConnected(object sender, ITcpClientSession session)
         {
@@ -45,10 +67,11 @@ namespace SunSocket.Client
         }
         public static void ReceiveCommond(object sender, ReceiveCommond cmd)
         {
-            TcpClientSession session = sender as TcpClientSession;
-            string msg = Encoding.UTF8.GetString(cmd.Data);
+            tSource.SetResult(cmd);
+            //TcpClientSession session = sender as TcpClientSession;
+            //string msg = Encoding.UTF8.GetString(cmd.Data);
             //li.Add(string.Format("sessionId:{0},cmdId:{1},msg:{2}", session.SessionId, cmd.CommondId, msg));
-            Console.WriteLine("sessionId:{0},cmdId:{1},msg:{2}", session.SessionId, cmd.CommondId, msg);
+            //Console.WriteLine("sessionId:{0},cmdId:{1},msg:{2}", session.SessionId, cmd.CommondId, msg);
         }
     }
     public class Loger : ILoger
@@ -119,3 +142,4 @@ namespace SunSocket.Client
         }
     }
 }
+
