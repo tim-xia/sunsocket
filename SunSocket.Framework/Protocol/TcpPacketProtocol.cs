@@ -236,17 +236,10 @@ namespace SunSocket.Framework.Protocol
                 Session.SendEventArgs.SetBuffer(SendBuffer.Buffer, 0, SendBuffer.DataSize);
                 if (Session.ConnectSocket != null)
                 {
-                    try
+                    bool willRaiseEvent = Session.ConnectSocket.SendAsync(Session.SendEventArgs);
+                    if (!willRaiseEvent)
                     {
-                        bool willRaiseEvent = Session.ConnectSocket.SendAsync(Session.SendEventArgs);
-                        if (!willRaiseEvent)
-                        {
-                            SendComplate(null, Session.SendEventArgs);
-                        }
-                    }
-                    catch
-                    {
-                        DisConnect();
+                        SendComplate(null, Session.SendEventArgs);
                     }
                 }
                 else

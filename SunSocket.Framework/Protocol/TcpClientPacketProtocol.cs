@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Concurrent;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Net;
@@ -36,8 +37,8 @@ namespace SunSocket.Framework.Protocol
         }
 
         private SendCommond NoComplateCmd = null;//未完全发送指令
-        int isSend = 0;//发送状态
-        private Queue<SendCommond> cmdQueue = new Queue<SendCommond>();//指令发送队列
+        bool isSend = false;//发送状态
+        private ConcurrentQueue<SendCommond> cmdQueue = new ConcurrentQueue<SendCommond>();//指令发送队列
         public TcpClientPacketProtocol(int bufferSize, int bufferPoolSize,ILoger loger)
         {
             this.loger = loger;
@@ -141,27 +142,30 @@ namespace SunSocket.Framework.Protocol
             }
             return count == 0;
         }
-
+        object lockObj = new object();
         public bool SendAsync(SendCommond cmd)
         {
             cmdQueue.Enqueue(cmd);
-            if (Interlocked.Increment(ref isSend) == 1)
+            if (!isSend)
             {
-                if (Session.ConnectSocket != null)
+                lock (lockObj)
                 {
-                    Task.Run(() =>
+                    if (!isSend)
                     {
-                        SendProcess();
-                    });
+                        isSend = true;
+                        if (Session.ConnectSocket != null)
+                        {
+                            Task.Run(() =>
+                            {
+                                SendProcess();
+                            });
+                        }
+                        else
+                        {
+                            return false;
+                        }
+                    }
                 }
-                else
-                {
-                    return false;
-                }
-            }
-            else
-            {
-                Interlocked.Decrement(ref isSend);
             }
             return true;
         }
@@ -190,32 +194,35 @@ namespace SunSocket.Framework.Protocol
                 }
                 if (surplus >= intByteLength)
                 {
-                    var cmd = cmdQueue.Dequeue();
-                    var cmdAllLength = cmd.Buffer.Length + checkandCmdLength;
-                    if (cmdAllLength <= surplus)
+                    SendCommond cmd;
+                    if (cmdQueue.TryDequeue(out cmd))
                     {
-                        SendBuffer.WriteInt(cmd.Buffer.Length+shortByteLength, false); //写入总大小
-                        SendBuffer.WriteShort(cmd.CommondId, false); //写入命令编号
-                        SendBuffer.WriteBuffer(cmd.Buffer); //写入命令内容
-                        surplus -= cmdAllLength;
-                    }
-                    else
-                    {
-                        SendBuffer.WriteInt(cmd.Buffer.Length, false); //写入总大小
-
-                        surplus -= cmd.Buffer.Length;
-
-                        if (surplus >= shortByteLength)
+                        var cmdAllLength = cmd.Buffer.Length + checkandCmdLength;
+                        if (cmdAllLength <= surplus)
                         {
+                            SendBuffer.WriteInt(cmd.Buffer.Length + shortByteLength, false); //写入总大小
                             SendBuffer.WriteShort(cmd.CommondId, false); //写入命令编号
-                            surplus -= shortByteLength;
+                            SendBuffer.WriteBuffer(cmd.Buffer); //写入命令内容
+                            surplus -= cmdAllLength;
                         }
-                        if (surplus > 0)
+                        else
                         {
-                            SendBuffer.WriteBuffer(cmd.Buffer, cmd.Offset, surplus); //写入命令内容
-                            cmd.Offset = surplus;
+                            SendBuffer.WriteInt(cmd.Buffer.Length, false); //写入总大小
+
+                            surplus -= cmd.Buffer.Length;
+
+                            if (surplus >= shortByteLength)
+                            {
+                                SendBuffer.WriteShort(cmd.CommondId, false); //写入命令编号
+                                surplus -= shortByteLength;
+                            }
+                            if (surplus > 0)
+                            {
+                                SendBuffer.WriteBuffer(cmd.Buffer, cmd.Offset, surplus); //写入命令内容
+                                cmd.Offset = surplus;
+                            }
+                            NoComplateCmd = cmd;//把未全部发送指令缓存
                         }
-                        NoComplateCmd = cmd;//把未全部发送指令缓存
                     }
                 }
                 else
@@ -236,12 +243,12 @@ namespace SunSocket.Framework.Protocol
                 }
                 else
                 {
-                    Interlocked.Decrement(ref isSend);
+                    isSend = false;
                 }
             }
             else
             {
-                Interlocked.Decrement(ref isSend);
+                isSend = false;
             }
         }
         public void SendComplate(object sender, SocketAsyncEventArgs sendEventArgs)
@@ -296,6 +303,14 @@ namespace SunSocket.Framework.Protocol
             SendBuffer.Clear();
             lock (clearLock)
             {
+                isSend = false;
+                if (cmdQueue.Count > 0)
+                {
+                    SendCommond cmd;
+                    while (cmdQueue.TryDequeue(out cmd))
+                    {
+                    }
+                }
                 if (InterimPacketBuffer != null)
                 {
                     InterimPacketBuffer.Clear();
