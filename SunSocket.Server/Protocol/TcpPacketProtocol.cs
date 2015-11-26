@@ -15,7 +15,7 @@ namespace SunSocket.Server.Protocol
 {
     public class TcpPacketProtocol : ITcpPacketProtocol
     {
-        object closeLock = new object();
+       
         bool NetByteOrder = false;
         static int intByteLength = sizeof(int), shortByteLength = sizeof(short);
         static int checkandCmdLength = intByteLength + shortByteLength;
@@ -47,7 +47,7 @@ namespace SunSocket.Server.Protocol
             ReceiveBuffers = new Queue<IFixedBuffer>();
             SendBuffer = new FixedBuffer(bufferPoolSize);
         }
-        private bool ProcessReceiveBuffer(byte[] receiveBuffer, int offset, int count)
+        public bool ProcessReceiveBuffer(byte[] receiveBuffer, int offset, int count)
         {
             while (count > 0)
             {
@@ -171,7 +171,7 @@ namespace SunSocket.Server.Protocol
             return true;
         }
 
-        private void SendProcess()
+        public void SendProcess()
         {
             int surplus = SendBuffer.Buffer.Length;
             while (cmdQueue.Count > 0)
@@ -239,7 +239,7 @@ namespace SunSocket.Server.Protocol
                     bool willRaiseEvent = Session.ConnectSocket.SendAsync(Session.SendEventArgs);
                     if (!willRaiseEvent)
                     {
-                        SendComplate(null, Session.SendEventArgs);
+                        Session.SendComplate();
                     }
                 }
                 else
@@ -250,54 +250,6 @@ namespace SunSocket.Server.Protocol
             else
             {
                 isSend = false;
-            }
-        }
-        public void SendComplate(object sender, SocketAsyncEventArgs sendEventArgs)
-        {
-            Session.ActiveDateTime = DateTime.Now;//发送数据视为活跃
-            if (sendEventArgs.SocketError == SocketError.Success)
-            {
-                SendBuffer.Clear(); //清除已发送的包
-                if (Session.ConnectSocket != null)
-                {
-                    SendProcess();//继续发送
-                }
-            }
-            else
-            {
-                lock(closeLock)
-                {
-                    DisConnect();
-                }
-            }
-        }
-
-        public void ReceiveComplate(object sender, SocketAsyncEventArgs receiveEventArgs)
-        {
-            if (receiveEventArgs.BytesTransferred > 0 && receiveEventArgs.SocketError == SocketError.Success)
-            {
-                Session.ActiveDateTime = DateTime.Now;
-                if (!ProcessReceiveBuffer(receiveEventArgs.Buffer, receiveEventArgs.Offset, receiveEventArgs.BytesTransferred))
-                { //如果处理数据返回失败，则断开连接
-                    DisConnect();
-                }
-                Session.StartReceiveAsync();//再次等待接收数据
-            }
-            else
-            {
-                DisConnect();
-            }
-        }
-        //断开连接
-        private void DisConnect()
-        {
-            if (Session.Server != null)
-            {
-                lock (closeLock)
-                {
-                    if (Session.Server != null)
-                        Session.Server.CloseSession(Session);
-                }
             }
         }
         public void Clear()

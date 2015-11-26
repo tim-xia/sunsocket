@@ -19,8 +19,18 @@ namespace SunSocket.Client.Interface
         /// <param name="cmd"></param>
         /// <returns></returns>
         bool SendAsync(SendCommond cmd);
-        void SendComplate(object sender, SocketAsyncEventArgs sendEventArgs);
-        void ReceiveComplate(object sender, SocketAsyncEventArgs receiveEventArgs);
+        /// <summary>
+        /// 处理接收数据
+        /// </summary>
+        /// <param name="receiveBuffer"></param>
+        /// <param name="offset"></param>
+        /// <param name="count"></param>
+        /// <returns></returns>
+        bool ProcessReceiveBuffer(byte[] receiveBuffer, int offset, int count);
+        /// <summary>
+        /// 继续处理需要发送的数据
+        /// </summary>
+        void SendProcess();
         /// <summary>
         /// 清空session
         /// </summary>

@@ -48,6 +48,10 @@ namespace SunSocket.Client.Interface
         /// </summary>
         void StartReceiveAsync();
         /// <summary>
+        /// 发送完成通知
+        /// </summary>
+        void SendComplate();
+        /// <summary>
         /// 连接
         /// </summary>
         void Connect();

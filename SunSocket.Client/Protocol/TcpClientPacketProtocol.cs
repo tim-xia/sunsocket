@@ -45,7 +45,7 @@ namespace SunSocket.Client.Protocol
             ReceiveBuffers = new Queue<IFixedBuffer>();
             SendBuffer = new FixedBuffer(bufferPoolSize);
         }
-        private bool ProcessReceiveBuffer(byte[] receiveBuffer, int offset, int count)
+        public bool ProcessReceiveBuffer(byte[] receiveBuffer, int offset, int count)
         {
             while (count > 0)
             {
@@ -168,7 +168,7 @@ namespace SunSocket.Client.Protocol
             return true;
         }
 
-        private void SendProcess()
+        public void SendProcess()
         {
             int surplus = SendBuffer.Buffer.Length;
             while (cmdQueue.Count > 0)
@@ -236,7 +236,7 @@ namespace SunSocket.Client.Protocol
                     bool willRaiseEvent = Session.ConnectSocket.SendAsync(Session.SendEventArgs);
                     if (!willRaiseEvent)
                     {
-                        SendComplate(null, Session.SendEventArgs);
+                        Session.SendComplate();
                     }
                 }
                 else
@@ -247,41 +247,6 @@ namespace SunSocket.Client.Protocol
             else
             {
                 isSend = false;
-            }
-        }
-        public void SendComplate(object sender, SocketAsyncEventArgs sendEventArgs)
-        {
-            Session.ActiveDateTime = DateTime.Now;//发送数据视为活跃
-            if (sendEventArgs.SocketError == SocketError.Success)
-            {
-                SendBuffer.Clear(); //清除已发送的包
-                if (Session.ConnectSocket != null)
-                    SendProcess();//继续发送
-            }
-            else
-            {
-                lock (closeLock)
-                {
-                    if (Session.ConnectSocket != null)
-                        Session.DisConnect();
-                }
-            }
-        }
-
-        public void ReceiveComplate(object sender, SocketAsyncEventArgs receiveEventArgs)
-        {
-            Session.ActiveDateTime = DateTime.Now;
-            if (receiveEventArgs.BytesTransferred > 0 && receiveEventArgs.SocketError == SocketError.Success)
-            {
-                if (!ProcessReceiveBuffer(receiveEventArgs.Buffer, receiveEventArgs.Offset, receiveEventArgs.BytesTransferred))
-                { //如果处理数据返回失败，则断开连接
-                    DisConnect();
-                }
-                Session.StartReceiveAsync();//再次等待接收数据
-            }
-            else
-            {
-                DisConnect();
             }
         }
         //断开连接

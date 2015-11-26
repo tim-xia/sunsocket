@@ -41,8 +41,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AsyncClient.cs" />
-    <Compile Include="Interface\IAsyncClient.cs" />
     <Compile Include="Interface\ITcpClientPacketProtocol.cs" />
     <Compile Include="Interface\ITcpClientSession.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

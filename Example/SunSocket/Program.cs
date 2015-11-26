@@ -48,6 +48,8 @@ namespace SunSocket
             //Console.WriteLine("sessionId:{0},cmdId:{1},msg:{2}", session.SessionId, cmd.CommondId, msg);
             //for (int i = 0; i < 50; i++)
             //{
+            sdata.Buffer = cmd.Data;
+           // Thread.Sleep(4000);
                 session.SendAsync(sdata);
             //}
         }

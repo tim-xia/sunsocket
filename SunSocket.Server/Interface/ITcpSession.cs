@@ -50,16 +50,12 @@ namespace SunSocket.Server.Interface
         /// </summary>
         void StartReceiveAsync();
         /// <summary>
+        /// 发送完成通知
+        /// </summary>
+        void SendComplate();
+        /// <summary>
         /// 清空session
         /// </summary>
         void Clear();
-        /// <summary>
-        /// soket接受数据完成事件
-        /// </summary>
-        event EventHandler<SocketAsyncEventArgs> OnSocketReceived;
-        /// <summary>
-        /// 接受数据处理完成事件(t1:)
-        /// </summary>
-        event Action<string, byte[], ITcpSession> OnReceiveProcessed;
     }
 }

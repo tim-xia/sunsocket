@@ -18,22 +18,21 @@ namespace TcpClient
         static CancellationTokenSource cancelSource;
         static void Main(string[] args)
         {
-            AsyncClient client = new AsyncClient(1024, 1024 * 4, new Loger());
-            client.OnReceived += ReceiveCommond;
-            client.OnConnected += Connected;
-            client.OnDisConnect += DisConnected;
-            client.Connect(new IPEndPoint(IPAddress.Parse("127.0.0.1"), 8088));
+            TcpClientSession session = new TcpClientSession(new IPEndPoint(IPAddress.Parse("127.0.0.1"), 8088), 1024, 1024 * 4, new Loger());
+            session.OnReceived += ReceiveCommond;
+            session.OnConnected += Connected;
+            session.OnDisConnect += DisConnected;
+            session.Connect();
             Console.ReadLine();
             short i = 0;
-            while (i < 5)
+            while (i < 500)
             {
-                Task.Delay(1).Wait();
                 i++;
                 var data = Encoding.UTF8.GetBytes("测试数据" + i);
                 try
                 {
                     var result = SendAsync(data).Result;
-                    //Console.WriteLine(Encoding.UTF8.GetString(result.Data));
+                    Console.WriteLine(Encoding.UTF8.GetString(result.Data));
                 }
                 catch
                 {

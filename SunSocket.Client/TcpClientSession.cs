@@ -15,6 +15,7 @@ namespace SunSocket.Client
         EndPoint remoteEndPoint;
         byte[] receiveBuffer;
         ILoger loger;
+        object closeLock = new object();
         public TcpClientSession(EndPoint remoteEndPoint, int bufferPoolSize, int bufferSize, ILoger loger)
         {
             this.loger = loger;
@@ -26,7 +27,7 @@ namespace SunSocket.Client
             SendEventArgs.RemoteEndPoint = remoteEndPoint;
             PacketProtocol = new TcpClientPacketProtocol(bufferSize, bufferPoolSize, loger);
             PacketProtocol.Session = this;
-            SendEventArgs.Completed += PacketProtocol.SendComplate;//数据发送完成事件
+            SendEventArgs.Completed += SendComplate;//数据发送完成事件
             receiveBuffer = new byte[bufferSize];
         }
         public DateTime ActiveDateTime
@@ -92,7 +93,7 @@ namespace SunSocket.Client
             ReceiveEventArgs.Completed -= ConnectComplate;
             if (asyncEventArgs.SocketError == SocketError.Success)
             {
-                ReceiveEventArgs.Completed += PacketProtocol.ReceiveComplate;
+                ReceiveEventArgs.Completed += ReceiveComplate;
                 ReceiveEventArgs.SetBuffer(receiveBuffer, 0, receiveBuffer.Length);
                 ConnectSocket = asyncEventArgs.ConnectSocket;
                 StartReceiveAsync();
@@ -102,6 +103,44 @@ namespace SunSocket.Client
             else
             {
                 loger.Error(string.Format("连接{0}失败",remoteEndPoint));
+            }
+        }
+        private void ReceiveComplate(object sender, SocketAsyncEventArgs receiveEventArgs)
+        {
+            ActiveDateTime = DateTime.Now;
+            if (receiveEventArgs.BytesTransferred > 0 && receiveEventArgs.SocketError == SocketError.Success)
+            {
+                if (!PacketProtocol.ProcessReceiveBuffer(receiveEventArgs.Buffer, receiveEventArgs.Offset, receiveEventArgs.BytesTransferred))
+                { //如果处理数据返回失败，则断开连接
+                    DisConnect();
+                }
+                StartReceiveAsync();//再次等待接收数据
+            }
+            else
+            {
+                DisConnect();
+            }
+        }
+        public void SendComplate()
+        {
+            SendComplate(null, SendEventArgs);
+        }
+        private void SendComplate(object sender, SocketAsyncEventArgs sendEventArgs)
+        {
+            ActiveDateTime = DateTime.Now;//发送数据视为活跃
+            if (sendEventArgs.SocketError == SocketError.Success)
+            {
+                PacketProtocol.SendBuffer.Clear(); //清除已发送的包
+                if (ConnectSocket != null)
+                    PacketProtocol.SendProcess();//继续发送
+            }
+            else
+            {
+                lock (closeLock)
+                {
+                    if (ConnectSocket != null)
+                        DisConnect();
+                }
             }
         }
         public void DisConnect()
@@ -138,7 +177,7 @@ namespace SunSocket.Client
                 bool willRaiseEvent = ConnectSocket.ReceiveAsync(ReceiveEventArgs); //投递接收请求
                 if (!willRaiseEvent)
                 {
-                    PacketProtocol.ReceiveComplate(null, ReceiveEventArgs);
+                    ReceiveComplate(null, ReceiveEventArgs);
                 }
             }
             catch (Exception e)
