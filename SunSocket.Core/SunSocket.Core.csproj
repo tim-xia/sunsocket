@@ -30,10 +30,6 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Autofac, Version=3.5.0.0, Culture=neutral, PublicKeyToken=17863af14b0044da, processorArchitecture=MSIL">
-      <HintPath>..\packages\Autofac.3.5.2\lib\net40\Autofac.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -48,7 +44,6 @@
     <Compile Include="Buffer\FixedBuffer.cs" />
     <Compile Include="Buffer\FixedBufferPool.cs" />
     <Compile Include="Interface\IFixedBuffer.cs" />
-    <Compile Include="DI\CoreIoc.cs" />
     <Compile Include="Interface\IDynamicBuffer.cs" />
     <Compile Include="Interface\ILoger.cs" />
     <Compile Include="Interface\IPool.cs" />
@@ -60,9 +55,6 @@
     <Compile Include="Session\DataContainer.cs" />
   </ItemGroup>
   <ItemGroup />
-  <ItemGroup>
-    <None Include="packages.config" />
-  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

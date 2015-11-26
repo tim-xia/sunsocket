@@ -8,7 +8,6 @@ using System.Threading;
 using System.Net.Sockets;
 using SunSocket.Core.Session;
 using SunSocket.Server.Protocol;
-using SunSocket.Core.DI;
 using SunSocket.Core.Interface;
 using SunSocket.Server.Interface;
 
