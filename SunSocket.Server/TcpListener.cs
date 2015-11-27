@@ -12,16 +12,16 @@ using SunSocket.Server.Config;
 
 namespace SunSocket.Server
 {
-    public class Listener : IListener
+    public class TcpListener : IListener
     {
         private Socket listenerSocket;
         IPEndPoint localEndPoint;
         IAsyncServer server;
         TcpServerConfig config;
-        public Listener(TcpServerConfig config, ServerEndPoint serverEndPoint,ILoger loger)
+        public TcpListener(TcpServerConfig config, ServerEndPoint serverEndPoint,ILoger loger, Func<ITcpPacketProtocol> protocolFunc)
         {
             this.config = config;
-            this.server = new AsyncServer(config.MaxBufferPoolSize,config.BufferSize,config.MaxConnections,loger);
+            this.server = new AsyncServer(config.BufferSize,config.MaxConnections,loger, protocolFunc);
             this.server.Name = serverEndPoint.Name;
             this.localEndPoint = new IPEndPoint(IPAddress.Parse(serverEndPoint.IP), serverEndPoint.Port);
         }

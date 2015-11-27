@@ -21,9 +21,9 @@ namespace SunSocket.Server
             set;
         }
         //构造函数
-        public AsyncServer(int bufferPoolSize, int bufferSize, int maxConnections,ILoger loger)
+        public AsyncServer(int bufferSize, int maxConnections,ILoger loger, Func<ITcpPacketProtocol> protocolFunc)
         {
-            this.sessionPool = new TcpSessionPool(bufferPoolSize,bufferSize,maxConnections,loger);
+            this.sessionPool = new TcpSessionPool(bufferSize,maxConnections,loger, protocolFunc);
             this.OnlineList = new ConcurrentDictionary<string, ITcpSession>();
             this.loger = loger;
         }

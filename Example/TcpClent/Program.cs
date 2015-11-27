@@ -8,6 +8,7 @@ using SunSocket.Client;
 using SunSocket.Core.Interface;
 using SunSocket.Core.Protocol;
 using SunSocket.Client.Interface;
+using SunSocket.Client.Protocol;
 
 namespace TcpClient
 {
@@ -18,14 +19,15 @@ namespace TcpClient
         static CancellationTokenSource cancelSource;
         static void Main(string[] args)
         {
-            TcpClientSession session = new TcpClientSession(new IPEndPoint(IPAddress.Parse("127.0.0.1"), 8088), 1024, 1024 * 4, new Loger());
+            var loger = new Loger();
+            TcpClientSession session = new TcpClientSession(new IPEndPoint(IPAddress.Parse("127.0.0.1"), 8088), 1024,loger, new TcpClientPacketProtocol(1024, 1024 * 4, loger));
             session.OnReceived += ReceiveCommond;
             session.OnConnected += Connected;
             session.OnDisConnect += DisConnected;
             session.Connect();
             Console.ReadLine();
             short i = 0;
-            while (i < 50)
+            while (i < 1)
             {
                 i++;
                 var data = Encoding.UTF8.GetBytes("测试数据kjfl发送大法师大法是大法师大法是否阿斯发达说法是否大是大非阿斯顿飞啊的方式阿斯顿飞阿凡达是啊发送到啊发送方啊发送的发送方啊是否啊第三方啊是否啊是否的萨芬啊是否啊是否阿飞大师傅kdsfjlkasjdflkjasdfljaslkfdjlkasdfjlkajsdlk" + i);

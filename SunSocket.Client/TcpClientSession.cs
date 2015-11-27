@@ -16,7 +16,7 @@ namespace SunSocket.Client
         byte[] receiveBuffer;
         ILoger loger;
         object closeLock = new object();
-        public TcpClientSession(EndPoint remoteEndPoint, int bufferPoolSize, int bufferSize, ILoger loger)
+        public TcpClientSession(EndPoint remoteEndPoint, int bufferSize, ILoger loger,ITcpClientPacketProtocol protocol)
         {
             this.loger = loger;
             this.remoteEndPoint = remoteEndPoint;
@@ -25,7 +25,7 @@ namespace SunSocket.Client
             ReceiveEventArgs.RemoteEndPoint = remoteEndPoint;
             SendEventArgs = new SocketAsyncEventArgs();
             SendEventArgs.RemoteEndPoint = remoteEndPoint;
-            PacketProtocol = new TcpClientPacketProtocol(bufferSize, bufferPoolSize, loger);
+            PacketProtocol = protocol;
             PacketProtocol.Session = this;
             SendEventArgs.Completed += SendComplate;//数据发送完成事件
             receiveBuffer = new byte[bufferSize];

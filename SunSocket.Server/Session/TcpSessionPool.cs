@@ -16,14 +16,15 @@ namespace SunSocket.Server.Session
     public class TcpSessionPool : ITcpSessionPool
     {
         private static ConcurrentQueue<ITcpSession> pool=new ConcurrentQueue<ITcpSession>();
-        private int count = 0, bufferPoolSize, bufferSize, maxSessions;
+        private int count = 0, bufferSize, maxSessions;
         ILoger loger;
-        public TcpSessionPool(int bufferPoolSize,int bufferSize,int maxSessions,ILoger loger)
+        Func<ITcpPacketProtocol> protocolFunc;
+        public TcpSessionPool(int bufferSize,int maxSessions,ILoger loger,Func<ITcpPacketProtocol> protocolFunc)
         {
-            this.bufferPoolSize = bufferPoolSize;
             this.bufferSize = bufferSize;
             this.maxSessions = maxSessions;
             this.loger = loger;
+            this.protocolFunc = protocolFunc;
         } 
 
         public int Count
@@ -52,7 +53,7 @@ namespace SunSocket.Server.Session
                     Interlocked.Increment(ref count);
                     session = new TcpSession(loger);
                     session.ReceiveEventArgs.SetBuffer(new byte[bufferSize], 0, bufferSize);
-                    session.PacketProtocol = new TcpPacketProtocol(bufferSize,bufferPoolSize,loger);
+                    session.PacketProtocol = protocolFunc();
                 }
             } 
             return session;

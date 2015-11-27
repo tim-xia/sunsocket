@@ -10,23 +10,22 @@ using SunSocket.Server.Config;
 using SunSocket.Server.Session;
 using SunSocket.Core.Interface;
 using SunSocket.Core.Protocol;
-using SunSocket.Core.Session;
+using SunSocket.Server.Interface;
+using SunSocket.Server.Protocol;
 
 namespace SunSocket
 {
     class Program
     {
         static List<string> li = new List<string>();
+        static TcpServerConfig config = new TcpServerConfig { BufferSize = 1024, MaxConnections = 8000 };
+        static Loger loger = new Loger();
         static void Main(string[] args)
         {
-            var loger = new Loger();
-            var config = new TcpServerConfig();
-            config.BufferSize = 50;
-            config.MaxConnections = 40000;
-            Server.Listener listener = new Server.Listener(config,new ServerEndPoint() {Name="one",IP="127.0.0.1",Port=8088}, loger);
+            Server.TcpListener listener = new Server.TcpListener(config,new ServerEndPoint() {Name="one",IP="127.0.0.1",Port=8088}, loger, GetProtocol);
             listener.AsyncServer.OnReceived += ReceiveCommond;
             listener.Start();
-            Server.Listener listenerOne = new Server.Listener(config, new ServerEndPoint() { Name = "two", IP = "127.0.0.1", Port = 9988 }, loger);
+            Server.TcpListener listenerOne = new Server.TcpListener(config, new ServerEndPoint() { Name = "two", IP = "127.0.0.1", Port = 9988 }, loger, GetProtocol);
             listenerOne.AsyncServer.OnReceived += ReceiveCommond;
             listenerOne.Start();
             MonitorConfig monitorConfig = new MonitorConfig();
@@ -39,6 +38,10 @@ namespace SunSocket
             Console.WriteLine("服务器已启动");
             Console.ReadLine();
         }
+        public static ITcpPacketProtocol GetProtocol()
+        {
+            return new TcpPacketProtocol(config.BufferSize, config.MaxBufferPoolSize, loger);
+        }
         static byte[] data = Encoding.UTF8.GetBytes("测试数据服务器返回");
         static SendData sdata = new SendData() { Buffer = data, Offset = 0};
         public static void ReceiveCommond(object sender, byte[] data)
@@ -48,8 +51,8 @@ namespace SunSocket
             //Console.WriteLine("sessionId:{0},cmdId:{1},msg:{2}", session.SessionId, cmd.CommondId, msg);
             //for (int i = 0; i < 50; i++)
             //{
-           // sdata.Buffer = cmd.Data;
-           // Thread.Sleep(4000);
+            // sdata.Buffer = cmd.Data;
+            // Thread.Sleep(4000);
                 session.SendAsync(new SendData { Buffer = data });
             //}
         }
