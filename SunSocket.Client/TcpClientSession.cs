@@ -77,7 +77,7 @@ namespace SunSocket.Client
 
         public event EventHandler<ITcpClientSession> OnDisConnect;
         //当接收到命令包时触发
-        public event EventHandler<ReceiveCommond> OnReceived;
+        public event EventHandler<byte[]> OnReceived;
         public event EventHandler<ITcpClientSession> OnConnected;
 
         private Socket localSocket;
@@ -161,11 +161,11 @@ namespace SunSocket.Client
             ConnectSocket.Close();
             ConnectSocket = null;
         }
-        public void ReceiveCommond(ITcpClientSession session, ReceiveCommond cmd)
+        public void ReceiveData(ITcpClientSession session, byte[] data)
         {
-            OnReceived(this, cmd);
+            OnReceived(this, data);
         }
-        public void SendAsync(SendCommond cmd)
+        public void SendAsync(SendData cmd)
         {
             PacketProtocol.SendAsync(cmd);
         }

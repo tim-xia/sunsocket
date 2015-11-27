@@ -29,7 +29,7 @@ namespace SunSocket.Server.Session
             get;set;
         }
 
-        public void SendAsync(SendCommond cmd)
+        public void SendAsync(SendData cmd)
         {
             Server.SendAsync(RemoteEndPoint, cmd);
         }

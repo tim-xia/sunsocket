@@ -42,7 +42,7 @@ namespace SunSocket.Server
             get;set;
         }
 
-        public event EventHandler<ReceiveCommond> OnReceived;
+        public event EventHandler<byte[]> OnReceived;
 
         public void Start()
         {
@@ -86,16 +86,12 @@ namespace SunSocket.Server
                 short cmdId = BitConverter.ToInt16(e.Buffer, intByteLength);
                 byte[] data = new byte[lenght];
                 System.Buffer.BlockCopy(e.Buffer, checkLenght, data, 0, lenght);
-                ReceiveCommond rCmd = new ReceiveCommond() { CommondId = cmdId, Data = data };
-                if (rCmd != null)
-                {
-                    UdpSession session = new UdpSession(e.RemoteEndPoint, this);
+                UdpSession session = new UdpSession(e.RemoteEndPoint, this);
 
-                    ThreadPool.QueueUserWorkItem(_ =>
-                    {
-                        OnReceived(session, rCmd);
-                    });
-                }
+                ThreadPool.QueueUserWorkItem(_ =>
+                {
+                    OnReceived(session, data);
+                });
             }
             this.BeginReceive(e);
         }
@@ -109,7 +105,7 @@ namespace SunSocket.Server
             ListenerSocket.Dispose();
         }
 
-        public void SendAsync(EndPoint endPoint, SendCommond cmd)
+        public void SendAsync(EndPoint endPoint, SendData cmd)
         {
             var args = sendArgsPool.Pop();
             if (args == null)
@@ -125,10 +121,7 @@ namespace SunSocket.Server
             {
                 args.RemoteEndPoint = endPoint;
                 byte[] length = BitConverter.GetBytes(cmd.Buffer.Length);
-
-                byte[] id = BitConverter.GetBytes(cmd.CommondId);
                 System.Buffer.BlockCopy(length, 0, args.Buffer, 0, length.Length);
-                System.Buffer.BlockCopy(id, 0, args.Buffer,length.Length, id.Length);
                 System.Buffer.BlockCopy(cmd.Buffer, 0, args.Buffer,checkLenght, cmd.Buffer.Length);
                 args.SetBuffer(0, cmd.Buffer.Length + checkLenght);
                 if (!this.ListenerSocket.SendToAsync(args)) SendCompleted(null,args);

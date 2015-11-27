@@ -29,10 +29,10 @@ namespace SunSocket.Server.Interface
         /// 接收数据
         /// </summary>
         void Stop();
-        void SendAsync(EndPoint endPoint, SendCommond cmd);
+        void SendAsync(EndPoint endPoint, SendData cmd);
         /// <summary>
         /// 数据包提取完成事件
         /// </summary>
-        event EventHandler<ReceiveCommond> OnReceived;
+        event EventHandler<byte[]> OnReceived;
     }
 }

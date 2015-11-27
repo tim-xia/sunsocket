@@ -21,12 +21,12 @@ namespace SunSocket
         {
             var loger = new Loger();
             var config = new TcpServerConfig();
-            config.BufferSize = 1024 * 4;
+            config.BufferSize = 50;
             config.MaxConnections = 40000;
             Server.Listener listener = new Server.Listener(config,new ServerEndPoint() {Name="one",IP="127.0.0.1",Port=8088}, loger);
             listener.AsyncServer.OnReceived += ReceiveCommond;
             listener.Start();
-            Server.Listener listenerOne = new Server.Listener(config, new ServerEndPoint() { Name = "two", IP = "192.168.199.236", Port = 9988 }, loger);
+            Server.Listener listenerOne = new Server.Listener(config, new ServerEndPoint() { Name = "two", IP = "127.0.0.1", Port = 9988 }, loger);
             listenerOne.AsyncServer.OnReceived += ReceiveCommond;
             listenerOne.Start();
             MonitorConfig monitorConfig = new MonitorConfig();
@@ -40,8 +40,8 @@ namespace SunSocket
             Console.ReadLine();
         }
         static byte[] data = Encoding.UTF8.GetBytes("测试数据服务器返回");
-        static SendCommond sdata = new SendCommond() { CommondId = 1, Buffer = data, Offset = 0};
-        public static void ReceiveCommond(object sender, ReceiveCommond cmd)
+        static SendData sdata = new SendData() { Buffer = data, Offset = 0};
+        public static void ReceiveCommond(object sender, byte[] data)
         {
             TcpSession session = sender as TcpSession;
             //string msg = Encoding.UTF8.GetString(cmd.Data);
@@ -50,7 +50,7 @@ namespace SunSocket
             //{
            // sdata.Buffer = cmd.Data;
            // Thread.Sleep(4000);
-                session.SendAsync(sdata);
+                session.SendAsync(new SendData { Buffer = data });
             //}
         }
     }

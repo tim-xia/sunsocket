@@ -35,8 +35,8 @@ namespace SunSocket.Server.Interface
         /// 接收命令
         /// </summary>
         /// <param name="session"></param>
-        /// <param name="cmd"></param>
-        void ReceiveCommond(ITcpSession session, ReceiveCommond cmd);
+        /// <param name="data"></param>
+        void ReceiveData(ITcpSession session, byte[] data);
         /// <summary>
         /// 关闭会话
         /// </summary>
@@ -45,7 +45,7 @@ namespace SunSocket.Server.Interface
         /// <summary>
         /// 数据包提取完成事件
         /// </summary>
-        event EventHandler<ReceiveCommond> OnReceived;
+        event EventHandler<byte[]> OnReceived;
         /// <summary>
         /// 当连接请求通过后
         /// </summary>

@@ -29,7 +29,7 @@ namespace SunSocket.Server
         }
 
         //当接收到命令包时触发
-        public event EventHandler<ReceiveCommond> OnReceived;
+        public event EventHandler<byte[]> OnReceived;
         //当收到请求时触发
         public event EventHandler<ITcpSession> OnConnected;
         //断开连接事件
@@ -51,9 +51,9 @@ namespace SunSocket.Server
             }
             StartAccept(acceptEventArgs); //把当前异步事件释放，等待下次连接
         }
-        public void ReceiveCommond(ITcpSession session, ReceiveCommond cmd)
+        public void ReceiveData(ITcpSession session, byte[] data)
         {
-            OnReceived(session, cmd);
+            OnReceived(session, data);
         }
         
         public void StartAccept(SocketAsyncEventArgs acceptEventArgs)

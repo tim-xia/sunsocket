@@ -18,11 +18,11 @@ namespace SunSocket.Udp
             server.Start();
             Console.ReadLine();
         }
-        static void ReceiveCompleted(object sender, ReceiveCommond e)
+        static void ReceiveCompleted(object sender, byte[] data)
         {
             IUdpSession session = sender as IUdpSession;
-            Console.WriteLine(Encoding.UTF8.GetString(e.Data));
-            session.SendAsync(new SendCommond() { CommondId=e.CommondId,Buffer=e.Data});
+            Console.WriteLine(Encoding.UTF8.GetString(data));
+            session.SendAsync(new SendData() {Buffer=data});
         }
     }
 }

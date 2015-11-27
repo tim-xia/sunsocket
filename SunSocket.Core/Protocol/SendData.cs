@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 
 namespace SunSocket.Core.Protocol
 {
-    public class ReceiveCommond
+    public class SendData
     {
-        public short CommondId { get; set; }
-        public byte[] Data { get; set; }
+        public byte[] Buffer { get; set; }
+        public int Offset { get; set; }
     }
 }

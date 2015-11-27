@@ -14,7 +14,7 @@ namespace TcpClient
     class Program
     {
         static ITcpClientSession Session;
-        static ConcurrentQueue<ReceiveCommond> CmdList = new ConcurrentQueue<ReceiveCommond>();
+        static ConcurrentQueue<byte[]> CmdList = new ConcurrentQueue<byte[]>();
         static CancellationTokenSource cancelSource;
         static void Main(string[] args)
         {
@@ -25,14 +25,14 @@ namespace TcpClient
             session.Connect();
             Console.ReadLine();
             short i = 0;
-            while (i < 500)
+            while (i < 50)
             {
                 i++;
-                var data = Encoding.UTF8.GetBytes("测试数据" + i);
+                var data = Encoding.UTF8.GetBytes("测试数据kjfl发送大法师大法是大法师大法是否阿斯发达说法是否大是大非阿斯顿飞啊的方式阿斯顿飞阿凡达是啊发送到啊发送方啊发送的发送方啊是否啊第三方啊是否啊是否的萨芬啊是否啊是否阿飞大师傅kdsfjlkasjdflkjasdfljaslkfdjlkasdfjlkajsdlk" + i);
                 try
                 {
                     var result = SendAsync(data).Result;
-                    Console.WriteLine(Encoding.UTF8.GetString(result.Data));
+                    Console.WriteLine(Encoding.UTF8.GetString(result));
                 }
                 catch
                 {
@@ -42,12 +42,12 @@ namespace TcpClient
             Console.WriteLine("处理完成");
             Console.ReadLine();
         }
-        static TaskCompletionSource<ReceiveCommond> tSource;
-        public static async Task<ReceiveCommond> SendAsync(byte[] data)
+        static TaskCompletionSource<byte[]> tSource;
+        public static async Task<byte[]> SendAsync(byte[] data)
         {
-            tSource = new TaskCompletionSource<ReceiveCommond>();
+            tSource = new TaskCompletionSource<byte[]>();
             cancelSource = new CancellationTokenSource(5000);
-            Session.SendAsync(new SendCommond() { CommondId = 1, Buffer = data });
+            Session.SendAsync(new SendData() { Buffer = data });
             //if (!tSource.Task.IsCompleted)
             //{
             //    return null;
@@ -64,9 +64,9 @@ namespace TcpClient
             Console.WriteLine("连接成功，开始接受数据");
             Session = session;
         }
-        public static void ReceiveCommond(object sender, ReceiveCommond cmd)
+        public static void ReceiveCommond(object sender, byte[] data)
         {
-            tSource.SetResult(cmd);
+            tSource.SetResult(data);
             //TcpClientSession session = sender as TcpClientSession;
             //string msg = Encoding.UTF8.GetString(cmd.Data);
             //li.Add(string.Format("sessionId:{0},cmdId:{1},msg:{2}", session.SessionId, cmd.CommondId, msg));

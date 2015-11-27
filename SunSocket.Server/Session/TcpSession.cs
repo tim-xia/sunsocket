@@ -84,7 +84,7 @@ namespace SunSocket.Server.Session
         /// 发送指令
         /// </summary>
         /// <param name="cmd"></param>
-        public void SendAsync(SendCommond cmd)
+        public void SendAsync(SendData cmd)
         {
             PacketProtocol.SendAsync(cmd);
         }

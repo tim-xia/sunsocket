@@ -20,14 +20,14 @@ namespace SunSocket.UdpClient
             Console.ReadLine();
             while (true)
             {
-                server.SendAsync(new IPEndPoint(IPAddress.Parse("127.0.0.1"), 8878), new SendCommond() { CommondId = 11, Buffer = Encoding.UTF8.GetBytes("我爱我的祖国啊啊啊啊,测试测试") });
+                server.SendAsync(new IPEndPoint(IPAddress.Parse("127.0.0.1"), 8878), new SendData() {Buffer = Encoding.UTF8.GetBytes("我爱我的祖国啊啊啊啊,测试测试") });
                 Console.ReadLine();
             }
         }
-        static void ReceiveCompleted(object sender, ReceiveCommond e)
+        static void ReceiveCompleted(object sender, byte[] data)
         {
             IUdpSession session = sender as IUdpSession;
-            Console.WriteLine(Encoding.UTF8.GetString(e.Data));
+            Console.WriteLine(Encoding.UTF8.GetString(data));
         }
     }
 }

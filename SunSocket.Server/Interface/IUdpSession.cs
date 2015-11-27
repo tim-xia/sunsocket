@@ -7,6 +7,6 @@ namespace SunSocket.Server.Interface
     {
         IUdpAsyncServer Server { get; set; }
         EndPoint RemoteEndPoint { get; set; }
-        void SendAsync(SendCommond cmd);
+        void SendAsync(SendData cmd);
     }
 }

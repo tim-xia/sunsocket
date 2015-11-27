@@ -36,13 +36,13 @@ namespace SunSocket.Client.Interface
         /// 接收数据
         /// </summary>
         /// <param name="session">session对象</param>
-        /// <param name="cmd"></param>
-        void ReceiveCommond(ITcpClientSession session, ReceiveCommond cmd);
+        /// <param name="data"></param>
+        void ReceiveData(ITcpClientSession session, byte[] data);
         /// <summary>
         /// 发送数据
         /// </summary>
         /// <param name="cmd"></param>
-        void SendAsync(SendCommond cmd);
+        void SendAsync(SendData cmd);
         /// <summary>
         /// 开始接收数据
         /// </summary>
@@ -70,6 +70,6 @@ namespace SunSocket.Client.Interface
         /// <summary>
         /// 收到指令事件
         /// </summary>
-        event EventHandler<ReceiveCommond> OnReceived;
+        event EventHandler<byte[]> OnReceived;
     }
 }

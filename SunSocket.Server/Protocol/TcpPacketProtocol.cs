@@ -17,8 +17,7 @@ namespace SunSocket.Server.Protocol
     {
        
         bool NetByteOrder = false;
-        static int intByteLength = sizeof(int), shortByteLength = sizeof(short);
-        static int checkandCmdLength = intByteLength + shortByteLength;
+        static int intByteLength = sizeof(int);
         private object clearLock = new object();
         ILoger loger;
         //缓冲器池
@@ -36,9 +35,9 @@ namespace SunSocket.Server.Protocol
             set;
         }
 
-        private SendCommond NoComplateCmd = null;//未完全发送指令
+        private SendData NoComplateCmd = null;//未完全发送指令
         bool isSend = false;//发送状态
-        private ConcurrentQueue<SendCommond> cmdQueue = new ConcurrentQueue<SendCommond>();//指令发送队列
+        private ConcurrentQueue<SendData> cmdQueue = new ConcurrentQueue<SendData>();//指令发送队列
         public TcpPacketProtocol(int bufferSize,int bufferPoolSize,ILoger loger)
         {
             this.loger = loger;
@@ -63,57 +62,32 @@ namespace SunSocket.Server.Protocol
                         int getLenght = 0;//已取出数据
 
                         var cacheBuffer = ReceiveBuffers.Dequeue();
-                        if (cacheBuffer.DataSize > checkandCmdLength)
+                        int cachePacketLength = BitConverter.ToInt32(cacheBuffer.Buffer, 0); //获取包长度
+                        var data = new byte[cachePacketLength];
+                        getLenght = cacheBuffer.DataSize - intByteLength;
+                        Buffer.BlockCopy(cacheBuffer.Buffer, intByteLength, data, 0, getLenght);
+                        cacheBuffer.Clear();//清理数据并装入池中
+                        BufferPool.Push(cacheBuffer);
+                        while (ReceiveBuffers.Count > 0)
                         {
-                            int cachePacketLength = BitConverter.ToInt32(cacheBuffer.Buffer, 0); //获取包长度
-                            short commondId = BitConverter.ToInt16(cacheBuffer.Buffer, intByteLength);
-                            var data = new byte[cachePacketLength - shortByteLength];
-                            getLenght = cacheBuffer.DataSize - checkandCmdLength;
-                            System.Buffer.BlockCopy(cacheBuffer.Buffer, checkandCmdLength, data, 0, getLenght);
-                            cacheBuffer.Clear();//清理数据并装入池中
-                            BufferPool.Push(cacheBuffer);
-                            while (ReceiveBuffers.Count > 0)
-                            {
-                                var popBuffer = ReceiveBuffers.Dequeue();
-                                System.Buffer.BlockCopy(popBuffer.Buffer, 0, data, getLenght, popBuffer.DataSize);
-                                getLenght += popBuffer.DataSize;
-                                popBuffer.Clear();//清理数据并装入池中
-                                BufferPool.Push(popBuffer);
-                            }
-                            var needLenght = needReceivePacketLenght - getLenght - checkandCmdLength;
-                            System.Buffer.BlockCopy(receiveBuffer, offset, data, getLenght, needLenght);
-                            offset += needLenght;
-                            count -= needLenght;
-                            //触发获取指令事件
-                            Session.Server.ReceiveCommond(Session, new ReceiveCommond() { CommondId = commondId, Data = data });
-                            //清理合包数据
-                            needReceivePacketLenght = 0; alreadyReceivePacketLength = 0;
+                            var popBuffer = ReceiveBuffers.Dequeue();
+                            Buffer.BlockCopy(popBuffer.Buffer, 0, data, getLenght, popBuffer.DataSize);
+                            getLenght += popBuffer.DataSize;
+                            popBuffer.Clear();//清理数据并装入池中
+                            BufferPool.Push(popBuffer);
                         }
-                        else
-                        {
-                            InterimPacketBuffer = cacheBuffer;
-                        }
+                        var needLenght = needReceivePacketLenght - getLenght - intByteLength;
+                        Buffer.BlockCopy(receiveBuffer, offset, data, getLenght, needLenght);
+                        offset += needLenght;
+                        count -= needLenght;
+                        //触发获取指令事件
+                        Session.Server.ReceiveData(Session, data);
+                        //清理合包数据
+                        needReceivePacketLenght = 0; alreadyReceivePacketLength = 0;
                     }
                 }
-                //按照长度分包
-                int packetLength = BitConverter.ToInt32(receiveBuffer, offset); //获取包长度
-                if (NetByteOrder)
-                    packetLength = IPAddress.NetworkToHostOrder(packetLength); //把网络字节顺序转为本地字节顺序
-                if ((count - intByteLength) >= packetLength) //如果数据包达到长度则马上进行解析
+                if (needReceivePacketLenght > 0)
                 {
-                    short commondId = BitConverter.ToInt16(receiveBuffer, offset + intByteLength); //获取指令编号
-                    int dataLength = packetLength - shortByteLength;
-                    var data = new byte[dataLength];
-                    System.Buffer.BlockCopy(receiveBuffer, offset + checkandCmdLength, data, 0, dataLength);
-                    //触发获取指令事件
-                    Session.Server.ReceiveCommond(Session, new ReceiveCommond() { CommondId = commondId, Data = data });
-                    int processLenght = packetLength + intByteLength;
-                    offset += processLenght;
-                    count -= processLenght;
-                }
-                else
-                {//存入分包缓存池
-                    needReceivePacketLenght = packetLength + intByteLength;//记录当前包总共需要多少的数据
                     while (count > 0)//遍历把数据放入缓冲器中
                     {
                         if (InterimPacketBuffer == null)
@@ -134,17 +108,39 @@ namespace SunSocket.Server.Protocol
                         {
                             InterimPacketBuffer.WriteBuffer(receiveBuffer, offset, count);
                             alreadyReceivePacketLength += count;//记录已接收的数据
-                            offset =0;
                             count = 0;
                         }
                     }
                 }
+                else
+                {
+                    if (count > 0)
+                    {
+                        //按照长度分包
+                        int packetLength = BitConverter.ToInt32(receiveBuffer, offset); //获取包长度
+                        if (NetByteOrder)
+                            packetLength = IPAddress.NetworkToHostOrder(packetLength); //把网络字节顺序转为本地字节顺序
+                        if ((count - intByteLength) >= packetLength) //如果数据包达到长度则马上进行解析
+                        {
+                            var data = new byte[packetLength];
+                            Buffer.BlockCopy(receiveBuffer, offset + intByteLength, data, 0, packetLength);
+                            //触发获取指令事件
+                            Session.Server.ReceiveData(Session, data);
+                            int processLenght = packetLength + intByteLength;
+                            offset += processLenght;
+                            count -= processLenght;
+                        }
+                        else
+                        {
+                            needReceivePacketLenght = packetLength + intByteLength;//记录当前包总共需要多少的数据
+                        }
+                    }
+                }
             }
-           
             return count == 0;
         }
         object lockObj = new object();
-        public bool SendAsync(SendCommond cmd)
+        public bool SendAsync(SendData cmd)
         {
             cmdQueue.Enqueue(cmd);
             if (!isSend)
@@ -195,34 +191,26 @@ namespace SunSocket.Server.Protocol
                 }
                 if (surplus >= intByteLength)
                 {
-                    SendCommond cmd;
-                    if (cmdQueue.TryDequeue(out cmd))
+                    SendData data;
+                    if (cmdQueue.TryDequeue(out data))
                     {
-                        var cmdAllLength = cmd.Buffer.Length + checkandCmdLength;
-                        if (cmdAllLength <= surplus)
+                        var PacketAllLength = data.Buffer.Length + intByteLength;
+                        if (PacketAllLength <= surplus)
                         {
-                            SendBuffer.WriteInt(cmd.Buffer.Length + shortByteLength, false); //写入总大小
-                            SendBuffer.WriteShort(cmd.CommondId, false); //写入命令编号
-                            SendBuffer.WriteBuffer(cmd.Buffer); //写入命令内容
-                            surplus -= cmdAllLength;
+                            SendBuffer.WriteInt(data.Buffer.Length, false); //写入总大小
+                            SendBuffer.WriteBuffer(data.Buffer); //写入命令内容
+                            surplus -= PacketAllLength;
                         }
                         else
                         {
-                            SendBuffer.WriteInt(cmd.Buffer.Length, false); //写入总大小
-
-                            surplus -= cmd.Buffer.Length;
-
-                            if (surplus >= shortByteLength)
-                            {
-                                SendBuffer.WriteShort(cmd.CommondId, false); //写入命令编号
-                                surplus -= shortByteLength;
-                            }
+                            SendBuffer.WriteInt(data.Buffer.Length, false); //写入总大小
+                            surplus -= data.Buffer.Length;
                             if (surplus > 0)
                             {
-                                SendBuffer.WriteBuffer(cmd.Buffer, cmd.Offset, surplus); //写入命令内容
-                                cmd.Offset = surplus;
+                                SendBuffer.WriteBuffer(data.Buffer, data.Offset, surplus); //写入命令内容
+                                data.Offset = surplus;
                             }
-                            NoComplateCmd = cmd;//把未全部发送指令缓存
+                            NoComplateCmd = data;//把未全部发送指令缓存
                         }
                     }
                 }
@@ -259,7 +247,7 @@ namespace SunSocket.Server.Protocol
                 isSend = false;
                 if (cmdQueue.Count > 0)
                 {
-                    SendCommond cmd;
+                    SendData cmd;
                     while (cmdQueue.TryDequeue(out cmd))
                     {
                     }

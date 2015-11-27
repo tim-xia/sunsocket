@@ -17,7 +17,7 @@ namespace SunSocket.Server.Interface
         /// </summary>
         /// <param name="cmd"></param>
         /// <returns></returns>
-        bool SendAsync(SendCommond cmd);
+        bool SendAsync(SendData cmd);
         /// <summary>
         /// 处理接收到的数据
         /// </summary>
