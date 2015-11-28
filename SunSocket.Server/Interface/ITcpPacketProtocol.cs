@@ -1,4 +1,5 @@
-﻿using System.Net.Sockets;
+﻿using System;
+using System.Net.Sockets;
 using SunSocket.Core.Interface;
 using SunSocket.Core.Protocol;
 
@@ -34,5 +35,9 @@ namespace SunSocket.Server.Interface
         /// 清理协议管理器
         /// </summary>
         void Clear();
+        /// <summary>
+        /// 数据包提取完成事件
+        /// </summary>
+        event EventHandler<byte[]> OnReceived;
     }
 }

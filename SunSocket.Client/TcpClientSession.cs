@@ -84,11 +84,6 @@ namespace SunSocket.Client
             get; set;
         }
 
-        public event EventHandler<ITcpClientSession> OnDisConnect;
-        //当接收到命令包时触发
-        public event EventHandler<byte[]> OnReceived;
-        public event EventHandler<ITcpClientSession> OnConnected;
-
         private Socket localSocket;
         public void Connect()
         {
@@ -151,10 +146,6 @@ namespace SunSocket.Client
                         DisConnect();
                 }
             }
-        }
-        public void ReceiveData(ITcpClientSession session, byte[] data)
-        {
-            OnReceived(this, data);
         }
         public void SendAsync(SendData cmd)
         {
@@ -229,5 +220,19 @@ namespace SunSocket.Client
                 }
             }
         }
+        /// <summary>
+        /// 收到指令事件
+        /// </summary>
+        public event EventHandler<byte[]> OnReceived {
+            add {
+                PacketProtocol.OnReceived += value;
+            }
+            remove
+            {
+                PacketProtocol.OnReceived -= value;
+            }
+        }
+        public event EventHandler<ITcpClientSession> OnDisConnect;
+        public event EventHandler<ITcpClientSession> OnConnected;
     }
 }

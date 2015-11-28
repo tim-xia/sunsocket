@@ -27,7 +27,7 @@ namespace SunSocket.Server.Session
         /// <summary>
         /// 连接时间
         /// </summary>
-        public DateTime ConnectDateTime { get; set; }
+        public DateTime? ConnectDateTime { get; set; }
         /// <summary>
         /// 上次活动时间
         /// </summary>
@@ -58,11 +58,6 @@ namespace SunSocket.Server.Session
         /// 发送数据
         /// </summary>
         public SocketAsyncEventArgs SendEventArgs{get;set;}
-
-        public IAsyncServer Server
-        {
-            get;set;
-        }
         ITcpPacketProtocol packetProtocol;
         //包接收发送处理器
         public ITcpPacketProtocol PacketProtocol
@@ -153,11 +148,11 @@ namespace SunSocket.Server.Session
         //断开连接
         public void DisConnect()
         {
-            if (Server != null)
+            if (ConnectDateTime != null)
             {
                 lock (closeLock)
                 {
-                    if (Server != null)
+                    if (ConnectDateTime != null)
                     {
                         if (Pool != null)
                         {
@@ -192,7 +187,6 @@ namespace SunSocket.Server.Session
                 }
                 ConnectSocket.Close();
                 ConnectSocket = null;
-                Server = null;
             }
         }
         //清理session
@@ -213,5 +207,9 @@ namespace SunSocket.Server.Session
 
         //断开连接事件
         public event EventHandler<ITcpSession> OnDisConnect;
+        /// <summary>
+        /// 数据包提取完成事件
+        /// </summary>
+        public event EventHandler<byte[]> OnReceived { add { PacketProtocol.OnReceived += value; }remove { PacketProtocol.OnReceived -= value; } }
     }
 }

@@ -16,7 +16,7 @@ namespace SunSocket.Server.Interface
         /// <summary>
         /// 连接时间
         /// </summary>
-        DateTime ConnectDateTime { get; set; }
+        DateTime? ConnectDateTime { get; set; }
         /// <summary>
         /// 最后活动时间
         /// </summary>
@@ -29,10 +29,6 @@ namespace SunSocket.Server.Interface
         /// 连接套接字
         /// </summary>
         Socket ConnectSocket { get; set; }
-        /// <summary>
-        /// 该session的归属server
-        /// </summary>
-        IAsyncServer Server { get; set; }
         /// <summary>
         /// 包协议解析器
         /// </summary>
@@ -70,5 +66,9 @@ namespace SunSocket.Server.Interface
         /// 断开连接通知
         /// </summary>
         event EventHandler<ITcpSession> OnDisConnect;
+        /// <summary>
+        /// 数据包提取完成事件
+        /// </summary>
+        event EventHandler<byte[]> OnReceived;
     }
 }

@@ -77,7 +77,7 @@ namespace SunSocket.Client.Protocol
                         offset += needLenght;
                         count -= needLenght;
                         //触发获取指令事件
-                        Session.ReceiveData(Session, data);
+                        ReceiveData(data);
                         //清理合包数据
                         needReceivePacketLenght = 0; alreadyReceivePacketLength = 0;
                     }
@@ -121,7 +121,7 @@ namespace SunSocket.Client.Protocol
                             var data = new byte[packetLength];
                             Buffer.BlockCopy(receiveBuffer, offset + intByteLength, data, 0, packetLength);
                             //触发获取指令事件
-                            Session.ReceiveData(Session, data);
+                            ReceiveData(data);
                             int processLenght = packetLength + intByteLength;
                             offset += processLenght;
                             count -= processLenght;
@@ -134,6 +134,11 @@ namespace SunSocket.Client.Protocol
                 }
             }
             return count == 0;
+        }
+        public void ReceiveData(byte[] data)
+        {
+            if (OnReceived != null)
+                OnReceived(Session, data);
         }
         object lockObj = new object();
         public bool SendAsync(SendData cmd)
@@ -276,5 +281,9 @@ namespace SunSocket.Client.Protocol
             alreadyReceivePacketLength = 0;
             needReceivePacketLenght = 0;
         }
+        /// <summary>
+        /// 数据包提取完成事件
+        /// </summary>
+        public event EventHandler<byte[]> OnReceived;
     }
 }

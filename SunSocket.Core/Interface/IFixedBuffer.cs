@@ -8,7 +8,6 @@ namespace SunSocket.Core.Interface
 {
     public interface IFixedBuffer
     {
-
         /// <summary>
         /// 缓存数组
         /// </summary>

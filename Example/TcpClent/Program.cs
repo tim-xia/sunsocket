@@ -25,7 +25,6 @@ namespace TcpClient
             var endPoint = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 8088);
             sessionPool = new TcpClientSessionPool(endPoint, 1024, 1024 * 4, loger, GetProtocol);
             ITcpClientSession session = sessionPool.Pop();
-            session.PacketProtocol = GetProtocol();
             session.OnReceived += ReceiveCommond;
             session.OnConnected += Connected;
             session.OnDisConnect += DisConnected;

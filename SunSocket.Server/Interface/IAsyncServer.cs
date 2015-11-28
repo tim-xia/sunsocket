@@ -32,12 +32,6 @@ namespace SunSocket.Server.Interface
         /// <param name="acceptEventArgs">异步套接字操作</param>
         void StartAccept(SocketAsyncEventArgs acceptEventArgs);
         /// <summary>
-        /// 接收命令
-        /// </summary>
-        /// <param name="session"></param>
-        /// <param name="data"></param>
-        void ReceiveData(ITcpSession session, byte[] data);
-        /// <summary>
         /// 数据包提取完成事件
         /// </summary>
         event EventHandler<byte[]> OnReceived;

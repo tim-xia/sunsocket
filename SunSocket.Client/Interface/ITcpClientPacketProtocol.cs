@@ -35,5 +35,9 @@ namespace SunSocket.Client.Interface
         /// 清空session
         /// </summary>
         void Clear();
+        /// <summary>
+        /// 收到指令事件
+        /// </summary>
+        event EventHandler<byte[]> OnReceived;
     }
 }

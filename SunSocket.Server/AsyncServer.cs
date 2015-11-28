@@ -44,7 +44,7 @@ namespace SunSocket.Server
             ITcpSession session = sessionPool.Pop();
             if (session != null)
             {
-                session.Server = this;
+                session.OnReceived += OnReceived;
                 session.ConnectSocket = acceptEventArgs.AcceptSocket;
                 session.OnDisConnect += SessionDisConnect;
                 if (OnConnected != null)
@@ -53,11 +53,7 @@ namespace SunSocket.Server
             }
             StartAccept(acceptEventArgs); //把当前异步事件释放，等待下次连接
         }
-        public void ReceiveData(ITcpSession session, byte[] data)
-        {
-            OnReceived(session, data);
-        }
-        
+
         public void StartAccept(SocketAsyncEventArgs acceptEventArgs)
         {
             if (acceptEventArgs == null)

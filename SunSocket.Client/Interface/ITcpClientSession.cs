@@ -38,12 +38,6 @@ namespace SunSocket.Client.Interface
         /// </summary>
         SocketAsyncEventArgs SendEventArgs { get; set; }
         /// <summary>
-        /// 接收数据
-        /// </summary>
-        /// <param name="session">session对象</param>
-        /// <param name="data"></param>
-        void ReceiveData(ITcpClientSession session, byte[] data);
-        /// <summary>
         /// 发送数据
         /// </summary>
         /// <param name="cmd"></param>
