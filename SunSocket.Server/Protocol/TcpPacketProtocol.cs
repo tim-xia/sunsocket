@@ -27,7 +27,7 @@ namespace SunSocket.Server.Protocol
         //数据接收缓冲器队列
         private Queue<IFixedBuffer> ReceiveBuffers;
         //数据发送缓冲器
-        public IDynamicBuffer SendBuffer { get; set; }
+        public IFixedBuffer SendBuffer { get; set; }
         private IDynamicBuffer ReceiveDataBuffer { get; set; }
 
         public ITcpSession Session
@@ -45,7 +45,7 @@ namespace SunSocket.Server.Protocol
             if(BufferPool==null)
                 BufferPool = new FixedBufferPool(bufferPoolSize, bufferSize);
             ReceiveBuffers = new Queue<IFixedBuffer>();
-            SendBuffer = new DynamicBuffer(bufferSize);
+            SendBuffer = new FixedBuffer(bufferSize);
             ReceiveDataBuffer = new DynamicBuffer(bufferSize);
         }
         public bool ProcessReceiveBuffer(byte[] receiveBuffer, int offset, int count)

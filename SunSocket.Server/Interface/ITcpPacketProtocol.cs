@@ -12,7 +12,7 @@ namespace SunSocket.Server.Interface
         /// </summary>
         ITcpSession Session { get; set; }
         //数据发送缓冲器
-        IDynamicBuffer SendBuffer { get; set; }
+        IFixedBuffer SendBuffer { get; set; }
         /// <summary>
         /// 发送指令
         /// </summary>
