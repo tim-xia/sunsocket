@@ -24,7 +24,7 @@ namespace SunSocket.Server
 
         public void Start()
         {
-           Task.Run(StartAsync);
+           Task.Factory.StartNew(StartAsync);
         }
         private async Task StartAsync()
         {
