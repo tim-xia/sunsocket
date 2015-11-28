@@ -51,7 +51,7 @@ namespace SunSocket.Server
                             {
                                 config.OnConnectTimeout(session);
                             }
-                            server.CloseSession(session);
+                            session.DisConnect();
                         }
                     }
                 }

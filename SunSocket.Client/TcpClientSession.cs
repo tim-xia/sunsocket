@@ -16,7 +16,7 @@ namespace SunSocket.Client
         byte[] receiveBuffer;
         ILoger loger;
         object closeLock = new object();
-        public TcpClientSession(EndPoint remoteEndPoint, int bufferSize, ILoger loger,ITcpClientPacketProtocol protocol)
+        public TcpClientSession(EndPoint remoteEndPoint, int bufferSize, ILoger loger)
         {
             this.loger = loger;
             this.remoteEndPoint = remoteEndPoint;
@@ -25,17 +25,15 @@ namespace SunSocket.Client
             ReceiveEventArgs.RemoteEndPoint = remoteEndPoint;
             SendEventArgs = new SocketAsyncEventArgs();
             SendEventArgs.RemoteEndPoint = remoteEndPoint;
-            PacketProtocol = protocol;
-            PacketProtocol.Session = this;
             SendEventArgs.Completed += SendComplate;//数据发送完成事件
             receiveBuffer = new byte[bufferSize];
         }
-        public DateTime ActiveDateTime
+        public DateTime? ActiveDateTime
         {
             get;set;
         }
 
-        public DateTime ConnectDateTime
+        public DateTime? ConnectDateTime
         {
             get;set;
         }
@@ -54,10 +52,16 @@ namespace SunSocket.Client
                 SendEventArgs.AcceptSocket = connectSocket;
             }
         }
-
+        private ITcpClientPacketProtocol packetProtocol;
         public ITcpClientPacketProtocol PacketProtocol
         {
-            get;set;
+            get {
+                return packetProtocol;
+            }
+            set {
+                packetProtocol = value;
+                PacketProtocol.Session = this;
+            }
         }
 
         public SocketAsyncEventArgs ReceiveEventArgs
@@ -73,6 +77,11 @@ namespace SunSocket.Client
         public string SessionId
         {
             get;set;
+        }
+
+        public IMonitorPool<string, ITcpClientSession> Pool
+        {
+            get; set;
         }
 
         public event EventHandler<ITcpClientSession> OnDisConnect;
@@ -143,24 +152,6 @@ namespace SunSocket.Client
                 }
             }
         }
-        public void DisConnect()
-        {
-            if (OnDisConnect != null)
-                OnDisConnect(null, this);
-            //释放引用，并清理缓存，包括释放协议对象等资源
-            PacketProtocol.Clear();
-            if (ConnectSocket != null)
-            try
-            {
-                ConnectSocket.Shutdown(SocketShutdown.Both);
-            }
-            catch (Exception e)
-            {
-                loger.Fatal(e);
-            }
-            ConnectSocket.Close();
-            ConnectSocket = null;
-        }
         public void ReceiveData(ITcpClientSession session, byte[] data)
         {
             OnReceived(this, data);
@@ -183,6 +174,59 @@ namespace SunSocket.Client
             catch (Exception e)
             {
                 loger.Fatal(e);
+            }
+        }
+        public void DisConnect()
+        {
+            if (OnDisConnect != null)
+            {
+                OnDisConnect(null, this);
+            }
+            if (ConnectSocket != null)
+            {
+                try
+                {
+                    ConnectSocket.Shutdown(SocketShutdown.Both);
+                }
+                catch (Exception e)
+                {
+                    //日志记录
+                    loger.Fatal(string.Format("CloseClientSocket Disconnect client {0} error, message: {1}", ConnectSocket, e.Message));
+                }
+                ConnectSocket.Close();
+                ConnectSocket = null;
+            }
+            Clear();
+            ReceiveEventArgs.Dispose();
+            SendEventArgs.Dispose();
+        }
+        public void Clear()
+        {
+            //释放引用，并清理缓存，包括释放协议对象等资源
+            PacketProtocol.Clear();
+        }
+        public void Dispose()
+        {
+            if (ConnectDateTime != null)
+            {
+                lock (closeLock)
+                {
+                    if (ConnectDateTime != null)
+                    {
+                        Clear();
+                        ConnectDateTime = null;
+                        ActiveDateTime = null;
+                        if (Pool != null)
+                        {
+                            Pool.Push(this);
+                        }
+                        else
+                        {
+                            ReceiveEventArgs.Dispose();
+                            SendEventArgs.Dispose();
+                        }
+                    }
+                }
             }
         }
     }

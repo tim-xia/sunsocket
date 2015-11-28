@@ -46,6 +46,7 @@
     <Compile Include="Interface\IFixedBuffer.cs" />
     <Compile Include="Interface\IDynamicBuffer.cs" />
     <Compile Include="Interface\ILoger.cs" />
+    <Compile Include="Interface\IMonitorPool.cs" />
     <Compile Include="Interface\IPool.cs" />
     <Compile Include="ObjectId.cs" />
     <Compile Include="Protocol\SendData.cs" />

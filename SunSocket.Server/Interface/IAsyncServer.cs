@@ -25,7 +25,7 @@ namespace SunSocket.Server.Interface
         /// <summary>
         /// 在线列表
         /// </summary>
-        ConcurrentDictionary<string, ITcpSession> OnlineList { get; set; }
+        ConcurrentDictionary<string, ITcpSession> OnlineList { get;}
         /// <summary>
         /// 开始接受请求
         /// </summary>
@@ -37,11 +37,6 @@ namespace SunSocket.Server.Interface
         /// <param name="session"></param>
         /// <param name="data"></param>
         void ReceiveData(ITcpSession session, byte[] data);
-        /// <summary>
-        /// 关闭会话
-        /// </summary>
-        /// <param name="sesseion"></param>
-        void CloseSession(ITcpSession sesseion);
         /// <summary>
         /// 数据包提取完成事件
         /// </summary>

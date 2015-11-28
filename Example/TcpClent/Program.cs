@@ -17,10 +17,15 @@ namespace TcpClient
         static ITcpClientSession Session;
         static ConcurrentQueue<byte[]> CmdList = new ConcurrentQueue<byte[]>();
         static CancellationTokenSource cancelSource;
+        static TcpClientSessionPool sessionPool;
+        static Loger loger;
         static void Main(string[] args)
         {
-            var loger = new Loger();
-            TcpClientSession session = new TcpClientSession(new IPEndPoint(IPAddress.Parse("127.0.0.1"), 8088), 1024,loger, new TcpClientPacketProtocol(1024, 1024 * 4, loger));
+            loger = new Loger();
+            var endPoint = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 8088);
+            sessionPool = new TcpClientSessionPool(endPoint, 1024, 1024 * 4, loger, GetProtocol);
+            ITcpClientSession session = sessionPool.Pop();
+            session.PacketProtocol = GetProtocol();
             session.OnReceived += ReceiveCommond;
             session.OnConnected += Connected;
             session.OnDisConnect += DisConnected;
@@ -43,6 +48,10 @@ namespace TcpClient
             }
             Console.WriteLine("处理完成");
             Console.ReadLine();
+        }
+        public static ITcpClientPacketProtocol GetProtocol()
+        {
+            return new TcpClientPacketProtocol(1024, 1024 * 4, loger);
         }
         static TaskCompletionSource<byte[]> tSource;
         public static async Task<byte[]> SendAsync(byte[] data)

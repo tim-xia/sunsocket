@@ -66,14 +66,12 @@ namespace SunSocket.Server.Protocol
                         var data = new byte[cachePacketLength];
                         getLenght = cacheBuffer.DataSize - intByteLength;
                         Buffer.BlockCopy(cacheBuffer.Buffer, intByteLength, data, 0, getLenght);
-                        cacheBuffer.Clear();//清理数据并装入池中
                         BufferPool.Push(cacheBuffer);
                         while (ReceiveBuffers.Count > 0)
                         {
                             var popBuffer = ReceiveBuffers.Dequeue();
                             Buffer.BlockCopy(popBuffer.Buffer, 0, data, getLenght, popBuffer.DataSize);
                             getLenght += popBuffer.DataSize;
-                            popBuffer.Clear();//清理数据并装入池中
                             BufferPool.Push(popBuffer);
                         }
                         var needLenght = needReceivePacketLenght - getLenght - intByteLength;
@@ -254,14 +252,12 @@ namespace SunSocket.Server.Protocol
                 }
                 if (InterimPacketBuffer != null)
                 {
-                    InterimPacketBuffer.Clear();
                     BufferPool.Push(InterimPacketBuffer);
                     InterimPacketBuffer = null;
                 }
                 while (ReceiveBuffers.Count > 0)
                 {
                     var packetBuffer = ReceiveBuffers.Dequeue();
-                    packetBuffer.Clear();
                     BufferPool.Push(packetBuffer);
                 }
             }

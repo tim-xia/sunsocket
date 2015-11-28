@@ -13,9 +13,10 @@ using SunSocket.Server.Interface;
 
 namespace SunSocket.Server.Session
 {
-    public class TcpSessionPool : ITcpSessionPool
+    public class TcpSessionPool : IMonitorPool<string,ITcpSession>
     {
-        private static ConcurrentQueue<ITcpSession> pool=new ConcurrentQueue<ITcpSession>();
+        private ConcurrentQueue<ITcpSession> pool=new ConcurrentQueue<ITcpSession>();
+        private ConcurrentDictionary<string, ITcpSession> activeDict = new ConcurrentDictionary<string, ITcpSession>();
         private int count = 0, bufferSize, maxSessions;
         ILoger loger;
         Func<ITcpPacketProtocol> protocolFunc;
@@ -25,7 +26,15 @@ namespace SunSocket.Server.Session
             this.maxSessions = maxSessions;
             this.loger = loger;
             this.protocolFunc = protocolFunc;
-        } 
+        }
+       
+        public ConcurrentDictionary<string, ITcpSession> ActiveList
+        {
+            get
+            {
+                return activeDict;
+            }
+        }
 
         public int Count
         {
@@ -55,12 +64,16 @@ namespace SunSocket.Server.Session
                     session.ReceiveEventArgs.SetBuffer(new byte[bufferSize], 0, bufferSize);
                     session.PacketProtocol = protocolFunc();
                 }
-            } 
+            }
+            activeDict.TryAdd(session.SessionId,session);
+            session.ConnectDateTime = DateTime.Now;
+            session.ActiveDateTime = DateTime.Now;
             return session;
         }
 
         public void Push(ITcpSession item)
         {
+            activeDict.TryRemove(item.SessionId, out item);
             pool.Enqueue(item);
         }
     }

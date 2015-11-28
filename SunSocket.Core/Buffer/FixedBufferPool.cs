@@ -51,10 +51,8 @@ namespace SunSocket.Core.Buffer
 
         public void Push(IFixedBuffer item)
         {
-            if (item == null)
-                throw new Exception("item cannot be null");
-            else
-                pool.Push(item);
+            item.Clear();
+            pool.Push(item);
         }
     }
 }

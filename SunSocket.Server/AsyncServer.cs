@@ -11,9 +11,14 @@ namespace SunSocket.Server
     public class AsyncServer : IAsyncServer
     {
         ILoger loger;
-        private ITcpSessionPool sessionPool;
+        private IMonitorPool<string, ITcpSession> sessionPool;
         public Socket ListenerSocket { get; set; }
-        public ConcurrentDictionary<string, ITcpSession> OnlineList { get; set; }
+        public ConcurrentDictionary<string, ITcpSession> OnlineList
+        {
+            get {
+                return sessionPool.ActiveList;
+            }
+        }
 
         public string Name
         {
@@ -24,7 +29,6 @@ namespace SunSocket.Server
         public AsyncServer(int bufferSize, int maxConnections,ILoger loger, Func<ITcpPacketProtocol> protocolFunc)
         {
             this.sessionPool = new TcpSessionPool(bufferSize,maxConnections,loger, protocolFunc);
-            this.OnlineList = new ConcurrentDictionary<string, ITcpSession>();
             this.loger = loger;
         }
 
@@ -41,10 +45,8 @@ namespace SunSocket.Server
             if (session != null)
             {
                 session.Server = this;
-                OnlineList.TryAdd(session.SessionId, session);
                 session.ConnectSocket = acceptEventArgs.AcceptSocket;
-                session.ConnectDateTime = DateTime.Now;
-                session.ActiveDateTime = session.ConnectDateTime;
+                session.OnDisConnect += SessionDisConnect;
                 if (OnConnected != null)
                     OnConnected(this, session);//启动连接请求通过事件
                 session.StartReceiveAsync();//开始接收数据
@@ -84,13 +86,10 @@ namespace SunSocket.Server
                 loger.Fatal(e);
             }
         }
-        public void CloseSession(ITcpSession sesseion)
+        public void SessionDisConnect(object sender,ITcpSession sesseion)
         {
             if (OnDisConnect != null)
                 OnDisConnect(this, sesseion);
-            sesseion.Clear();//自清理
-            sessionPool.Push(sesseion);
-            OnlineList.TryRemove(sesseion.SessionId, out sesseion);
         }
     }
 }

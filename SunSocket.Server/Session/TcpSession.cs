@@ -80,6 +80,13 @@ namespace SunSocket.Server.Session
         {
             get;set;
         }
+
+        public IMonitorPool<string, ITcpSession> Pool
+        {
+            get;
+            set;
+        }
+
         /// <summary>
         /// 发送指令
         /// </summary>
@@ -144,15 +151,48 @@ namespace SunSocket.Server.Session
             }
         }
         //断开连接
-        private void DisConnect()
+        public void DisConnect()
         {
             if (Server != null)
             {
                 lock (closeLock)
                 {
                     if (Server != null)
-                        Server.CloseSession(this);
+                    {
+                        if (Pool != null)
+                        {
+                            _DisConnect();
+                            Clear();
+                            Pool.Push(this);
+                        }
+                        else
+                        {
+                            Dispose();
+                        }
+                    }
                 }
+            }
+        }
+        private void _DisConnect()
+        {
+            if (OnDisConnect != null)
+            {
+                OnDisConnect(null, this);
+            }
+            if (ConnectSocket != null)
+            {
+                try
+                {
+                    ConnectSocket.Shutdown(SocketShutdown.Both);
+                }
+                catch (Exception e)
+                {
+                    //日志记录
+                    loger.Fatal(string.Format("CloseClientSocket Disconnect client {0} error, message: {1}", ConnectSocket, e.Message));
+                }
+                ConnectSocket.Close();
+                ConnectSocket = null;
+                Server = null;
             }
         }
         //清理session
@@ -161,20 +201,17 @@ namespace SunSocket.Server.Session
             //释放引用，并清理缓存，包括释放协议对象等资源
             PacketProtocol.Clear();
             SessionData.Clear();//清理session数据
-            if (ConnectSocket == null)
-                return;
-            try
-            {
-                ConnectSocket.Shutdown(SocketShutdown.Both);
-            }
-            catch (Exception e)
-            {
-                //日志记录
-                loger.Fatal(string.Format("CloseClientSocket Disconnect client {0} error, message: {1}", ConnectSocket, e.Message));
-            }
-            ConnectSocket.Close();
-            ConnectSocket = null;
-            Server = null;
         }
+
+        public void Dispose()
+        {
+            _DisConnect();
+            Clear();
+            ReceiveEventArgs.Dispose();
+            SendEventArgs.Dispose();
+        }
+
+        //断开连接事件
+        public event EventHandler<ITcpSession> OnDisConnect;
     }
 }

@@ -1,21 +1,26 @@
 ﻿using System;
 using System.Net.Sockets;
 using SunSocket.Core.Protocol;
+using SunSocket.Core.Interface;
 
 
 namespace SunSocket.Client.Interface
 {
-    public interface ITcpClientSession 
+    public interface ITcpClientSession :IDisposable
     {
         string SessionId { get; set; }
         /// <summary>
+        /// 所在池
+        /// </summary>
+        IMonitorPool<string, ITcpClientSession> Pool { get; set; }
+        /// <summary>
         /// 连接时间
         /// </summary>
-        DateTime ConnectDateTime { get; set; }
+        DateTime? ConnectDateTime { get; set; }
         /// <summary>
         /// 最后活动时间
         /// </summary>
-        DateTime ActiveDateTime { get; set; }
+        DateTime? ActiveDateTime { get; set; }
         /// <summary>
         /// 连接套接字
         /// </summary>
@@ -56,9 +61,13 @@ namespace SunSocket.Client.Interface
         /// </summary>
         void Connect();
         /// <summary>
-        /// 清空session
+        /// 断开连接
         /// </summary>
         void DisConnect();
+        /// <summary>
+        /// 清理但不断开连接
+        /// </summary>
+        void Clear();
         /// <summary>
         /// 连接成功事件
         /// </summary>
