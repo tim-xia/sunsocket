@@ -13,7 +13,7 @@ using SunSocket.Server.Interface;
 
 namespace SunSocket.Server.Session
 {
-    public class TcpSessionPool : IMonitorPool<string,ITcpSession>
+    public class TcpSessionPool : ITcpSessionPool<string,ITcpSession>
     {
         private ConcurrentQueue<ITcpSession> pool=new ConcurrentQueue<ITcpSession>();
         private ConcurrentDictionary<string, ITcpSession> activeDict = new ConcurrentDictionary<string, ITcpSession>();
@@ -63,6 +63,8 @@ namespace SunSocket.Server.Session
                     session = new TcpSession(loger);
                     session.ReceiveEventArgs.SetBuffer(new byte[bufferSize], 0, bufferSize);
                     session.PacketProtocol = protocolFunc();
+                    session.OnReceived += OnReceived;
+                    session.OnDisConnect += OnDisConnect;
                 }
             }
             activeDict.TryAdd(session.SessionId,session);
@@ -76,5 +78,9 @@ namespace SunSocket.Server.Session
             activeDict.TryRemove(item.SessionId, out item);
             pool.Enqueue(item);
         }
+        //当接收到命令包时触发
+        public event EventHandler<byte[]> OnReceived;
+        //断开连接事件
+        public event EventHandler<ITcpSession> OnDisConnect;
     }
 }

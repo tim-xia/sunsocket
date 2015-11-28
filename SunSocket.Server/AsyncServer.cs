@@ -2,7 +2,6 @@
 using System.Net.Sockets;
 using SunSocket.Core.Interface;
 using System.Collections.Concurrent;
-using SunSocket.Core.Protocol;
 using SunSocket.Server.Interface;
 using SunSocket.Server.Session;
 
@@ -11,7 +10,7 @@ namespace SunSocket.Server
     public class AsyncServer : IAsyncServer
     {
         ILoger loger;
-        private IMonitorPool<string, ITcpSession> sessionPool;
+        private ITcpSessionPool<string, ITcpSession> sessionPool;
         public Socket ListenerSocket { get; set; }
         public ConcurrentDictionary<string, ITcpSession> OnlineList
         {
@@ -32,21 +31,12 @@ namespace SunSocket.Server
             this.loger = loger;
         }
 
-        //当接收到命令包时触发
-        public event EventHandler<byte[]> OnReceived;
-        //当收到请求时触发
-        public event EventHandler<ITcpSession> OnConnected;
-        //断开连接事件
-        public event EventHandler<ITcpSession> OnDisConnect;
-
         private void ProcessAccept(SocketAsyncEventArgs acceptEventArgs)
         {
             ITcpSession session = sessionPool.Pop();
             if (session != null)
             {
-                session.OnReceived += OnReceived;
                 session.ConnectSocket = acceptEventArgs.AcceptSocket;
-                session.OnDisConnect += SessionDisConnect;
                 if (OnConnected != null)
                     OnConnected(this, session);//启动连接请求通过事件
                 session.StartReceiveAsync();//开始接收数据
@@ -82,10 +72,25 @@ namespace SunSocket.Server
                 loger.Fatal(e);
             }
         }
-        public void SessionDisConnect(object sender,ITcpSession sesseion)
-        {
-            if (OnDisConnect != null)
-                OnDisConnect(this, sesseion);
+        //当收到请求时触发
+        public event EventHandler<ITcpSession> OnConnected;
+        //当接收到命令包时触发
+        public event EventHandler<byte[]> OnReceived {
+            add {
+                sessionPool.OnReceived += value;
+            }
+            remove {
+                sessionPool.OnReceived -= value;
+            }
+        }
+        //断开连接事件
+        public event EventHandler<ITcpSession> OnDisConnect {
+            add {
+                sessionPool.OnDisConnect += value;
+            }
+            remove {
+                sessionPool.OnDisConnect -= value;
+            }
         }
     }
 }

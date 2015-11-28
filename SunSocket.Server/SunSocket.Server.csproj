@@ -50,6 +50,7 @@
     <Compile Include="Interface\IMonitor.cs" />
     <Compile Include="Interface\ITcpPacketProtocol.cs" />
     <Compile Include="Interface\ITcpSession.cs" />
+    <Compile Include="Interface\ITcpSessionPool.cs" />
     <Compile Include="Interface\IUdpAsyncServer.cs" />
     <Compile Include="Interface\IUdpSession.cs" />
     <Compile Include="TcpListener.cs" />

@@ -7,7 +7,7 @@ using SunSocket.Client.Interface;
 
 namespace SunSocket.Client
 {
-    public class TcpClientSessionPool : IMonitorPool<string, ITcpClientSession>
+    public class TcpClientSessionPool : ITcpClientSessionPool<string, ITcpClientSession>
     {
         private ConcurrentQueue<ITcpClientSession> pool = new ConcurrentQueue<ITcpClientSession>();
         private ConcurrentDictionary<string, ITcpClientSession> activeDict = new ConcurrentDictionary<string, ITcpClientSession>();
@@ -57,6 +57,9 @@ namespace SunSocket.Client
                     Interlocked.Increment(ref count);
                     session = new TcpClientSession(remoteEndPoint,bufferSize,loger);
                     session.PacketProtocol = protocolFunc();
+                    session.OnReceived += OnReceived;
+                    session.OnDisConnect += OnDisConnect;
+                    session.OnConnected += OnConnected;
                 }
             }
             activeDict.TryAdd(session.SessionId, session);
@@ -68,5 +71,11 @@ namespace SunSocket.Client
             pool.Enqueue(item);
             activeDict.TryRemove(item.SessionId, out item);       
         }
+        /// <summary>
+        /// 收到指令事件
+        /// </summary>
+        public event EventHandler<byte[]> OnReceived;
+        public event EventHandler<ITcpClientSession> OnDisConnect;
+        public event EventHandler<ITcpClientSession> OnConnected;
     }
 }

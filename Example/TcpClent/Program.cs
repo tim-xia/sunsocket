@@ -24,10 +24,10 @@ namespace TcpClient
             loger = new Loger();
             var endPoint = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 8088);
             sessionPool = new TcpClientSessionPool(endPoint, 1024, 1024 * 4, loger, GetProtocol);
+            sessionPool.OnReceived += ReceiveCommond;
+            sessionPool.OnConnected += Connected;
+            sessionPool.OnDisConnect += DisConnected;
             ITcpClientSession session = sessionPool.Pop();
-            session.OnReceived += ReceiveCommond;
-            session.OnConnected += Connected;
-            session.OnDisConnect += DisConnected;
             session.Connect();
             Console.ReadLine();
             short i = 0;
