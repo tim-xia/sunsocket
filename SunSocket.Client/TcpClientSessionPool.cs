@@ -52,9 +52,8 @@ namespace SunSocket.Client
             ITcpClientSession session;
             if (!pool.TryDequeue(out session))
             {
-                if (count < maxSessions)
+                if (Interlocked.Increment(ref count) < maxSessions)
                 {
-                    Interlocked.Increment(ref count);
                     session = new TcpClientSession(remoteEndPoint,bufferSize,loger);
                     session.PacketProtocol = protocolFunc();
                     session.OnReceived += OnReceived;
@@ -74,7 +73,7 @@ namespace SunSocket.Client
         /// <summary>
         /// 收到指令事件
         /// </summary>
-        public event EventHandler<byte[]> OnReceived;
+        public event EventHandler<IDynamicBuffer> OnReceived;
         public event EventHandler<ITcpClientSession> OnDisConnect;
         public event EventHandler<ITcpClientSession> OnConnected;
     }

@@ -9,6 +9,8 @@ using SunSocket.Core.Interface;
 using SunSocket.Core.Protocol;
 using SunSocket.Client.Interface;
 using SunSocket.Client.Protocol;
+using MsgPack.Serialization;
+using System.IO;
 
 namespace TcpClient
 {
@@ -31,7 +33,7 @@ namespace TcpClient
             session.Connect();
             Console.ReadLine();
             short i = 0;
-            while (i < 1)
+            while (i < 500)
             {
                 i++;
                 var data = Encoding.UTF8.GetBytes("测试数据kjfl发送大法师大法是大法师大法是否阿斯发达说法是否大是大非阿斯顿飞啊的方式阿斯顿飞阿凡达是啊发送到啊发送方啊发送的发送方啊是否啊第三方啊是否啊是否的萨芬啊是否啊是否阿飞大师傅kdsfjlkasjdflkjasdfljaslkfdjlkasdfjlkajsdlk" + i);
@@ -39,6 +41,7 @@ namespace TcpClient
                 {
                     var result = SendAsync(data).Result;
                     Console.WriteLine(Encoding.UTF8.GetString(result));
+                    MemoryStream stream = new MemoryStream();
                 }
                 catch
                 {
@@ -74,9 +77,11 @@ namespace TcpClient
             Console.WriteLine("连接成功，开始接受数据");
             Session = session;
         }
-        public static void ReceiveCommond(object sender, byte[] data)
+        public static void ReceiveCommond(object sender, IDynamicBuffer data)
         {
-            tSource.SetResult(data);
+            var result = new byte[data.DataSize];
+            Buffer.BlockCopy(data.Buffer, 0, result, 0, data.DataSize);
+            tSource.SetResult(result);
             //TcpClientSession session = sender as TcpClientSession;
             //string msg = Encoding.UTF8.GetString(cmd.Data);
             //li.Add(string.Format("sessionId:{0},cmdId:{1},msg:{2}", session.SessionId, cmd.CommondId, msg));

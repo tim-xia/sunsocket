@@ -12,7 +12,7 @@ namespace SunSocket.Server.Interface
         /// </summary>
         ITcpSession Session { get; set; }
         //数据发送缓冲器
-        IFixedBuffer SendBuffer { get; set; }
+        IDynamicBuffer SendBuffer { get; set; }
         /// <summary>
         /// 发送指令
         /// </summary>
@@ -38,6 +38,6 @@ namespace SunSocket.Server.Interface
         /// <summary>
         /// 数据包提取完成事件
         /// </summary>
-        event EventHandler<byte[]> OnReceived;
+        event EventHandler<IDynamicBuffer> OnReceived;
     }
 }

@@ -57,9 +57,8 @@ namespace SunSocket.Server.Session
             ITcpSession session;
             if (!pool.TryDequeue(out session))
             {
-                if(count < maxSessions)
+                if(Interlocked.Increment(ref count) < maxSessions)
                 {
-                    Interlocked.Increment(ref count);
                     session = new TcpSession(loger);
                     session.ReceiveEventArgs.SetBuffer(new byte[bufferSize], 0, bufferSize);
                     session.PacketProtocol = protocolFunc();
@@ -79,7 +78,7 @@ namespace SunSocket.Server.Session
             pool.Enqueue(item);
         }
         //当接收到命令包时触发
-        public event EventHandler<byte[]> OnReceived;
+        public event EventHandler<IDynamicBuffer> OnReceived;
         //断开连接事件
         public event EventHandler<ITcpSession> OnDisConnect;
     }

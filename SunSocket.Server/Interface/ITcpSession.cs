@@ -69,6 +69,6 @@ namespace SunSocket.Server.Interface
         /// <summary>
         /// 数据包提取完成事件
         /// </summary>
-        event EventHandler<byte[]> OnReceived;
+        event EventHandler<IDynamicBuffer> OnReceived;
     }
 }

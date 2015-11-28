@@ -8,7 +8,7 @@ using System.Net.Sockets;
 using System.Threading;
 using System.Collections.Concurrent;
 using SunSocket.Core.Session;
-using SunSocket.Core.Protocol;
+using SunSocket.Core.Interface;
 
 namespace SunSocket.Server.Interface
 {
@@ -34,7 +34,7 @@ namespace SunSocket.Server.Interface
         /// <summary>
         /// 数据包提取完成事件
         /// </summary>
-        event EventHandler<byte[]> OnReceived;
+        event EventHandler<IDynamicBuffer> OnReceived;
         /// <summary>
         /// 当连接请求通过后
         /// </summary>

@@ -11,7 +11,7 @@ namespace SunSocket.Server.Interface
     public interface ITcpSessionPool<K,T>:IMonitorPool<K,T>
     {
         //当接收到命令包时触发
-         event EventHandler<byte[]> OnReceived;
+         event EventHandler<IDynamicBuffer> OnReceived;
         //断开连接事件
          event EventHandler<ITcpSession> OnDisConnect;
     }

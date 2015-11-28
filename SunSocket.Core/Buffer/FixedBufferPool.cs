@@ -12,7 +12,7 @@ namespace SunSocket.Core.Buffer
 {
     public class FixedBufferPool : IPool<IFixedBuffer>
     {
-        private static ConcurrentStack<IFixedBuffer> pool = new ConcurrentStack<IFixedBuffer>();
+        private ConcurrentStack<IFixedBuffer> pool = new ConcurrentStack<IFixedBuffer>();
         private int size, bufferSize;
         private int count = 0;
         public FixedBufferPool(int size, int bufferSize)

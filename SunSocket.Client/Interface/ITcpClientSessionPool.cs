@@ -12,7 +12,7 @@ namespace SunSocket.Client.Interface
         /// <summary>
         /// 收到指令事件
         /// </summary>
-        event EventHandler<byte[]> OnReceived;
+        event EventHandler<IDynamicBuffer> OnReceived;
         event EventHandler<ITcpClientSession> OnDisConnect;
         event EventHandler<ITcpClientSession> OnConnected;
     }

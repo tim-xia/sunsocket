@@ -44,7 +44,7 @@ namespace SunSocket
         }
         static byte[] data = Encoding.UTF8.GetBytes("测试数据服务器返回");
         static SendData sdata = new SendData() { Buffer = data, Offset = 0};
-        public static void ReceiveCommond(object sender, byte[] data)
+        public static void ReceiveCommond(object sender, IDynamicBuffer data)
         {
             TcpSession session = sender as TcpSession;
             //string msg = Encoding.UTF8.GetString(cmd.Data);
@@ -53,7 +53,9 @@ namespace SunSocket
             //{
             // sdata.Buffer = cmd.Data;
             // Thread.Sleep(4000);
-                session.SendAsync(new SendData { Buffer = data });
+            var result = new byte[data.DataSize];
+            Buffer.BlockCopy(data.Buffer, 0, result, 0, data.DataSize);
+            session.SendAsync(new SendData { Buffer = result });
             //}
         }
     }

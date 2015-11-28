@@ -75,7 +75,7 @@ namespace SunSocket.Server
         //当收到请求时触发
         public event EventHandler<ITcpSession> OnConnected;
         //当接收到命令包时触发
-        public event EventHandler<byte[]> OnReceived {
+        public event EventHandler<IDynamicBuffer> OnReceived {
             add {
                 sessionPool.OnReceived += value;
             }

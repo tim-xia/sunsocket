@@ -131,7 +131,6 @@ namespace SunSocket.Server.Session
            ActiveDateTime = DateTime.Now;//发送数据视为活跃
             if (sendEventArgs.SocketError == SocketError.Success)
             {
-                PacketProtocol.SendBuffer.Clear(); //清除已发送的包
                 if (ConnectSocket != null)
                 {
                     PacketProtocol.SendProcess();//继续发送
@@ -210,6 +209,6 @@ namespace SunSocket.Server.Session
         /// <summary>
         /// 数据包提取完成事件
         /// </summary>
-        public event EventHandler<byte[]> OnReceived { add { PacketProtocol.OnReceived += value; }remove { PacketProtocol.OnReceived -= value; } }
+        public event EventHandler<IDynamicBuffer> OnReceived { add { PacketProtocol.OnReceived += value; }remove { PacketProtocol.OnReceived -= value; } }
     }
 }

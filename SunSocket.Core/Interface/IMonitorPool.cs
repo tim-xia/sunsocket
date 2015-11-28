@@ -10,7 +10,7 @@ namespace SunSocket.Core.Interface
     public interface IMonitorPool<K,T>:IPool<T>
     {
         /// <summary>
-        /// 在线列表
+        /// 活动列表
         /// </summary>
         ConcurrentDictionary<K, T> ActiveList { get; }
     }

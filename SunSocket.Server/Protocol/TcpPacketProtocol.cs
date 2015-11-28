@@ -27,7 +27,8 @@ namespace SunSocket.Server.Protocol
         //数据接收缓冲器队列
         private Queue<IFixedBuffer> ReceiveBuffers;
         //数据发送缓冲器
-        public IFixedBuffer SendBuffer { get; set; }
+        public IDynamicBuffer SendBuffer { get; set; }
+        private IDynamicBuffer ReceiveDataBuffer { get; set; }
 
         public ITcpSession Session
         {
@@ -44,10 +45,12 @@ namespace SunSocket.Server.Protocol
             if(BufferPool==null)
                 BufferPool = new FixedBufferPool(bufferPoolSize, bufferSize);
             ReceiveBuffers = new Queue<IFixedBuffer>();
-            SendBuffer = new FixedBuffer(bufferPoolSize);
+            SendBuffer = new DynamicBuffer(bufferSize);
+            ReceiveDataBuffer = new DynamicBuffer(bufferSize);
         }
         public bool ProcessReceiveBuffer(byte[] receiveBuffer, int offset, int count)
         {
+            ReceiveDataBuffer.Clear();
             while (count > 0)
             {
                 if (needReceivePacketLenght > 0 && alreadyReceivePacketLength + count >= needReceivePacketLenght)//说明包已获取完成
@@ -63,23 +66,22 @@ namespace SunSocket.Server.Protocol
 
                         var cacheBuffer = ReceiveBuffers.Dequeue();
                         int cachePacketLength = BitConverter.ToInt32(cacheBuffer.Buffer, 0); //获取包长度
-                        var data = new byte[cachePacketLength];
                         getLenght = cacheBuffer.DataSize - intByteLength;
-                        Buffer.BlockCopy(cacheBuffer.Buffer, intByteLength, data, 0, getLenght);
+                        ReceiveDataBuffer.WriteBuffer(cacheBuffer.Buffer, intByteLength, getLenght);
                         BufferPool.Push(cacheBuffer);
                         while (ReceiveBuffers.Count > 0)
                         {
                             var popBuffer = ReceiveBuffers.Dequeue();
-                            Buffer.BlockCopy(popBuffer.Buffer, 0, data, getLenght, popBuffer.DataSize);
+                            ReceiveDataBuffer.WriteBuffer(popBuffer.Buffer, 0, popBuffer.DataSize);
                             getLenght += popBuffer.DataSize;
                             BufferPool.Push(popBuffer);
                         }
                         var needLenght = needReceivePacketLenght - getLenght - intByteLength;
-                        Buffer.BlockCopy(receiveBuffer, offset, data, getLenght, needLenght);
+                        ReceiveDataBuffer.WriteBuffer(receiveBuffer, offset, needLenght);
                         offset += needLenght;
                         count -= needLenght;
                         //触发获取指令事件
-                        ReceiveData(data);
+                        ReceiveData();
                         //清理合包数据
                         needReceivePacketLenght = 0; alreadyReceivePacketLength = 0;
                     }
@@ -120,10 +122,9 @@ namespace SunSocket.Server.Protocol
                             packetLength = IPAddress.NetworkToHostOrder(packetLength); //把网络字节顺序转为本地字节顺序
                         if ((count - intByteLength) >= packetLength) //如果数据包达到长度则马上进行解析
                         {
-                            var data = new byte[packetLength];
-                            Buffer.BlockCopy(receiveBuffer, offset + intByteLength, data, 0, packetLength);
+                            ReceiveDataBuffer.WriteBuffer(receiveBuffer, offset + intByteLength, packetLength);
                             //触发获取指令事件
-                            ReceiveData(data);
+                            ReceiveData();
                             int processLenght = packetLength + intByteLength;
                             offset += processLenght;
                             count -= processLenght;
@@ -137,10 +138,11 @@ namespace SunSocket.Server.Protocol
             }
             return count == 0;
         }
-        public void ReceiveData(byte[] data)
+        public void ReceiveData()
         {
             if (OnReceived != null)
-                OnReceived(Session, data);
+                OnReceived(Session, ReceiveDataBuffer);
+            ReceiveDataBuffer.Clear();//清空数据接收器缓存
         }
         object lockObj = new object();
         public bool SendAsync(SendData cmd)
@@ -172,6 +174,7 @@ namespace SunSocket.Server.Protocol
 
         public void SendProcess()
         {
+            SendBuffer.Clear(); //清除已发送的包
             int surplus = SendBuffer.Buffer.Length;
             while (cmdQueue.Count > 0)
             {
@@ -274,6 +277,6 @@ namespace SunSocket.Server.Protocol
         /// <summary>
         /// 数据包提取完成事件
         /// </summary>
-        public event EventHandler<byte[]> OnReceived;
+        public event EventHandler<IDynamicBuffer> OnReceived;
     }
 }
