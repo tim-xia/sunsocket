@@ -56,10 +56,5 @@ namespace SunSocket.Server
         {
             pool.Push(item);
         }
-
-        public void Dispose()
-        {
-            throw new NotImplementedException();
-        }
     }
 }
