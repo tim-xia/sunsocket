@@ -38,7 +38,7 @@ namespace SunSocket.Server.Protocol
 
         private SendData NoComplateCmd = null;//未完全发送指令
         bool isSend = false;//发送状态
-        private ConcurrentQueue<SendData> cmdQueue = new ConcurrentQueue<SendData>();//指令发送队列
+        private ConcurrentQueue<SendData> sendDataQueue = new ConcurrentQueue<SendData>();//指令发送队列
         public TcpPacketProtocol(int bufferSize,int bufferPoolSize,ILoger loger)
         {
             this.loger = loger;
@@ -145,9 +145,9 @@ namespace SunSocket.Server.Protocol
             ReceiveDataBuffer.Clear();//清空数据接收器缓存
         }
         object lockObj = new object();
-        public bool SendAsync(SendData cmd)
+        public void SendAsync(SendData data)
         {
-            cmdQueue.Enqueue(cmd);
+            sendDataQueue.Enqueue(data);
             if (!isSend)
             {
                 lock(lockObj)
@@ -157,26 +157,28 @@ namespace SunSocket.Server.Protocol
                         isSend = true;
                         if (Session.ConnectSocket != null)
                         {
-                            Task.Run(() =>
+                            if (sendDataQueue.Count > 1)
+                            {
+                                Task.Factory.StartNew(() =>
+                                {
+                                    SendProcess();
+                                });
+                            }
+                            else
                             {
                                 SendProcess();
-                            });
-                        }
-                        else
-                        {
-                            return false;
+                            }
                         }
                     }
                 }
             }
-            return true;
         }
 
         public void SendProcess()
         {
             SendBuffer.Clear(); //清除已发送的包
             int surplus = SendBuffer.Buffer.Length;
-            while (cmdQueue.Count > 0)
+            while (sendDataQueue.Count > 0)
             {
                 if (NoComplateCmd != null)
                 {
@@ -198,7 +200,7 @@ namespace SunSocket.Server.Protocol
                 if (surplus >= intByteLength)
                 {
                     SendData data;
-                    if (cmdQueue.TryDequeue(out data))
+                    if (sendDataQueue.TryDequeue(out data))
                     {
                         var PacketAllLength = data.Buffer.Length + intByteLength;
                         if (PacketAllLength <= surplus)
@@ -251,10 +253,10 @@ namespace SunSocket.Server.Protocol
             lock (clearLock)
             {
                 isSend = false;
-                if (cmdQueue.Count > 0)
+                if (sendDataQueue.Count > 0)
                 {
                     SendData cmd;
-                    while (cmdQueue.TryDequeue(out cmd))
+                    while (sendDataQueue.TryDequeue(out cmd))
                     {
                     }
                 }

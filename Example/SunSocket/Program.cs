@@ -49,12 +49,12 @@ namespace SunSocket
             TcpSession session = sender as TcpSession;
             //string msg = Encoding.UTF8.GetString(cmd.Data);
             //Console.WriteLine("sessionId:{0},cmdId:{1},msg:{2}", session.SessionId, cmd.CommondId, msg);
+            var result = new byte[data.DataSize];
+            Buffer.BlockCopy(data.Buffer, 0, result, 0, data.DataSize);
             //for (int i = 0; i < 50; i++)
             //{
             // sdata.Buffer = cmd.Data;
             // Thread.Sleep(4000);
-            var result = new byte[data.DataSize];
-            Buffer.BlockCopy(data.Buffer, 0, result, 0, data.DataSize);
             session.SendAsync(new SendData { Buffer = result });
             //}
         }

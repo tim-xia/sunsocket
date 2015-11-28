@@ -7,8 +7,8 @@
     <ProjectGuid>{1C5A17AA-3FBE-4C65-B148-28A2BFD35C21}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>SunSocket.Framework</RootNamespace>
-    <AssemblyName>SunSocket.Framework</AssemblyName>
+    <RootNamespace>SunSocket.Server</RootNamespace>
+    <AssemblyName>SunSocket.Server</AssemblyName>
     <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
