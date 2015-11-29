@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using SunSocket.Server.Interface;
 using SunSocket.Core.Interface;
@@ -13,6 +14,7 @@ namespace SunSocket.Server
     {
         List<IAsyncServer> ServerList = new List<IAsyncServer>();
         MonitorConfig config;
+        CancellationTokenSource token = new CancellationTokenSource();
         public TcpMonitor(MonitorConfig config)
         {
             this.config = config;
@@ -24,7 +26,7 @@ namespace SunSocket.Server
 
         public void Start()
         {
-           Task.Factory.StartNew(StartAsync);
+           Task.Factory.StartNew(StartAsync, token.Token);
         }
         private async Task StartAsync()
         {
@@ -59,7 +61,7 @@ namespace SunSocket.Server
         }
         public void Stop()
         {
-            throw new NotImplementedException();
+            token.Cancel();
         }
     }
 }
