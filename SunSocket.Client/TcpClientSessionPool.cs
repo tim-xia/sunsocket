@@ -52,7 +52,7 @@ namespace SunSocket.Client
             ITcpClientSession session;
             if (!pool.TryDequeue(out session))
             {
-                if (Interlocked.Increment(ref count) < maxSessions)
+                if (Interlocked.Increment(ref count) <= maxSessions)
                 {
                     session = new TcpClientSession(remoteEndPoint,bufferSize,loger);
                     session.Pool = this;
@@ -62,7 +62,8 @@ namespace SunSocket.Client
                     session.OnConnected += OnConnected;
                 }
             }
-            activeDict.TryAdd(session.SessionId, session);
+            if (session != null)
+                activeDict.TryAdd(session.SessionId, session);
             return session;
         }
 

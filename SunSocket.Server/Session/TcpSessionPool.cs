@@ -57,7 +57,7 @@ namespace SunSocket.Server.Session
             ITcpSession session;
             if (!pool.TryDequeue(out session))
             {
-                if(Interlocked.Increment(ref count) < maxSessions)
+                if(Interlocked.Increment(ref count) <= maxSessions)
                 {
                     session = new TcpSession(loger);
                     session.Pool = this;
@@ -67,9 +67,12 @@ namespace SunSocket.Server.Session
                     session.OnDisConnect += OnDisConnect;
                 }
             }
-            activeDict.TryAdd(session.SessionId,session);
-            session.ConnectDateTime = DateTime.Now;
-            session.ActiveDateTime = DateTime.Now;
+            if (session != null)
+            {
+                activeDict.TryAdd(session.SessionId, session);
+                session.ConnectDateTime = DateTime.Now;
+                session.ActiveDateTime = DateTime.Now;
+            }
             return session;
         }
 

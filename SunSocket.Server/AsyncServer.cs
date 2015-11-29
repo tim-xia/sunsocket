@@ -41,6 +41,10 @@ namespace SunSocket.Server
                     OnConnected(this, session);//启动连接请求通过事件
                 session.StartReceiveAsync();//开始接收数据
             }
+            else
+            {
+                acceptEventArgs.AcceptSocket.Disconnect(false);
+            }
             StartAccept(acceptEventArgs); //把当前异步事件释放，等待下次连接
         }
 
