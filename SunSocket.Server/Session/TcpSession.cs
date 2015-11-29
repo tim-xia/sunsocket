@@ -128,7 +128,7 @@ namespace SunSocket.Server.Session
         }
         private void SendComplate(object sender, SocketAsyncEventArgs sendEventArgs)
         {
-           ActiveDateTime = DateTime.Now;//发送数据视为活跃
+            ActiveDateTime = DateTime.Now;//发送数据视为活跃
             if (sendEventArgs.SocketError == SocketError.Success)
             {
                 if (ConnectSocket != null)

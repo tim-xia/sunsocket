@@ -157,17 +157,11 @@ namespace SunSocket.Server.Protocol
                         isSend = true;
                         if (Session.ConnectSocket != null)
                         {
-                            if (sendDataQueue.Count > 1)
-                            {
-                                Task.Factory.StartNew(() =>
-                                {
-                                    SendProcess();
-                                });
-                            }
-                            else
-                            {
-                                SendProcess();
-                            }
+                            SendProcess();
+                        }
+                        else
+                        {
+                            Session.DisConnect();
                         }
                     }
                 }
