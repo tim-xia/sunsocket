@@ -55,6 +55,7 @@ namespace SunSocket.Client
                 if (Interlocked.Increment(ref count) < maxSessions)
                 {
                     session = new TcpClientSession(remoteEndPoint,bufferSize,loger);
+                    session.Pool = this;
                     session.PacketProtocol = protocolFunc();
                     session.OnReceived += OnReceived;
                     session.OnDisConnect += OnDisConnect;

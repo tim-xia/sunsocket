@@ -76,7 +76,7 @@ namespace SunSocket.Server.Session
             get;set;
         }
 
-        public IMonitorPool<string, ITcpSession> Pool
+        public ITcpSessionPool<string, ITcpSession> Pool
         {
             get;
             set;
@@ -169,6 +169,7 @@ namespace SunSocket.Server.Session
         }
         private void _DisConnect()
         {
+            ConnectDateTime = null;
             if (OnDisConnect != null)
             {
                 OnDisConnect(null, this);

@@ -12,7 +12,7 @@ namespace SunSocket.Server.Interface
         /// <summary>
         /// 所在池
         /// </summary>
-        IMonitorPool<string, ITcpSession> Pool { get; set; }
+        ITcpSessionPool<string, ITcpSession> Pool { get; set; }
         /// <summary>
         /// 连接时间
         /// </summary>

@@ -60,6 +60,7 @@ namespace SunSocket.Server.Session
                 if(Interlocked.Increment(ref count) < maxSessions)
                 {
                     session = new TcpSession(loger);
+                    session.Pool = this;
                     session.ReceiveEventArgs.SetBuffer(new byte[bufferSize], 0, bufferSize);
                     session.PacketProtocol = protocolFunc();
                     session.OnReceived += OnReceived;
