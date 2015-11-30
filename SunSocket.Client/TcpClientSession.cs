@@ -20,7 +20,7 @@ namespace SunSocket.Client
         {
             this.loger = loger;
             this.remoteEndPoint = remoteEndPoint;
-            SessionId = ObjectId.GenerateNewId().ToString();//生成唯一sesionId
+            SessionId = Guid.NewGuid().ToString();//生成唯一sesionId
             ReceiveEventArgs = new SocketAsyncEventArgs();
             ReceiveEventArgs.RemoteEndPoint = remoteEndPoint;
             SendEventArgs = new SocketAsyncEventArgs();

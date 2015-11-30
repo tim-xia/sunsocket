@@ -48,7 +48,6 @@
     <Compile Include="Interface\ILoger.cs" />
     <Compile Include="Interface\IMonitorPool.cs" />
     <Compile Include="Interface\IPool.cs" />
-    <Compile Include="ObjectId.cs" />
     <Compile Include="Protocol\SendData.cs" />
     <Compile Include="Interface\ICmdOperation.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

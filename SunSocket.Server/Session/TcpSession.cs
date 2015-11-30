@@ -15,7 +15,7 @@ namespace SunSocket.Server.Session
         public TcpSession(ILoger loger)
         {
             this.loger = loger;
-            SessionId = ObjectId.GenerateNewId().ToString();//生成唯一sesionId
+            SessionId = Guid.NewGuid().ToString();//生成唯一sesionId
             SessionData = new DataContainer();
             ReceiveEventArgs = new SocketAsyncEventArgs();
             SendEventArgs = new SocketAsyncEventArgs();
