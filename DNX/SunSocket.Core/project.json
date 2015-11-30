@@ -1,0 +1,24 @@
+{
+  "version": "1.0.0-*",
+  "description": "SunSocket.Core Class Library",
+  "authors": [ "zhouzehui" ],
+  "tags": [ "" ],
+  "projectUrl": "",
+  "licenseUrl": "",
+
+  "dependencies": {
+    "Microsoft.CSharp": "4.0.1-beta-23516",
+    "System.Net.Sockets": "4.0.0",
+    "System.Collections.Concurrent": "4.0.10",
+    "System.Threading": "4.0.10",
+    "System.Threading.Tasks": "4.0.10",
+    "System.Runtime": "4.0.20",
+    "System.Linq": "4.0.0",
+    "System.Collections": "4.0.10",
+    "System.Collections.Immutable": "1.1.37"
+  },
+
+  "frameworks": {
+    "dotnet": { }
+  }
+}

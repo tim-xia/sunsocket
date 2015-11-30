@@ -1,0 +1,50 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 14
+VisualStudioVersion = 14.0.23107.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "SunSocket.Server", "SunSocket.Server\SunSocket.Server.xproj", "{CB6DF5D0-7877-4987-9639-F77F8FC54F36}"
+EndProject
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "SunSocket.Core", "SunSocket.Core\SunSocket.Core.xproj", "{F7938811-7791-4ACF-AC46-E9C9CD853BEF}"
+EndProject
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "SunSocket.Client", "SunSocket.Client\SunSocket.Client.xproj", "{444F4829-1DEE-4FB8-ACD4-209393BB4521}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Example", "Example", "{AD6942A7-CD77-486C-8DE1-C994484E6370}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{D5F3109E-1C5C-497B-B3D1-F48B6AFDFA05}"
+	ProjectSection(SolutionItems) = preProject
+		global.json = global.json
+	EndProjectSection
+EndProject
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "TcpServer", "Example\TcpServer\TcpServer.xproj", "{44FB0AD9-14A4-475F-B6C2-FF68A9B0D6AB}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{CB6DF5D0-7877-4987-9639-F77F8FC54F36}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CB6DF5D0-7877-4987-9639-F77F8FC54F36}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CB6DF5D0-7877-4987-9639-F77F8FC54F36}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CB6DF5D0-7877-4987-9639-F77F8FC54F36}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F7938811-7791-4ACF-AC46-E9C9CD853BEF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F7938811-7791-4ACF-AC46-E9C9CD853BEF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F7938811-7791-4ACF-AC46-E9C9CD853BEF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F7938811-7791-4ACF-AC46-E9C9CD853BEF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{444F4829-1DEE-4FB8-ACD4-209393BB4521}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{444F4829-1DEE-4FB8-ACD4-209393BB4521}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{444F4829-1DEE-4FB8-ACD4-209393BB4521}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{444F4829-1DEE-4FB8-ACD4-209393BB4521}.Release|Any CPU.Build.0 = Release|Any CPU
+		{44FB0AD9-14A4-475F-B6C2-FF68A9B0D6AB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{44FB0AD9-14A4-475F-B6C2-FF68A9B0D6AB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{44FB0AD9-14A4-475F-B6C2-FF68A9B0D6AB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{44FB0AD9-14A4-475F-B6C2-FF68A9B0D6AB}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{44FB0AD9-14A4-475F-B6C2-FF68A9B0D6AB} = {AD6942A7-CD77-486C-8DE1-C994484E6370}
+	EndGlobalSection
+EndGlobal
