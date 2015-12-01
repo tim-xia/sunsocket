@@ -8,8 +8,7 @@
 
   "dependencies": {
     "SunSocket.Core": "1.0.0-*",
-    "SunSocket.Server": "1.0.0-*",
-    "System.Runtime": "4.0.20"
+    "SunSocket.Server": "1.0.0-*"
   },
 
   "commands": {
@@ -17,7 +16,6 @@
   },
 
   "frameworks": {
-    "dnx451": { },
     "dnxcore50": {
       "dependencies": {
         "System.Collections": "4.0.10-beta-23019",
