@@ -19,7 +19,6 @@ namespace SunSocket.Server.Protocol
         bool NetByteOrder = false;
         static int intByteLength = sizeof(int);
         private object clearLock = new object();
-        ILoger loger;
         private int alreadyReceivePacketLength, needReceivePacketLenght;
         private IFixedBuffer InterimPacketBuffer;
         //数据接收缓冲器队列
@@ -27,22 +26,24 @@ namespace SunSocket.Server.Protocol
         //数据发送缓冲器
         public IFixedBuffer SendBuffer { get; set; }
         private IDynamicBuffer ReceiveDataBuffer { get; set; }
-
+        ITcpSession _session;
         public ITcpSession Session
         {
-            get;
-            set;
+            get { return _session; }
+            set {
+                _session = value;
+                SendBuffer = new FixedBuffer(value.Pool.TcpServer.Config.BufferSize);
+                ReceiveDataBuffer = new DynamicBuffer(value.Pool.TcpServer.Config.BufferSize);
+            }
         }
 
         private SendData NoComplateCmd = null;//未完全发送指令
         bool isSend = false;//发送状态
         private ConcurrentQueue<SendData> sendDataQueue = new ConcurrentQueue<SendData>();//指令发送队列
-        public TcpPacketProtocol(int bufferSize,ILoger loger)
+        public TcpPacketProtocol()
         {
-            this.loger = loger;
             ReceiveBuffers = new Queue<IFixedBuffer>();
-            SendBuffer = new FixedBuffer(bufferSize);
-            ReceiveDataBuffer = new DynamicBuffer(bufferSize);
+            
         }
         public bool ProcessReceiveBuffer(byte[] receiveBuffer, int offset, int count)
         {

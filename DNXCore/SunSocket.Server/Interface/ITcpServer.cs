@@ -12,12 +12,16 @@ using SunSocket.Core.Interface;
 
 namespace SunSocket.Server.Interface
 {
-    public interface IAsyncServer
+    public interface ITcpServer
     {
         /// <summary>
-        /// 服务名称
+        /// 配置信息
         /// </summary>
-        string Name { get; set; }
+        TcpServerConfig Config { get; set; }
+        /// <summary>
+        /// 日志处理器
+        /// </summary>
+        ILoger Loger { get; set; }
         /// <summary>
         /// 监听socket
         /// </summary>
@@ -27,21 +31,32 @@ namespace SunSocket.Server.Interface
         /// </summary>
         ConcurrentDictionary<string, ITcpSession> OnlineList { get;}
         /// <summary>
+        /// 启动监听
+        /// </summary>
+        void Start();
+        /// <summary>
+        /// 停止监听
+        /// </summary>
+        void Stop();
+        /// <summary>
         /// 开始接受请求
         /// </summary>
         /// <param name="acceptEventArgs">异步套接字操作</param>
         void StartAccept(SocketAsyncEventArgs acceptEventArgs);
-        /// <summary>
-        /// 数据包提取完成事件
-        /// </summary>
-        event EventHandler<IDynamicBuffer> OnReceived;
+
+        void OnReceived(ITcpSession session, IDynamicBuffer dataBuffer);
         /// <summary>
         /// 当连接请求通过后
         /// </summary>
-        event EventHandler<ITcpSession> OnConnected;
+        void OnConnected(ITcpSession session);
         /// <summary>
         /// 断开连接通知
         /// </summary>
-        event EventHandler<ITcpSession> OnDisConnect;
+        void OnDisConnect(ITcpSession session);
+        /// <summary>
+        /// 获取协议解析器
+        /// </summary>
+        /// <returns></returns>
+        ITcpPacketProtocol GetProtocol();
     }
 }

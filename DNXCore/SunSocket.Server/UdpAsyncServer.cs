@@ -85,10 +85,7 @@ namespace SunSocket.Server
                 byte[] data = new byte[lenght];
                 System.Buffer.BlockCopy(e.Buffer, checkLenght, data, 0, lenght);
                 UdpSession session = new UdpSession(e.RemoteEndPoint, this);
-                Task.Factory.StartNew(() =>
-                {
-                    OnReceived(session, data);
-                });
+                Task.Factory.StartNew(() => { OnReceived(session, data); });
             }
             this.BeginReceive(e);
         }

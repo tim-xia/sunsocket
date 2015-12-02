@@ -10,9 +10,13 @@ namespace SunSocket.Server.Interface
 {
     public interface ITcpSessionPool<K,T>:IMonitorPool<K,T>
     {
-        //当接收到命令包时触发
-         event EventHandler<IDynamicBuffer> OnReceived;
-        //断开连接事件
-         event EventHandler<ITcpSession> OnDisConnect;
+        /// <summary>
+        /// 内存池
+        /// </summary>
+        IPool<IFixedBuffer> FixedBufferPool { get; set; }
+        /// <summary>
+        /// 池所属的Server
+        /// </summary>
+        ITcpServer TcpServer { get; set; }
     }
 }

@@ -10,11 +10,9 @@ namespace SunSocket.Server.Session
 {
     public class TcpSession : ITcpSession
     {
-        ILoger loger;
         object closeLock = new object();
-        public TcpSession(ILoger loger)
+        public TcpSession()
         {
-            this.loger = loger;
             SessionId = Guid.NewGuid().ToString();//生成唯一sesionId
             SessionData = new DataContainer();
             ReceiveEventArgs = new SocketAsyncEventArgs();
@@ -103,7 +101,7 @@ namespace SunSocket.Server.Session
             }
             catch (Exception e)
             {
-                loger.Fatal(e);
+               Pool.TcpServer.Loger.Fatal(e);
             }
         }
         private void ReceiveComplate(object sender, SocketAsyncEventArgs receiveEventArgs)
@@ -169,11 +167,8 @@ namespace SunSocket.Server.Session
         }
         private void _DisConnect()
         {
+            Pool.TcpServer.OnDisConnect(this);
             ConnectDateTime = null;
-            if (OnDisConnect != null)
-            {
-                OnDisConnect(null, this);
-            }
             if (ConnectSocket != null)
             {
                 try
@@ -183,7 +178,7 @@ namespace SunSocket.Server.Session
                 catch (Exception e)
                 {
                     //日志记录
-                    loger.Fatal(string.Format("CloseClientSocket Disconnect client {0} error, message: {1}", ConnectSocket, e.Message));
+                    Pool.TcpServer.Loger.Fatal(string.Format("CloseClientSocket Disconnect client {0} error, message: {1}", ConnectSocket, e.Message));
                 }
                 ConnectSocket.Dispose();
                 ConnectSocket = null;
@@ -204,12 +199,5 @@ namespace SunSocket.Server.Session
             ReceiveEventArgs.Dispose();
             SendEventArgs.Dispose();
         }
-
-        //断开连接事件
-        public event EventHandler<ITcpSession> OnDisConnect;
-        /// <summary>
-        /// 数据包提取完成事件
-        /// </summary>
-        public event EventHandler<IDynamicBuffer> OnReceived { add { PacketProtocol.OnReceived += value; }remove { PacketProtocol.OnReceived -= value; } }
     }
 }
