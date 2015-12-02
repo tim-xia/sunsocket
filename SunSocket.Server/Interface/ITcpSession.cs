@@ -62,13 +62,5 @@ namespace SunSocket.Server.Interface
         /// 断开连接
         /// </summary>
         void DisConnect();
-        /// <summary>
-        /// 断开连接通知
-        /// </summary>
-        event EventHandler<ITcpSession> OnDisConnect;
-        /// <summary>
-        /// 数据包提取完成事件
-        /// </summary>
-        event EventHandler<IDynamicBuffer> OnReceived;
     }
 }

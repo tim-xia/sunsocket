@@ -9,6 +9,7 @@ using System.Net.Sockets;
 using SunSocket.Core.Session;
 using SunSocket.Server.Protocol;
 using SunSocket.Core.Interface;
+using SunSocket.Core.Buffer;
 using SunSocket.Server.Interface;
 
 namespace SunSocket.Server.Session
@@ -19,15 +20,17 @@ namespace SunSocket.Server.Session
         private ConcurrentDictionary<string, ITcpSession> activeDict = new ConcurrentDictionary<string, ITcpSession>();
         private int count = 0, bufferSize, maxSessions;
         ILoger loger;
-        Func<ITcpPacketProtocol> protocolFunc;
-        public TcpSessionPool(int bufferSize,int maxSessions,ILoger loger,Func<ITcpPacketProtocol> protocolFunc)
+        public TcpSessionPool(int bufferSize,int fixedBufferPoolSize,int maxSessions,ILoger loger)
         {
             this.bufferSize = bufferSize;
             this.maxSessions = maxSessions;
             this.loger = loger;
-            this.protocolFunc = protocolFunc;
+            FixedBufferPool= new FixedBufferPool(fixedBufferPoolSize, bufferSize);
         }
-       
+        public IPool<IFixedBuffer> FixedBufferPool {
+            get;
+            set;
+        }
         public ConcurrentDictionary<string, ITcpSession> ActiveList
         {
             get
@@ -52,6 +55,12 @@ namespace SunSocket.Server.Session
             }
         }
 
+        public ITcpServer TcpServer
+        {
+            get;
+            set;
+        }
+
         public ITcpSession Pop()
         {
             ITcpSession session;
@@ -62,9 +71,7 @@ namespace SunSocket.Server.Session
                     session = new TcpSession(loger);
                     session.Pool = this;
                     session.ReceiveEventArgs.SetBuffer(new byte[bufferSize], 0, bufferSize);
-                    session.PacketProtocol = protocolFunc();
-                    session.OnReceived += OnReceived;
-                    session.OnDisConnect += OnDisConnect;
+                    session.PacketProtocol = new TcpPacketProtocol(bufferSize,loger);
                 }
             }
             if (session != null)
@@ -81,9 +88,5 @@ namespace SunSocket.Server.Session
             activeDict.TryRemove(item.SessionId, out item);
             pool.Enqueue(item);
         }
-        //当接收到命令包时触发
-        public event EventHandler<IDynamicBuffer> OnReceived;
-        //断开连接事件
-        public event EventHandler<ITcpSession> OnDisConnect;
     }
 }

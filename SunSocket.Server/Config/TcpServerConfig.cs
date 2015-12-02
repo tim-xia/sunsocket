@@ -10,6 +10,18 @@ namespace SunSocket.Server
     public class TcpServerConfig
     {
         /// <summary>
+        /// 名称
+        /// </summary>
+        public string Name { get; set; }
+        /// <summary>
+        /// IP地址
+        /// </summary>
+        public string IP { get; set; }
+        /// <summary>
+        /// Ip端口
+        /// </summary>
+        public int Port { get; set; }
+        /// <summary>
         /// 缓冲器数组大小
         /// </summary>
         public int BufferSize
@@ -40,6 +52,6 @@ namespace SunSocket.Server
         /// <summary>
         /// buffer池最大量(一般用于合并分包)
         /// </summary>
-        public int MaxBufferPoolSize { get { return maxBufferPoolSize; }set { maxBufferPoolSize = value; } }
+        public int MaxFixedBufferPoolSize { get { return maxBufferPoolSize; }set { maxBufferPoolSize = value; } }
     }
 }

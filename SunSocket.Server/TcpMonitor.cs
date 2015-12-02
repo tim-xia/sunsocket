@@ -12,14 +12,14 @@ namespace SunSocket.Server
 {
     public class TcpMonitor : IMonitor
     {
-        List<IAsyncServer> ServerList = new List<IAsyncServer>();
+        List<ITcpServer> ServerList = new List<ITcpServer>();
         MonitorConfig config;
         CancellationTokenSource token = new CancellationTokenSource();
         public TcpMonitor(MonitorConfig config)
         {
             this.config = config;
         }
-        public void AddServer(IAsyncServer Server)
+        public void AddServer(ITcpServer Server)
         {
             ServerList.Add(Server);
         }
