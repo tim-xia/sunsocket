@@ -18,14 +18,21 @@ namespace SunSocket.Server.Session
     {
         private ConcurrentQueue<ITcpSession> pool=new ConcurrentQueue<ITcpSession>();
         private ConcurrentDictionary<string, ITcpSession> activeDict = new ConcurrentDictionary<string, ITcpSession>();
-        private int count = 0, bufferSize, maxSessions;
-        ILoger loger;
-        public TcpSessionPool(int bufferSize,int fixedBufferPoolSize,int maxSessions,ILoger loger)
+        private int count = 0;
+        public TcpSessionPool()
         {
-            this.bufferSize = bufferSize;
-            this.maxSessions = maxSessions;
-            this.loger = loger;
-            FixedBufferPool= new FixedBufferPool(fixedBufferPoolSize, bufferSize);
+        }
+        ITcpServer server;
+        public ITcpServer TcpServer
+        {
+            get {
+                return server;
+            }
+            set
+            {
+                server = value;
+                FixedBufferPool = new FixedBufferPool(value.Config.MaxFixedBufferPoolSize, value.Config.BufferSize);
+            }
         }
         public IPool<IFixedBuffer> FixedBufferPool {
             get;
@@ -55,23 +62,17 @@ namespace SunSocket.Server.Session
             }
         }
 
-        public ITcpServer TcpServer
-        {
-            get;
-            set;
-        }
-
         public ITcpSession Pop()
         {
             ITcpSession session;
             if (!pool.TryDequeue(out session))
             {
-                if(Interlocked.Increment(ref count) <= maxSessions)
+                if(Interlocked.Increment(ref count) <= TcpServer.Config.MaxConnections)
                 {
-                    session = new TcpSession(loger);
+                    session = new TcpSession();
                     session.Pool = this;
-                    session.ReceiveEventArgs.SetBuffer(new byte[bufferSize], 0, bufferSize);
-                    session.PacketProtocol = new TcpPacketProtocol(bufferSize,loger);
+                    session.ReceiveEventArgs.SetBuffer(new byte[TcpServer.Config.BufferSize], 0, TcpServer.Config.BufferSize);
+                    session.PacketProtocol = TcpServer.GetProtocol();
                 }
             }
             if (session != null)

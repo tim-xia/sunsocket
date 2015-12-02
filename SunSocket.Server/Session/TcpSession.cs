@@ -10,11 +10,9 @@ namespace SunSocket.Server.Session
 {
     public class TcpSession : ITcpSession
     {
-        ILoger loger;
         object closeLock = new object();
-        public TcpSession(ILoger loger)
+        public TcpSession()
         {
-            this.loger = loger;
             SessionId = Guid.NewGuid().ToString();//生成唯一sesionId
             SessionData = new DataContainer();
             ReceiveEventArgs = new SocketAsyncEventArgs();
@@ -103,7 +101,7 @@ namespace SunSocket.Server.Session
             }
             catch (Exception e)
             {
-                loger.Fatal(e);
+               Pool.TcpServer.Loger.Fatal(e);
             }
         }
         private void ReceiveComplate(object sender, SocketAsyncEventArgs receiveEventArgs)
@@ -180,7 +178,7 @@ namespace SunSocket.Server.Session
                 catch (Exception e)
                 {
                     //日志记录
-                    loger.Fatal(string.Format("CloseClientSocket Disconnect client {0} error, message: {1}", ConnectSocket, e.Message));
+                    Pool.TcpServer.Loger.Fatal(string.Format("CloseClientSocket Disconnect client {0} error, message: {1}", ConnectSocket, e.Message));
                 }
                 ConnectSocket.Dispose();
                 ConnectSocket = null;

@@ -5,12 +5,12 @@ using SunSocket.Core.Interface;
 using System.Collections.Concurrent;
 using SunSocket.Server.Interface;
 using SunSocket.Server.Session;
+using SunSocket.Server.Protocol;
 
 namespace SunSocket.Server
 {
     public class TcpServer : ITcpServer
     {
-        ILoger loger;
         private ITcpSessionPool<string, ITcpSession> sessionPool;
         private IPEndPoint endPoint;
         public Socket ListenerSocket { get; set; }
@@ -20,17 +20,17 @@ namespace SunSocket.Server
                 return sessionPool.ActiveList;
             }
         }
-
-        public TcpServerConfig Config { get; set; }
         //构造函数
-        public TcpServer(TcpServerConfig config,ILoger loger)
+        public TcpServer(TcpServerConfig config, ILoger loger)
         {
             this.Config = config;
             endPoint = new IPEndPoint(IPAddress.Parse(config.IP), config.Port);
-            this.sessionPool = new TcpSessionPool(config.BufferSize, config.MaxFixedBufferPoolSize, config.MaxConnections, loger);
+            this.sessionPool = new TcpSessionPool();
             this.sessionPool.TcpServer = this;
-            this.loger = loger;
+            this.Loger = loger;
         }
+        public TcpServerConfig Config { get; set; }
+        public ILoger Loger { get; set; }
         public void Start()
         {
             ListenerSocket = new Socket(endPoint.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
@@ -91,7 +91,7 @@ namespace SunSocket.Server
             }
             catch (Exception e)
             {
-                loger.Fatal(e);
+                Loger.Fatal(e);
             }
         }
         //当接收到命令包时触发
@@ -106,6 +106,10 @@ namespace SunSocket.Server
         //断开连接事件
         public virtual void OnDisConnect(ITcpSession session) {
             
+        }
+        public virtual ITcpPacketProtocol GetProtocol()
+        {
+            return new TcpPacketProtocol(Config.BufferSize, Loger);
         }
     }
 }

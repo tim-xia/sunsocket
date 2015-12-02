@@ -11,8 +11,6 @@ namespace SunSocket.Client.Interface
         /// 归属session
         /// </summary>
         ITcpClientSession Session { get; set; }
-        //数据发送缓冲器
-        IFixedBuffer SendBuffer { get; set; }
         /// <summary>
         /// 发送指令
         /// </summary>
@@ -34,9 +32,5 @@ namespace SunSocket.Client.Interface
         /// 清空session
         /// </summary>
         void Clear();
-        /// <summary>
-        /// 收到指令事件
-        /// </summary>
-        event EventHandler<IDynamicBuffer> OnReceived;
     }
 }

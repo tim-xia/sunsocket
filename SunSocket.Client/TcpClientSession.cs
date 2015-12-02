@@ -79,7 +79,7 @@ namespace SunSocket.Client
             get;set;
         }
 
-        public IMonitorPool<string, ITcpClientSession> Pool
+        public ITcpClientSessionPool Pool
         {
             get; set;
         }
@@ -101,8 +101,7 @@ namespace SunSocket.Client
                 ReceiveEventArgs.SetBuffer(receiveBuffer, 0, receiveBuffer.Length);
                 ConnectSocket = asyncEventArgs.ConnectSocket;
                 StartReceiveAsync();
-                if (OnConnected != null)
-                    OnConnected(asyncEventArgs, this);//响应连接成功事件
+                OnConnected(this);//响应连接成功事件
             }
             else
             {
@@ -168,10 +167,7 @@ namespace SunSocket.Client
         }
         public void DisConnect()
         {
-            if (OnDisConnect != null)
-            {
-                OnDisConnect(null, this);
-            }
+            OnDisConnect(this);
             if (ConnectSocket != null)
             {
                 try
@@ -219,19 +215,19 @@ namespace SunSocket.Client
                 }
             }
         }
-        /// <summary>
-        /// 收到指令事件
-        /// </summary>
-        public event EventHandler<IDynamicBuffer> OnReceived {
-            add {
-                PacketProtocol.OnReceived += value;
-            }
-            remove
-            {
-                PacketProtocol.OnReceived -= value;
-            }
+        //当接收到命令包时触发
+        public virtual void OnReceived(ITcpClientSession session, IDynamicBuffer dataBuffer)
+        {
+
         }
-        public event EventHandler<ITcpClientSession> OnDisConnect;
-        public event EventHandler<ITcpClientSession> OnConnected;
+        public virtual void OnConnected(ITcpClientSession session)
+        {
+
+        }
+        //断开连接事件
+        public virtual void OnDisConnect(ITcpClientSession session)
+        {
+
+        }
     }
 }

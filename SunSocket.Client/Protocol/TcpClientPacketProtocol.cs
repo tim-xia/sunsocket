@@ -36,7 +36,7 @@ namespace SunSocket.Client.Protocol
         private SendData NoComplateCmd = null;//未完全发送指令
         bool isSend = false;//发送状态
         private ConcurrentQueue<SendData> sendDataQueue = new ConcurrentQueue<SendData>();//指令发送队列
-        public TcpClientPacketProtocol(int bufferSize, int bufferPoolSize,ILoger loger)
+        public TcpClientPacketProtocol(int bufferSize, int fixedBufferPoolSize,ILoger loger)
         {
             this.loger = loger;
             if (BufferPool == null)
@@ -44,7 +44,7 @@ namespace SunSocket.Client.Protocol
                 lock(closeLock)
                 {
                     if(BufferPool==null)
-                        BufferPool = new FixedBufferPool(bufferPoolSize, bufferSize);
+                        BufferPool = new FixedBufferPool(fixedBufferPoolSize, bufferSize);
                 }
             }
             ReceiveBuffers = new Queue<IFixedBuffer>();
@@ -142,8 +142,7 @@ namespace SunSocket.Client.Protocol
         }
         public void ReceiveData()
         {
-            if (OnReceived != null)
-                OnReceived(Session, ReceiveDataBuffer);
+            Session.OnReceived(Session, ReceiveDataBuffer);
             ReceiveDataBuffer.Clear();//清空数据接收器缓存
         }
         object lockObj = new object();
@@ -284,9 +283,5 @@ namespace SunSocket.Client.Protocol
             alreadyReceivePacketLength = 0;
             needReceivePacketLenght = 0;
         }
-        /// <summary>
-        /// 数据包提取完成事件
-        /// </summary>
-        public event EventHandler<IDynamicBuffer> OnReceived;
     }
 }

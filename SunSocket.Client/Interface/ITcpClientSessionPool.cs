@@ -7,13 +7,8 @@ using SunSocket.Core.Interface;
 
 namespace SunSocket.Client.Interface
 {
-    public interface ITcpClientSessionPool<K, T> : IMonitorPool<K, T>
+    public interface ITcpClientSessionPool : IMonitorPool<string, ITcpClientSession>
     {
-        /// <summary>
-        /// 收到指令事件
-        /// </summary>
-        event EventHandler<IDynamicBuffer> OnReceived;
-        event EventHandler<ITcpClientSession> OnDisConnect;
-        event EventHandler<ITcpClientSession> OnConnected;
+        ITcpClientPacketProtocol GetProtocal();
     }
 }

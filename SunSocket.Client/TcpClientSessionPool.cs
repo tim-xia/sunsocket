@@ -3,25 +3,25 @@ using System.Collections.Concurrent;
 using System.Net;
 using System.Threading;
 using SunSocket.Core.Interface;
+using SunSocket.Client.Protocol;
 using SunSocket.Client.Interface;
 
 namespace SunSocket.Client
 {
-    public class TcpClientSessionPool : ITcpClientSessionPool<string, ITcpClientSession>
+    public class TcpClientSessionPool : ITcpClientSessionPool
     {
         private ConcurrentQueue<ITcpClientSession> pool = new ConcurrentQueue<ITcpClientSession>();
         private ConcurrentDictionary<string, ITcpClientSession> activeDict = new ConcurrentDictionary<string, ITcpClientSession>();
-        private int count = 0, bufferSize, maxSessions;
+        private int count = 0, bufferSize, maxSessions, fixedBufferPoolSize;
         ILoger loger;
         EndPoint remoteEndPoint;
-        Func<ITcpClientPacketProtocol> protocolFunc;
-        public TcpClientSessionPool(EndPoint remoteEndPoint, int bufferSize, int maxSessions, ILoger loger, Func<ITcpClientPacketProtocol> protocolFunc)
+        public TcpClientSessionPool(EndPoint remoteEndPoint, int bufferSize,int fixedBufferPoolSize, int maxSessions, ILoger loger)
         {
             this.bufferSize = bufferSize;
             this.maxSessions = maxSessions;
             this.remoteEndPoint = remoteEndPoint;
+            this.fixedBufferPoolSize = fixedBufferPoolSize;
             this.loger = loger;
-            this.protocolFunc = protocolFunc;
         }
         public int Count
         {
@@ -56,27 +56,21 @@ namespace SunSocket.Client
                 {
                     session = new TcpClientSession(remoteEndPoint,bufferSize,loger);
                     session.Pool = this;
-                    session.PacketProtocol = protocolFunc();
-                    session.OnReceived += OnReceived;
-                    session.OnDisConnect += OnDisConnect;
-                    session.OnConnected += OnConnected;
+                    session.PacketProtocol = GetProtocal();
                 }
             }
             if (session != null)
                 activeDict.TryAdd(session.SessionId, session);
             return session;
         }
-
+        public virtual ITcpClientPacketProtocol GetProtocal()
+        {
+            return null;
+        }
         public void Push(ITcpClientSession item)
         {
             pool.Enqueue(item);
             activeDict.TryRemove(item.SessionId, out item);       
         }
-        /// <summary>
-        /// 收到指令事件
-        /// </summary>
-        public event EventHandler<IDynamicBuffer> OnReceived;
-        public event EventHandler<ITcpClientSession> OnDisConnect;
-        public event EventHandler<ITcpClientSession> OnConnected;
     }
 }

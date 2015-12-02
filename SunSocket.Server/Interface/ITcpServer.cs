@@ -19,6 +19,10 @@ namespace SunSocket.Server.Interface
         /// </summary>
         TcpServerConfig Config { get; set; }
         /// <summary>
+        /// 日志处理器
+        /// </summary>
+        ILoger Loger { get; set; }
+        /// <summary>
         /// 监听socket
         /// </summary>
         Socket ListenerSocket { get; set; }
@@ -49,5 +53,10 @@ namespace SunSocket.Server.Interface
         /// 断开连接通知
         /// </summary>
         void OnDisConnect(ITcpSession session);
+        /// <summary>
+        /// 获取协议解析器
+        /// </summary>
+        /// <returns></returns>
+        ITcpPacketProtocol GetProtocol();
     }
 }
