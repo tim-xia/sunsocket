@@ -137,7 +137,7 @@ namespace SunSocket.Server.Protocol
         }
         public void ReceiveData()
         {
-             Session.Pool.TcpServer.OnReceived(Session, ReceiveDataBuffer);
+            Session.Pool.TcpServer.OnReceived(Session, ReceiveDataBuffer);
             ReceiveDataBuffer.Clear();//清空数据接收器缓存
         }
         object lockObj = new object();
