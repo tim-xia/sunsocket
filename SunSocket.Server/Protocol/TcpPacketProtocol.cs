@@ -15,7 +15,6 @@ namespace SunSocket.Server.Protocol
 {
     public class TcpPacketProtocol : ITcpPacketProtocol
     {
-       
         bool NetByteOrder = false;
         static int intByteLength = sizeof(int);
         private object clearLock = new object();
@@ -172,16 +171,16 @@ namespace SunSocket.Server.Protocol
             {
                 if (NoComplateCmd != null)
                 {
-                    int noComplateLength = NoComplateCmd.Buffer.Length - NoComplateCmd.Offset;
+                    int noComplateLength = NoComplateCmd.Data.Length - NoComplateCmd.Offset;
                     if (noComplateLength <= SendBuffer.Buffer.Length)
                     {
-                        SendBuffer.WriteBuffer(NoComplateCmd.Buffer, NoComplateCmd.Offset, noComplateLength);
+                        SendBuffer.WriteBuffer(NoComplateCmd.Data, NoComplateCmd.Offset, noComplateLength);
                         surplus -= noComplateLength;
                         NoComplateCmd = null;
                     }
                     else
                     {
-                        SendBuffer.WriteBuffer(NoComplateCmd.Buffer, NoComplateCmd.Offset, SendBuffer.Buffer.Length);
+                        SendBuffer.WriteBuffer(NoComplateCmd.Data, NoComplateCmd.Offset, SendBuffer.Buffer.Length);
                         NoComplateCmd.Offset += SendBuffer.Buffer.Length;
                         surplus -= SendBuffer.Buffer.Length;
                         break;//跳出当前循环
@@ -192,20 +191,20 @@ namespace SunSocket.Server.Protocol
                     SendData data;
                     if (sendDataQueue.TryDequeue(out data))
                     {
-                        var PacketAllLength = data.Buffer.Length + intByteLength;
+                        var PacketAllLength = data.Data.Length + intByteLength;
                         if (PacketAllLength <= surplus)
                         {
-                            SendBuffer.WriteInt(data.Buffer.Length, false); //写入总大小
-                            SendBuffer.WriteBuffer(data.Buffer); //写入命令内容
+                            SendBuffer.WriteInt(data.Data.Length, false); //写入总大小
+                            SendBuffer.WriteBuffer(data.Data); //写入命令内容
                             surplus -= PacketAllLength;
                         }
                         else
                         {
-                            SendBuffer.WriteInt(data.Buffer.Length, false); //写入总大小
-                            surplus -= data.Buffer.Length;
+                            SendBuffer.WriteInt(data.Data.Length, false); //写入总大小
+                            surplus -= data.Data.Length;
                             if (surplus > 0)
                             {
-                                SendBuffer.WriteBuffer(data.Buffer, data.Offset, surplus); //写入命令内容
+                                SendBuffer.WriteBuffer(data.Data, data.Offset, surplus); //写入命令内容
                                 data.Offset = surplus;
                             }
                             NoComplateCmd = data;//把未全部发送指令缓存

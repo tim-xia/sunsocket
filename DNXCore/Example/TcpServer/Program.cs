@@ -19,7 +19,7 @@ namespace TcpServerOne
         {
             var result = new byte[dataBuffer.DataSize];
             Buffer.BlockCopy(dataBuffer.Buffer, 0, result, 0, dataBuffer.DataSize);
-            session.SendAsync(new SendData { Buffer = result });
+            session.SendAsync(result);
         }
     }
     class Program

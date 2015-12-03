@@ -79,14 +79,14 @@ namespace SunSocket.Server.Session
             get;
             set;
         }
-
         /// <summary>
         /// 发送指令
         /// </summary>
-        /// <param name="cmd"></param>
-        public void SendAsync(SendData cmd)
+        /// <param name="data"></param>
+        public void SendAsync(byte[] data)
         {
-            PacketProtocol.SendAsync(cmd);
+            SendData sendData = new SendData() { Data = data };
+            PacketProtocol.SendAsync(sendData);
         }
 
         public void StartReceiveAsync()

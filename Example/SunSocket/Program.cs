@@ -19,11 +19,12 @@ namespace SunSocket
     {
         public MyServer(TcpServerConfig config, ILoger loger) : base(config, loger)
         { }
+        static byte[] data = Encoding.UTF8.GetBytes("测试数据服务器返回");
         public override void OnReceived(ITcpSession session, IDynamicBuffer dataBuffer)
         {
-            var result = new byte[dataBuffer.DataSize];
-            Buffer.BlockCopy(dataBuffer.Buffer, 0, result, 0, dataBuffer.DataSize);
-            session.SendAsync(new SendData { Buffer = result });
+            //var result = new byte[dataBuffer.DataSize];
+            //Buffer.BlockCopy(dataBuffer.Buffer, 0, result, 0, dataBuffer.DataSize);
+            session.SendAsync(data);
         }
     }
     class Program
@@ -35,17 +36,15 @@ namespace SunSocket
             TcpServerConfig configOne = new TcpServerConfig { Name = "one", IP = "127.0.0.1", Port = 8088,BufferSize = 1024,MaxFixedBufferPoolSize=1024*4, MaxConnections = 8000 };
             MyServer listener = new MyServer(configOne, loger);
             listener.Start();
-            MonitorConfig monitorConfig = new MonitorConfig();
-            monitorConfig.WorkDelayMilliseconds = 10000;
-            monitorConfig.TimeoutMilliseconds = 10000;
-            TcpMonitor monitor = new TcpMonitor(monitorConfig);
-            monitor.AddServer(listener);
-            monitor.Start();
+            //MonitorConfig monitorConfig = new MonitorConfig();
+            //monitorConfig.WorkDelayMilliseconds = 10000;
+            //monitorConfig.TimeoutMilliseconds = 10000;
+            //TcpMonitor monitor = new TcpMonitor(monitorConfig);
+            //monitor.AddServer(listener);
+            //monitor.Start();
             Console.WriteLine("服务器已启动");
             Console.ReadLine();
         }
-        static byte[] data = Encoding.UTF8.GetBytes("测试数据服务器返回");
-        static SendData sdata = new SendData() { Buffer = data, Offset = 0};
     }
     public class Loger : ILoger
     {

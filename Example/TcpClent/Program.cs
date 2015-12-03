@@ -60,7 +60,7 @@ namespace TcpClient
         {
             tSource = new TaskCompletionSource<byte[]>();
             cancelSource = new CancellationTokenSource(5000);
-            Session.SendAsync(new SendData() { Buffer = data });
+            Session.SendAsync(new SendData() { Data = data });
             //if (!tSource.Task.IsCompleted)
             //{
             //    return null;

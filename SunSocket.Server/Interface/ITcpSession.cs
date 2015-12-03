@@ -44,8 +44,8 @@ namespace SunSocket.Server.Interface
         /// <summary>
         /// 发送数据
         /// </summary>
-        /// <param name="cmd"></param>
-        void SendAsync(SendData cmd);
+        /// <param name="data"></param>
+        void SendAsync(byte[] data);
         /// <summary>
         /// 开始接收数据
         /// </summary>

@@ -115,15 +115,15 @@ namespace SunSocket.Server
                     args= sendArgsPool.Pop();
                 }
             }
-            if (cmd.Buffer.Length + checkLenght > args.Buffer.Length)
+            if (cmd.Data.Length + checkLenght > args.Buffer.Length)
                 throw new Exception("发送的数据大于buffer最大长度");
             else
             {
                 args.RemoteEndPoint = endPoint;
-                byte[] length = BitConverter.GetBytes(cmd.Buffer.Length);
+                byte[] length = BitConverter.GetBytes(cmd.Data.Length);
                 System.Buffer.BlockCopy(length, 0, args.Buffer, 0, length.Length);
-                System.Buffer.BlockCopy(cmd.Buffer, 0, args.Buffer,checkLenght, cmd.Buffer.Length);
-                args.SetBuffer(0, cmd.Buffer.Length + checkLenght);
+                System.Buffer.BlockCopy(cmd.Data, 0, args.Buffer,checkLenght, cmd.Data.Length);
+                args.SetBuffer(0, cmd.Data.Length + checkLenght);
                 if (!this.ListenerSocket.SendToAsync(args)) SendCompleted(null,args);
             }
         }

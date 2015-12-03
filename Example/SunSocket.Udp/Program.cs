@@ -22,7 +22,7 @@ namespace SunSocket.Udp
         {
             IUdpSession session = sender as IUdpSession;
             Console.WriteLine(Encoding.UTF8.GetString(data));
-            session.SendAsync(new SendData() {Buffer=data});
+            session.SendAsync(new SendData() {Data=data});
         }
     }
 }
