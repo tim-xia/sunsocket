@@ -71,7 +71,7 @@ namespace SunSocket.Server.Session
                 {
                     session = new TcpSession();
                     session.Pool = this;
-                    session.ReceiveEventArgs.SetBuffer(new byte[TcpServer.Config.BufferSize], 0, TcpServer.Config.BufferSize);
+                    session.ReceiveBuffer = new byte[TcpServer.Config.BufferSize];
                     session.PacketProtocol = TcpServer.GetProtocol();
                     session.PacketProtocol.Session = session;
                 }

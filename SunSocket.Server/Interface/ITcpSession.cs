@@ -14,6 +14,10 @@ namespace SunSocket.Server.Interface
         /// </summary>
         ITcpSessionPool<string, ITcpSession> Pool { get; set; }
         /// <summary>
+        /// 数据接收缓冲区
+        /// </summary>
+        byte[] ReceiveBuffer { get; set; }
+        /// <summary>
         /// 连接时间
         /// </summary>
         DateTime? ConnectDateTime { get; set; }

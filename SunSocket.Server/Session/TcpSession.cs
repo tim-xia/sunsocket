@@ -20,7 +20,18 @@ namespace SunSocket.Server.Session
             SendEventArgs.Completed += SendComplate;//数据发送完成事件
             ReceiveEventArgs.Completed += ReceiveComplate;
         }
-        
+        byte[] receiveBuffer;
+        public byte[] ReceiveBuffer
+        {
+            get {
+                return receiveBuffer;
+            }
+            set
+            {
+                receiveBuffer = value;
+                ReceiveEventArgs.SetBuffer(receiveBuffer, 0, receiveBuffer.Length);
+            }
+        }
         public string SessionId{get; set;}
         /// <summary>
         /// 连接时间

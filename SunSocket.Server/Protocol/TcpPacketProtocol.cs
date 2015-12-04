@@ -46,7 +46,6 @@ namespace SunSocket.Server.Protocol
         }
         public bool ProcessReceiveBuffer(byte[] receiveBuffer, int offset, int count)
         {
-            ReceiveDataBuffer.Clear();
             while (count > 0)
             {
                 if (needReceivePacketLenght > 0 && alreadyReceivePacketLength + count >= needReceivePacketLenght)//说明包已获取完成

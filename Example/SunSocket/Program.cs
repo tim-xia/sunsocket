@@ -36,12 +36,12 @@ namespace SunSocket
             TcpServerConfig configOne = new TcpServerConfig { Name = "one", IP = "127.0.0.1", Port = 8088,BufferSize = 1024,MaxFixedBufferPoolSize=1024*4, MaxConnections = 8000 };
             MyServer listener = new MyServer(configOne, loger);
             listener.Start();
-            //MonitorConfig monitorConfig = new MonitorConfig();
-            //monitorConfig.WorkDelayMilliseconds = 10000;
-            //monitorConfig.TimeoutMilliseconds = 10000;
-            //TcpMonitor monitor = new TcpMonitor(monitorConfig);
-            //monitor.AddServer(listener);
-            //monitor.Start();
+            MonitorConfig monitorConfig = new MonitorConfig();
+            monitorConfig.WorkDelayMilliseconds = 10000;
+            monitorConfig.TimeoutMilliseconds = 10000;
+            TcpMonitor monitor = new TcpMonitor(monitorConfig);
+            monitor.AddServer(listener);
+            monitor.Start();
             Console.WriteLine("服务器已启动");
             Console.ReadLine();
         }
