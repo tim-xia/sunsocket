@@ -23,7 +23,6 @@ namespace SunSocket.Client.Protocol
         private IFixedBuffer InterimPacketBuffer;
         //数据接收缓冲器队列
         private Queue<IFixedBuffer> ReceiveBuffers;
-        ILoger loger;
         //数据发送缓冲器
         public IFixedBuffer SendBuffer { get; set; }
         private IDynamicBuffer ReceiveDataBuffer { get; set; }
@@ -36,9 +35,8 @@ namespace SunSocket.Client.Protocol
         private SendData NoComplateCmd = null;//未完全发送指令
         bool isSend = false;//发送状态
         private ConcurrentQueue<SendData> sendDataQueue = new ConcurrentQueue<SendData>();//指令发送队列
-        public TcpClientPacketProtocol(int bufferSize, int fixedBufferPoolSize,ILoger loger)
+        public TcpClientPacketProtocol(int bufferSize, int fixedBufferPoolSize)
         {
-            this.loger = loger;
             if (BufferPool == null)
             {
                 lock(closeLock)

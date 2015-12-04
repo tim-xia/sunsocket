@@ -58,6 +58,7 @@ namespace SunSocket.Server
             }
             else
             {
+                Loger.Warning("TcpServer:session is null");
                 acceptEventArgs.AcceptSocket.Dispose();
             }
             StartAccept(acceptEventArgs); //把当前异步事件释放，等待下次连接
