@@ -8,7 +8,6 @@ namespace SunSocket.Core.Interface
 {
     public interface ILoger
     {
-
         /// <summary>
         /// 记录日志信息
         /// </summary>

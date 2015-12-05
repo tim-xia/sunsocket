@@ -69,7 +69,7 @@ namespace SunSocket.Server.Session
             ITcpSession session;
             if (!pool.TryDequeue(out session))
             {
-                if(Interlocked.Increment(ref count) <= TcpServer.Config.MaxConnections)
+                if (Interlocked.Increment(ref count) <= TcpServer.Config.MaxConnections)
                 {
                     session = new TcpSession();
                     session.SessionId = sessionId.NewId();
@@ -77,6 +77,10 @@ namespace SunSocket.Server.Session
                     session.ReceiveBuffer = new byte[TcpServer.Config.BufferSize];
                     session.PacketProtocol = TcpServer.GetProtocol();
                     session.PacketProtocol.Session = session;
+                }
+                else
+                {
+                    TcpServer.Loger.Warning("session count attain maxnum");
                 }
             }
             if (session != null)

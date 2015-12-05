@@ -73,7 +73,7 @@ namespace TcpClient
         }
         public static ITcpClientPacketProtocol GetProtocol()
         {
-            return new TcpClientPacketProtocol(1024, 1024 * 4, loger);
+            return new TcpClientPacketProtocol(1024, 1024 * 4);
         }
         static TaskCompletionSource<byte[]> tSource;
         public static void Send(byte[] data)
