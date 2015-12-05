@@ -120,19 +120,19 @@ namespace SunSocket.Server.Session
             if (receiveEventArgs.BytesTransferred > 0 && receiveEventArgs.SocketError == SocketError.Success)
             {
                 ActiveDateTime = DateTime.Now;
-                //try
-                //{
+                try
+                {
                     if (!PacketProtocol.ProcessReceiveBuffer(receiveEventArgs.Buffer, receiveEventArgs.Offset, receiveEventArgs.BytesTransferred))
                     { //如果处理数据返回失败，则断开连接
                         DisConnect();
                     }
                     StartReceiveAsync();//再次等待接收数据
-                //}
-                //catch(Exception e)
-                //{
-                //    DisConnect();
-                //    Pool.TcpServer.Loger.Error(e);
-                //}
+                }
+                catch (Exception e)
+                {
+                    DisConnect();
+                    Pool.TcpServer.Loger.Error(e);
+                }
             }
             else
             {

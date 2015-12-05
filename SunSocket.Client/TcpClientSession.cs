@@ -122,6 +122,7 @@ namespace SunSocket.Client
                 }
                 catch (Exception e)
                 {
+                    DisConnect();
                     loger.Error(e);
                 }
             }

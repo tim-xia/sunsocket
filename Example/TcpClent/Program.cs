@@ -40,35 +40,26 @@ namespace TcpClient
             loger = new Loger();
             var endPoint = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 8088);
             client = new MyClient(endPoint, loger);
-            client.PacketProtocol = new TcpClientPacketProtocol(1024, 1024 * 4, loger);
+            client.PacketProtocol = new TcpClientPacketProtocol(1024, 1024 * 4);
             client.Received += ReceiveCommond;
             client.Connect();
-            Console.ReadLine();
-            int i = 0;
+
             Stopwatch sw = new Stopwatch();
             Console.WriteLine("连接服务器成功");
+            int i = 0;
+            string c = Console.ReadLine();
+            if (!string.IsNullOrEmpty(c))
+                allCount = int.Parse(c);
             sw.Start();//开始记录时间
             sb.Start();
             while (i <= allCount)
             {
                 i++;
                 var data = Encoding.UTF8.GetBytes("测试数据kjfl发送大法师大法是大法师大法是否阿斯发达说法是否大是大非阿斯顿飞啊的方式阿斯顿飞阿凡达是啊发送到啊发送方啊发送的发送方啊是否啊第三方啊是否啊是否的萨芬啊是否啊是否阿飞大师傅kdsfjlkasjdflkjasdfljaslkfdjlkasdfjlkajsdlk" + i);
-                //try
-                //{
-                //    var result = SendAsync(data).Result;
-                //   // Console.WriteLine(Encoding.UTF8.GetString(result));
-                //}
-                //catch
-                //{
-                //    Console.WriteLine("请求超时");
-                //}
-                Send(data);        
+                Send(data);
             }
-            sw.Stop();//结束记录时间
-                      //Console.WriteLine("单连接{0}次同步请求的运行时间：{1} 秒{2}毫秒", i, sw.Elapsed.Seconds, sw.Elapsed.Milliseconds);
+            sw.Stop();
             Console.WriteLine("发送{0}次数据完成，运行时间：{1} 秒{2}毫秒", i, sw.Elapsed.Seconds, sw.Elapsed.Milliseconds);
-            Console.WriteLine();
-            Console.WriteLine("发送完成");
             Console.ReadLine();
         }
         public static ITcpClientPacketProtocol GetProtocol()
