@@ -8,11 +8,15 @@ namespace SunSocket.Server.Interface
 {
     public interface ITcpSession:IDisposable
     {
-        string SessionId { get; set; }
+        long SessionId { get; set; }
         /// <summary>
         /// 所在池
         /// </summary>
-        ITcpSessionPool<string, ITcpSession> Pool { get; set; }
+        ITcpSessionPool<long, ITcpSession> Pool { get; set; }
+        /// <summary>
+        /// 数据接收缓冲区
+        /// </summary>
+        byte[] ReceiveBuffer { get; set; }
         /// <summary>
         /// 连接时间
         /// </summary>
@@ -44,7 +48,7 @@ namespace SunSocket.Server.Interface
         /// <summary>
         /// 发送数据
         /// </summary>
-        /// <param name="cmd"></param>
+        /// <param name="data"></param>
         void SendAsync(byte[] data);
         /// <summary>
         /// 开始接收数据

@@ -8,11 +8,11 @@ namespace SunSocket.Client.Interface
 {
     public interface ITcpClientSession :IDisposable
     {
-        string SessionId { get; set; }
+        long SessionId { get; set; }
         /// <summary>
         /// 所在池
         /// </summary>
-        IMonitorPool<string, ITcpClientSession> Pool { get; set; }
+        ITcpClientSessionPool Pool { get; set; }
         /// <summary>
         /// 连接时间
         /// </summary>
@@ -62,17 +62,14 @@ namespace SunSocket.Client.Interface
         /// 清理但不断开连接
         /// </summary>
         void Clear();
+        void OnReceived(ITcpClientSession session, IDynamicBuffer dataBuffer);
         /// <summary>
-        /// 连接成功事件
+        /// 当连接请求通过后
         /// </summary>
-        event EventHandler<ITcpClientSession> OnConnected;
+        void OnConnected(ITcpClientSession session);
         /// <summary>
-        /// 断开连接事件
+        /// 断开连接通知
         /// </summary>
-        event EventHandler<ITcpClientSession> OnDisConnect;
-        /// <summary>
-        /// 收到指令事件
-        /// </summary>
-        event EventHandler<IDynamicBuffer> OnReceived;
+        void OnDisConnect(ITcpClientSession session);
     }
 }

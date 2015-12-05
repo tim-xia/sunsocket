@@ -11,10 +11,10 @@ namespace SunSocket.Server
 {
     public class TcpServer : ITcpServer
     {
-        private ITcpSessionPool<string, ITcpSession> sessionPool;
+        private ITcpSessionPool<long, ITcpSession> sessionPool;
         private IPEndPoint endPoint;
         public Socket ListenerSocket { get; set; }
-        public ConcurrentDictionary<string, ITcpSession> OnlineList
+        public ConcurrentDictionary<long, ITcpSession> OnlineList
         {
             get {
                 return sessionPool.ActiveList;
@@ -30,6 +30,8 @@ namespace SunSocket.Server
             this.Loger = loger;
         }
         public TcpServerConfig Config { get; set; }
+        public long ServerId { get { return Config.ServerId; } }
+        public string ServerName { get { return Config.Name; } }
         public ILoger Loger { get; set; }
         public void Start()
         {
@@ -58,6 +60,7 @@ namespace SunSocket.Server
             }
             else
             {
+                Loger.Warning("TcpServer:session is null");
                 acceptEventArgs.AcceptSocket.Dispose();
             }
             StartAccept(acceptEventArgs); //把当前异步事件释放，等待下次连接

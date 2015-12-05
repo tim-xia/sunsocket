@@ -9,6 +9,7 @@ namespace SunSocket.Server
 {
     public class TcpServerConfig
     {
+        public int ServerId { get; set; }
         /// <summary>
         /// 名称
         /// </summary>

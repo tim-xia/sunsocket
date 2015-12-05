@@ -26,11 +26,6 @@ namespace SunSocket
             var result = new byte[dataBuffer.DataSize];
             Buffer.BlockCopy(dataBuffer.Buffer, 0, result, 0, dataBuffer.DataSize);
             //var txt= Encoding.UTF8.GetString(result);
-            //Interlocked.Increment(ref count);
-            //if (count > 400000)
-            //{
-            //    var bbb = txt;
-            //}
             session.SendAsync(data);
         }
     }

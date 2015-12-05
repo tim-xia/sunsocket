@@ -35,7 +35,7 @@ namespace SunSocket.Server
                 await Task.Delay(config.WorkDelayMilliseconds);
                 foreach (var server in ServerList)
                 {
-                    List<string> keyList = new List<string>();
+                    List<long> keyList = new List<long>();
                     foreach (var sessionKV in server.OnlineList)
                     {
                         var session = sessionKV.Value;
