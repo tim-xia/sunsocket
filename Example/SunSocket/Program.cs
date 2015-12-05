@@ -20,10 +20,17 @@ namespace SunSocket
         public MyServer(TcpServerConfig config, ILoger loger) : base(config, loger)
         { }
         static byte[] data = Encoding.UTF8.GetBytes("测试数据服务器返回");
+        static int count = 0;
         public override void OnReceived(ITcpSession session, IDynamicBuffer dataBuffer)
         {
-            //var result = new byte[dataBuffer.DataSize];
-            //Buffer.BlockCopy(dataBuffer.Buffer, 0, result, 0, dataBuffer.DataSize);
+            var result = new byte[dataBuffer.DataSize];
+            Buffer.BlockCopy(dataBuffer.Buffer, 0, result, 0, dataBuffer.DataSize);
+            //var txt= Encoding.UTF8.GetString(result);
+            //Interlocked.Increment(ref count);
+            //if (count > 400000)
+            //{
+            //    var bbb = txt;
+            //}
             session.SendAsync(data);
         }
     }
@@ -33,7 +40,7 @@ namespace SunSocket
         static Loger loger = new Loger();
         static void Main(string[] args)
         {
-            TcpServerConfig configOne = new TcpServerConfig { Name = "one", IP = "127.0.0.1", Port = 8088,BufferSize = 1024,MaxFixedBufferPoolSize=1024*4, MaxConnections = 8000 };
+            TcpServerConfig configOne = new TcpServerConfig { ServerId=1,Name = "one", IP = "127.0.0.1", Port = 8088,BufferSize = 1024,MaxFixedBufferPoolSize=1024*4, MaxConnections = 8000 };
             MyServer listener = new MyServer(configOne, loger);
             listener.Start();
             MonitorConfig monitorConfig = new MonitorConfig();

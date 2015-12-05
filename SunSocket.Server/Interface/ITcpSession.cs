@@ -8,11 +8,11 @@ namespace SunSocket.Server.Interface
 {
     public interface ITcpSession:IDisposable
     {
-        string SessionId { get; set; }
+        long SessionId { get; set; }
         /// <summary>
         /// 所在池
         /// </summary>
-        ITcpSessionPool<string, ITcpSession> Pool { get; set; }
+        ITcpSessionPool<long, ITcpSession> Pool { get; set; }
         /// <summary>
         /// 数据接收缓冲区
         /// </summary>

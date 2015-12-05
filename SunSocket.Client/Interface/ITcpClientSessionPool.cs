@@ -7,7 +7,7 @@ using SunSocket.Core.Interface;
 
 namespace SunSocket.Client.Interface
 {
-    public interface ITcpClientSessionPool : IMonitorPool<string, ITcpClientSession>
+    public interface ITcpClientSessionPool : IMonitorPool<long, ITcpClientSession>
     {
         ITcpClientPacketProtocol GetProtocal();
     }

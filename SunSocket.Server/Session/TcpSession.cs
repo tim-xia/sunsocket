@@ -13,7 +13,6 @@ namespace SunSocket.Server.Session
         object closeLock = new object();
         public TcpSession()
         {
-            SessionId = Guid.NewGuid().ToString();//生成唯一sesionId
             SessionData = new DataContainer();
             ReceiveEventArgs = new SocketAsyncEventArgs();
             SendEventArgs = new SocketAsyncEventArgs();
@@ -32,7 +31,7 @@ namespace SunSocket.Server.Session
                 ReceiveEventArgs.SetBuffer(receiveBuffer, 0, receiveBuffer.Length);
             }
         }
-        public string SessionId{get; set;}
+        public long SessionId{get; set;}
         /// <summary>
         /// 连接时间
         /// </summary>
@@ -85,7 +84,7 @@ namespace SunSocket.Server.Session
             get;set;
         }
 
-        public ITcpSessionPool<string, ITcpSession> Pool
+        public ITcpSessionPool<long, ITcpSession> Pool
         {
             get;
             set;
@@ -121,11 +120,19 @@ namespace SunSocket.Server.Session
             if (receiveEventArgs.BytesTransferred > 0 && receiveEventArgs.SocketError == SocketError.Success)
             {
                 ActiveDateTime = DateTime.Now;
-                if (!PacketProtocol.ProcessReceiveBuffer(receiveEventArgs.Buffer, receiveEventArgs.Offset, receiveEventArgs.BytesTransferred))
-                { //如果处理数据返回失败，则断开连接
-                    DisConnect();
-                }
-                StartReceiveAsync();//再次等待接收数据
+                //try
+                //{
+                    if (!PacketProtocol.ProcessReceiveBuffer(receiveEventArgs.Buffer, receiveEventArgs.Offset, receiveEventArgs.BytesTransferred))
+                    { //如果处理数据返回失败，则断开连接
+                        DisConnect();
+                    }
+                    StartReceiveAsync();//再次等待接收数据
+                //}
+                //catch(Exception e)
+                //{
+                //    DisConnect();
+                //    Pool.TcpServer.Loger.Error(e);
+                //}
             }
             else
             {

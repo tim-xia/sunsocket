@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Net;
 using System.Threading;
 using SunSocket.Core.Interface;
+using SunSocket.Core;
 using SunSocket.Client.Protocol;
 using SunSocket.Client.Interface;
 
@@ -11,17 +12,19 @@ namespace SunSocket.Client
     public class TcpClientSessionPool : ITcpClientSessionPool
     {
         private ConcurrentQueue<ITcpClientSession> pool = new ConcurrentQueue<ITcpClientSession>();
-        private ConcurrentDictionary<string, ITcpClientSession> activeDict = new ConcurrentDictionary<string, ITcpClientSession>();
+        private ConcurrentDictionary<long, ITcpClientSession> activeDict = new ConcurrentDictionary<long, ITcpClientSession>();
         private int count = 0, bufferSize, maxSessions, fixedBufferPoolSize;
         ILoger loger;
         EndPoint remoteEndPoint;
-        public TcpClientSessionPool(EndPoint remoteEndPoint, int bufferSize,int fixedBufferPoolSize, int maxSessions, ILoger loger)
+        SessionId sessionId;
+        public TcpClientSessionPool(long serverId,EndPoint remoteEndPoint, int bufferSize,int fixedBufferPoolSize, int maxSessions, ILoger loger)
         {
             this.bufferSize = bufferSize;
             this.maxSessions = maxSessions;
             this.remoteEndPoint = remoteEndPoint;
             this.fixedBufferPoolSize = fixedBufferPoolSize;
             this.loger = loger;
+            sessionId = new SessionId(serverId);
         }
         public int Count
         {
@@ -39,7 +42,7 @@ namespace SunSocket.Client
             }
         }
 
-        public ConcurrentDictionary<string, ITcpClientSession> ActiveList
+        public ConcurrentDictionary<long, ITcpClientSession> ActiveList
         {
             get
             {
@@ -56,6 +59,7 @@ namespace SunSocket.Client
                 {
                     session = new TcpClientSession(remoteEndPoint,bufferSize,loger);
                     session.Pool = this;
+                    session.SessionId = sessionId.NewId();
                     session.PacketProtocol = GetProtocal();
                 }
             }

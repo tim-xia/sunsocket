@@ -11,44 +11,64 @@ using SunSocket.Client.Interface;
 using SunSocket.Client.Protocol;
 using MsgPack.Serialization;
 using System.IO;
+using System.Diagnostics;
 
 namespace TcpClient
 {
+    class MyClient : TcpClientSession
+    {
+        public MyClient(EndPoint server, ILoger loger) : base(server, 1024, loger)
+        {
+
+        }
+        public override void OnReceived(ITcpClientSession session, IDynamicBuffer dataBuffer)
+        {
+            Received(session, dataBuffer);
+        }
+        public event EventHandler<IDynamicBuffer> Received;
+    }
     class Program
     {
-        static ITcpClientSession Session;
-        static ConcurrentQueue<byte[]> CmdList = new ConcurrentQueue<byte[]>();
         static CancellationTokenSource cancelSource;
-        static TcpClientSessionPool sessionPool;
+        static MyClient client;
         static Loger loger;
+        static int receiveCount = 0;
+        static int allCount = 1000000;
+        static Stopwatch sb = new Stopwatch();
         static void Main(string[] args)
         {
             loger = new Loger();
             var endPoint = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 8088);
-            sessionPool = new TcpClientSessionPool(endPoint, 1024, 1024 * 4, loger, GetProtocol);
-            sessionPool.OnReceived += ReceiveCommond;
-            sessionPool.OnConnected += Connected;
-            sessionPool.OnDisConnect += DisConnected;
-            ITcpClientSession session = sessionPool.Pop();
-            session.Connect();
+            client = new MyClient(endPoint, loger);
+            client.PacketProtocol = new TcpClientPacketProtocol(1024, 1024 * 4, loger);
+            client.Received += ReceiveCommond;
+            client.Connect();
             Console.ReadLine();
-            short i = 0;
-            while (i < 500)
+            int i = 0;
+            Stopwatch sw = new Stopwatch();
+            Console.WriteLine("连接服务器成功");
+            sw.Start();//开始记录时间
+            sb.Start();
+            while (i <= allCount)
             {
                 i++;
                 var data = Encoding.UTF8.GetBytes("测试数据kjfl发送大法师大法是大法师大法是否阿斯发达说法是否大是大非阿斯顿飞啊的方式阿斯顿飞阿凡达是啊发送到啊发送方啊发送的发送方啊是否啊第三方啊是否啊是否的萨芬啊是否啊是否阿飞大师傅kdsfjlkasjdflkjasdfljaslkfdjlkasdfjlkajsdlk" + i);
-                try
-                {
-                    var result = SendAsync(data).Result;
-                    Console.WriteLine(Encoding.UTF8.GetString(result));
-                    MemoryStream stream = new MemoryStream();
-                }
-                catch
-                {
-                    Console.WriteLine("请求超时");
-                }        
+                //try
+                //{
+                //    var result = SendAsync(data).Result;
+                //   // Console.WriteLine(Encoding.UTF8.GetString(result));
+                //}
+                //catch
+                //{
+                //    Console.WriteLine("请求超时");
+                //}
+                Send(data);        
             }
-            Console.WriteLine("处理完成");
+            sw.Stop();//结束记录时间
+                      //Console.WriteLine("单连接{0}次同步请求的运行时间：{1} 秒{2}毫秒", i, sw.Elapsed.Seconds, sw.Elapsed.Milliseconds);
+            Console.WriteLine("发送{0}次数据完成，运行时间：{1} 秒{2}毫秒", i, sw.Elapsed.Seconds, sw.Elapsed.Milliseconds);
+            Console.WriteLine();
+            Console.WriteLine("发送完成");
             Console.ReadLine();
         }
         public static ITcpClientPacketProtocol GetProtocol()
@@ -56,11 +76,15 @@ namespace TcpClient
             return new TcpClientPacketProtocol(1024, 1024 * 4, loger);
         }
         static TaskCompletionSource<byte[]> tSource;
+        public static void Send(byte[] data)
+        {
+            client.SendAsync(new SendData() { Data = data });
+        }
         public static async Task<byte[]> SendAsync(byte[] data)
         {
             tSource = new TaskCompletionSource<byte[]>();
             cancelSource = new CancellationTokenSource(5000);
-            Session.SendAsync(new SendData() { Data = data });
+            client.SendAsync(new SendData() { Data = data });
             //if (!tSource.Task.IsCompleted)
             //{
             //    return null;
@@ -75,17 +99,14 @@ namespace TcpClient
         public static void Connected(object sender, ITcpClientSession session)
         {
             Console.WriteLine("连接成功，开始接受数据");
-            Session = session;
         }
         public static void ReceiveCommond(object sender, IDynamicBuffer data)
         {
-            var result = new byte[data.DataSize];
-            Buffer.BlockCopy(data.Buffer, 0, result, 0, data.DataSize);
-            tSource.SetResult(result);
-            //TcpClientSession session = sender as TcpClientSession;
-            //string msg = Encoding.UTF8.GetString(cmd.Data);
-            //li.Add(string.Format("sessionId:{0},cmdId:{1},msg:{2}", session.SessionId, cmd.CommondId, msg));
-            //Console.WriteLine("sessionId:{0},cmdId:{1},msg:{2}", session.SessionId, cmd.CommondId, msg);
+            if (Interlocked.Increment(ref receiveCount) > allCount)
+            {
+                sb.Stop();
+                Console.WriteLine("接收{0}次数据完成，运行时间：{1} 秒{2}毫秒", allCount, sb.Elapsed.Seconds, sb.Elapsed.Milliseconds);
+            }
         }
     }
     public class Loger : ILoger

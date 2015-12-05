@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using System.Collections.Concurrent;
 using System.Threading;
 using System.Net.Sockets;
-using SunSocket.Core.Session;
+using SunSocket.Core;
 using SunSocket.Server.Protocol;
 using SunSocket.Core.Interface;
 using SunSocket.Core.Buffer;
@@ -14,11 +14,12 @@ using SunSocket.Server.Interface;
 
 namespace SunSocket.Server.Session
 {
-    public class TcpSessionPool : ITcpSessionPool<string,ITcpSession>
+    public class TcpSessionPool : ITcpSessionPool<long, ITcpSession>
     {
         private ConcurrentQueue<ITcpSession> pool=new ConcurrentQueue<ITcpSession>();
-        private ConcurrentDictionary<string, ITcpSession> activeDict = new ConcurrentDictionary<string, ITcpSession>();
+        private ConcurrentDictionary<long, ITcpSession> activeDict = new ConcurrentDictionary<long, ITcpSession>();
         private int count = 0;
+        SessionId sessionId;
         public TcpSessionPool()
         {
         }
@@ -31,6 +32,7 @@ namespace SunSocket.Server.Session
             set
             {
                 server = value;
+                sessionId = new SessionId(value.ServerId);
                 FixedBufferPool = new FixedBufferPool(value.Config.MaxFixedBufferPoolSize, value.Config.BufferSize);
             }
         }
@@ -38,7 +40,7 @@ namespace SunSocket.Server.Session
             get;
             set;
         }
-        public ConcurrentDictionary<string, ITcpSession> ActiveList
+        public ConcurrentDictionary<long, ITcpSession> ActiveList
         {
             get
             {
@@ -70,6 +72,7 @@ namespace SunSocket.Server.Session
                 if(Interlocked.Increment(ref count) <= TcpServer.Config.MaxConnections)
                 {
                     session = new TcpSession();
+                    session.SessionId = sessionId.NewId();
                     session.Pool = this;
                     session.ReceiveBuffer = new byte[TcpServer.Config.BufferSize];
                     session.PacketProtocol = TcpServer.GetProtocol();

@@ -20,7 +20,6 @@ namespace SunSocket.Client
         {
             this.loger = loger;
             this.remoteEndPoint = remoteEndPoint;
-            SessionId = Guid.NewGuid().ToString();//生成唯一sesionId
             ReceiveEventArgs = new SocketAsyncEventArgs();
             ReceiveEventArgs.RemoteEndPoint = remoteEndPoint;
             SendEventArgs = new SocketAsyncEventArgs();
@@ -74,7 +73,7 @@ namespace SunSocket.Client
             get;set;
         }
 
-        public string SessionId
+        public long SessionId
         {
             get;set;
         }
@@ -113,11 +112,18 @@ namespace SunSocket.Client
             ActiveDateTime = DateTime.Now;
             if (receiveEventArgs.BytesTransferred > 0 && receiveEventArgs.SocketError == SocketError.Success)
             {
-                if (!PacketProtocol.ProcessReceiveBuffer(receiveEventArgs.Buffer, receiveEventArgs.Offset, receiveEventArgs.BytesTransferred))
-                { //如果处理数据返回失败，则断开连接
-                    DisConnect();
+                try
+                {
+                    if (!PacketProtocol.ProcessReceiveBuffer(receiveEventArgs.Buffer, receiveEventArgs.Offset, receiveEventArgs.BytesTransferred))
+                    { //如果处理数据返回失败，则断开连接
+                        DisConnect();
+                    }
+                    StartReceiveAsync();//再次等待接收数据
                 }
-                StartReceiveAsync();//再次等待接收数据
+                catch (Exception e)
+                {
+                    loger.Error(e);
+                }
             }
             else
             {

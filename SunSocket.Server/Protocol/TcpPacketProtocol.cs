@@ -60,7 +60,6 @@ namespace SunSocket.Server.Protocol
                         int getLenght = 0;//已取出数据
 
                         var cacheBuffer = ReceiveBuffers.Dequeue();
-                        int cachePacketLength = BitConverter.ToInt32(cacheBuffer.Buffer, 0); //获取包长度
                         getLenght = cacheBuffer.DataSize - intByteLength;
                         ReceiveDataBuffer.WriteBuffer(cacheBuffer.Buffer, intByteLength, getLenght);
                         Session.Pool.FixedBufferPool.Push(cacheBuffer);
@@ -79,6 +78,33 @@ namespace SunSocket.Server.Protocol
                         ReceiveData();
                         //清理合包数据
                         needReceivePacketLenght = 0; alreadyReceivePacketLength = 0;
+                    }
+                }
+                else
+                {
+                    if (InterimPacketBuffer != null&& alreadyReceivePacketLength==0)
+                    {
+                        var diff = intByteLength - InterimPacketBuffer.DataSize;
+                        InterimPacketBuffer.WriteBuffer(receiveBuffer,offset,diff);
+                        offset += diff;
+                        count -= diff;
+                        var packetLength = BitConverter.ToInt32(InterimPacketBuffer.Buffer, 0);
+                        if (NetByteOrder)
+                            packetLength = IPAddress.NetworkToHostOrder(packetLength); //把网络字节顺序转为本地字节顺序
+                        if (count >= packetLength)
+                        {
+                            Session.Pool.FixedBufferPool.Push(InterimPacketBuffer);
+                            InterimPacketBuffer = null;
+                            ReceiveDataBuffer.WriteBuffer(receiveBuffer, offset, packetLength);
+                            ReceiveData();
+                            offset += packetLength;
+                            count -= packetLength;
+                        }
+                        else
+                        {
+                            needReceivePacketLenght = packetLength+intByteLength;
+                            alreadyReceivePacketLength = intByteLength;
+                        }
                     }
                 }
                 if (needReceivePacketLenght > 0)
@@ -109,12 +135,17 @@ namespace SunSocket.Server.Protocol
                 }
                 else
                 {
-                    if (count > 0)
+                    if (count >= intByteLength)
                     {
                         //按照长度分包
                         int packetLength = BitConverter.ToInt32(receiveBuffer, offset); //获取包长度
                         if (NetByteOrder)
                             packetLength = IPAddress.NetworkToHostOrder(packetLength); //把网络字节顺序转为本地字节顺序
+
+                        if (packetLength < 0)
+                        {
+                            var ddd = packetLength;
+                        }
                         if ((count - intByteLength) >= packetLength) //如果数据包达到长度则马上进行解析
                         {
                             ReceiveDataBuffer.WriteBuffer(receiveBuffer, offset + intByteLength, packetLength);
@@ -128,6 +159,15 @@ namespace SunSocket.Server.Protocol
                         {
                             needReceivePacketLenght = packetLength + intByteLength;//记录当前包总共需要多少的数据
                         }
+                    }
+                    else
+                    {
+                        if (InterimPacketBuffer == null)
+                        {
+                            InterimPacketBuffer = Session.Pool.FixedBufferPool.Pop();
+                        }
+                        InterimPacketBuffer.WriteBuffer(receiveBuffer,offset,count);
+                        count = 0;
                     }
                 }
             }
@@ -171,7 +211,7 @@ namespace SunSocket.Server.Protocol
                 if (NoComplateCmd != null)
                 {
                     int noComplateLength = NoComplateCmd.Data.Length - NoComplateCmd.Offset;
-                    if (noComplateLength <= SendBuffer.Buffer.Length)
+                    if (noComplateLength <= surplus)
                     {
                         SendBuffer.WriteBuffer(NoComplateCmd.Data, NoComplateCmd.Offset, noComplateLength);
                         surplus -= noComplateLength;
@@ -179,9 +219,9 @@ namespace SunSocket.Server.Protocol
                     }
                     else
                     {
-                        SendBuffer.WriteBuffer(NoComplateCmd.Data, NoComplateCmd.Offset, SendBuffer.Buffer.Length);
-                        NoComplateCmd.Offset += SendBuffer.Buffer.Length;
-                        surplus -= SendBuffer.Buffer.Length;
+                        SendBuffer.WriteBuffer(NoComplateCmd.Data, NoComplateCmd.Offset, surplus);
+                        NoComplateCmd.Offset += surplus;
+                        surplus -= surplus;
                         break;//跳出当前循环
                     }
                 }
@@ -200,13 +240,14 @@ namespace SunSocket.Server.Protocol
                         else
                         {
                             SendBuffer.WriteInt(data.Data.Length, false); //写入总大小
-                            surplus -= data.Data.Length;
+                            surplus -= intByteLength; ;
                             if (surplus > 0)
                             {
                                 SendBuffer.WriteBuffer(data.Data, data.Offset, surplus); //写入命令内容
                                 data.Offset = surplus;
                             }
                             NoComplateCmd = data;//把未全部发送指令缓存
+                            break;
                         }
                     }
                 }
