@@ -109,11 +109,11 @@ namespace SunSocket.Client
         }
         private void ReceiveComplate(object sender, SocketAsyncEventArgs receiveEventArgs)
         {
-            ActiveDateTime = DateTime.Now;
             if (receiveEventArgs.BytesTransferred > 0 && receiveEventArgs.SocketError == SocketError.Success)
             {
                 try
                 {
+                    ActiveDateTime = DateTime.Now;
                     if (!PacketProtocol.ProcessReceiveBuffer(receiveEventArgs.Buffer, receiveEventArgs.Offset, receiveEventArgs.BytesTransferred))
                     { //如果处理数据返回失败，则断开连接
                         DisConnect();
@@ -137,7 +137,6 @@ namespace SunSocket.Client
         }
         private void SendComplate(object sender, SocketAsyncEventArgs sendEventArgs)
         {
-            ActiveDateTime = DateTime.Now;//发送数据视为活跃
             if (sendEventArgs.SocketError == SocketError.Success)
             {
                 if (ConnectSocket != null)
@@ -152,9 +151,10 @@ namespace SunSocket.Client
                 }
             }
         }
-        public void SendAsync(SendData cmd)
+        public void SendAsync(byte[] data)
         {
-            PacketProtocol.SendAsync(cmd);
+            SendData sendData = new SendData() { Data = data };
+            PacketProtocol.SendAsync(sendData);
         }
 
         public void StartReceiveAsync()

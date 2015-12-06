@@ -12,9 +12,9 @@ namespace SunSocket.Server
 {
     public class TcpMonitor : IMonitor
     {
-        List<ITcpServer> ServerList = new List<ITcpServer>();
-        MonitorConfig config;
-        CancellationTokenSource token = new CancellationTokenSource();
+        protected List<ITcpServer> ServerList = new List<ITcpServer>();
+        protected MonitorConfig config;
+        protected CancellationTokenSource token = new CancellationTokenSource();
         public TcpMonitor(MonitorConfig config)
         {
             this.config = config;
@@ -24,9 +24,9 @@ namespace SunSocket.Server
             ServerList.Add(Server);
         }
 
-        public void Start()
+        public virtual async Task Start()
         {
-           Task.Factory.StartNew(StartAsync, token.Token);
+            await Task.Factory.StartNew(StartAsync, token.Token);
         }
         private async Task StartAsync()
         {
@@ -35,29 +35,25 @@ namespace SunSocket.Server
                 await Task.Delay(config.WorkDelayMilliseconds);
                 foreach (var server in ServerList)
                 {
-                    List<long> keyList = new List<long>();
+                    List<ITcpSession> clearList = new List<ITcpSession>();
                     foreach (var sessionKV in server.OnlineList)
                     {
                         var session = sessionKV.Value;
-                        if ((DateTime.Now - session.ActiveDateTime).Milliseconds > config.TimeoutMilliseconds)
+                        if ((DateTime.Now - session.ActiveDateTime).TotalMilliseconds > config.TimeoutMilliseconds)
                         {
-                            keyList.Add(sessionKV.Key);
+                            clearList.Add(session);
                         }
                     }
-                    foreach (var key in keyList)
+                    foreach (var session in clearList)
                     {
-                        ITcpSession session;
-                        if (server.OnlineList.TryRemove(key, out session))
-                        {
-                            if (config.OnConnectTimeout != null)
-                            {
-                                config.OnConnectTimeout(session);
-                            }
-                            session.DisConnect();
-                        }
+                        session.DisConnect();
                     }
                 }
             }
+        }
+        public virtual bool OnTimeOut(ITcpSession session)
+        {
+            return true;
         }
         public void Stop()
         {

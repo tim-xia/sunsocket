@@ -12,7 +12,7 @@ namespace SunSocket.Server.Interface
     public interface IMonitor
     {
         void AddServer(ITcpServer Server);
-        void Start();
+        Task Start();
         void Stop();
     }
 }

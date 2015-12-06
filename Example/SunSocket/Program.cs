@@ -25,8 +25,46 @@ namespace SunSocket
         {
             var result = new byte[dataBuffer.DataSize];
             Buffer.BlockCopy(dataBuffer.Buffer, 0, result, 0, dataBuffer.DataSize);
+            session.SessionData.Set("islogin", true);//设置登录状态
             //var txt= Encoding.UTF8.GetString(result);
             session.SendAsync(data);
+        }
+    }
+    public class MyMonitor : TcpMonitor
+    {
+        int loginTimeOutMilliseconds;
+        public MyMonitor(MonitorConfig config, int loginTimeOutMilliseconds) : base(config)
+        {
+            this.loginTimeOutMilliseconds = loginTimeOutMilliseconds;
+        }
+        public override async Task Start()
+        {
+            LoginMonitor();
+            await base.Start();
+        }
+        public async Task LoginMonitor()
+        {
+            while (true)
+            {
+                await Task.Delay(loginTimeOutMilliseconds);
+                foreach (var server in ServerList)
+                {
+                    List<ITcpSession> clearList = new List<ITcpSession>();
+                    foreach (var sessionKV in server.OnlineList)
+                    {
+                        var session = sessionKV.Value;
+                        var isLogin = session.SessionData.Get("islogin");
+                        if ((DateTime.Now - session.ActiveDateTime).TotalMilliseconds > loginTimeOutMilliseconds && isLogin==null)
+                        {
+                            clearList.Add(session);
+                        }
+                    }
+                    foreach (var session in clearList)
+                    {
+                        session.DisConnect();
+                    }
+                }
+            }
         }
     }
     class Program
@@ -41,7 +79,7 @@ namespace SunSocket
             MonitorConfig monitorConfig = new MonitorConfig();
             monitorConfig.WorkDelayMilliseconds = 10000;
             monitorConfig.TimeoutMilliseconds = 10000;
-            TcpMonitor monitor = new TcpMonitor(monitorConfig);
+            MyMonitor monitor = new MyMonitor(monitorConfig,3000);
             monitor.AddServer(listener);
             monitor.Start();
             Console.WriteLine("服务器已启动");

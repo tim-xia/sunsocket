@@ -73,8 +73,8 @@ namespace SunSocket.Client
         }
         public void Push(ITcpClientSession item)
         {
-            pool.Enqueue(item);
-            activeDict.TryRemove(item.SessionId, out item);       
+            if (activeDict.TryRemove(item.SessionId, out item))
+                pool.Enqueue(item);
         }
     }
 }

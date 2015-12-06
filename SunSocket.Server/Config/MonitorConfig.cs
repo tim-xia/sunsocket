@@ -14,12 +14,8 @@ namespace SunSocket.Server.Config
         /// </summary>
         public int WorkDelayMilliseconds { get; set; }
         /// <summary>
-        /// 连接超时时间
+        /// 超时时间
         /// </summary>
         public int TimeoutMilliseconds { get; set; }
-        /// <summary>
-        /// 链接超时事件[参数为Session对象]
-        /// </summary>
-        public Action<object> OnConnectTimeout { get; set; }
     }
 }
