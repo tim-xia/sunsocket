@@ -11,7 +11,7 @@ using System.Net;
 
 namespace SunSocket.Server.Interface
 {
-    public interface IUdpAsyncServer
+    public interface IUdpServer
     {
         /// <summary>
         /// 服务名称

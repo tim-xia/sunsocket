@@ -1,23 +1,17 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Collections.Concurrent;
 using System.Threading;
-using System.Net.Sockets;
 using SunSocket.Core;
-using SunSocket.Server.Protocol;
 using SunSocket.Core.Interface;
 using SunSocket.Core.Buffer;
 using SunSocket.Server.Interface;
 
 namespace SunSocket.Server.Session
 {
-    public class TcpSessionPool : ITcpSessionPool<long, ITcpSession>
+    public class TcpSessionPool : ITcpSessionPool
     {
         private ConcurrentQueue<ITcpSession> pool=new ConcurrentQueue<ITcpSession>();
-        private ConcurrentDictionary<long, ITcpSession> activeDict = new ConcurrentDictionary<long, ITcpSession>();
+        private ConcurrentDictionary<uint, ITcpSession> activeDict = new ConcurrentDictionary<uint, ITcpSession>();
         private int count = 0;
         SessionId sessionId;
         public TcpSessionPool()
@@ -40,7 +34,7 @@ namespace SunSocket.Server.Session
             get;
             set;
         }
-        public ConcurrentDictionary<long, ITcpSession> ActiveList
+        public ConcurrentDictionary<uint, ITcpSession> ActiveList
         {
             get
             {

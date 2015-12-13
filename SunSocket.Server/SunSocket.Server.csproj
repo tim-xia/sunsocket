@@ -40,16 +40,22 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Config\RUdpServerConfig.cs" />
+    <Compile Include="Interface\IRUdpServer.cs" />
+    <Compile Include="Interface\IRUdpSession.cs" />
+    <Compile Include="Interface\IRUdpSessionPool.cs" />
+    <Compile Include="RUdpServer.cs" />
+    <Compile Include="Session\RUdpSession.cs" />
+    <Compile Include="Session\RUdpSessionPool.cs" />
     <Compile Include="TcpServer.cs" />
     <Compile Include="Config\MonitorConfig.cs" />
     <Compile Include="Config\TcpServerConfig.cs" />
-    <Compile Include="EventArgsPool.cs" />
     <Compile Include="Interface\ITcpServer.cs" />
     <Compile Include="Interface\IMonitor.cs" />
     <Compile Include="Interface\ITcpPacketProtocol.cs" />
     <Compile Include="Interface\ITcpSession.cs" />
     <Compile Include="Interface\ITcpSessionPool.cs" />
-    <Compile Include="Interface\IUdpAsyncServer.cs" />
+    <Compile Include="Interface\IUdpServer.cs" />
     <Compile Include="Interface\IUdpSession.cs" />
     <Compile Include="TcpMonitor.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -57,7 +63,7 @@
     <Compile Include="Session\TcpSession.cs" />
     <Compile Include="Session\TcpSessionPool.cs" />
     <Compile Include="Session\UdpSession.cs" />
-    <Compile Include="UdpAsyncServer.cs" />
+    <Compile Include="UdpServer.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\SunSocket.Core\SunSocket.Core.csproj">

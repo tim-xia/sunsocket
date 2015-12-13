@@ -5,6 +5,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
+using SunSocket.Core;
 using SunSocket.Core.Interface;
 using SunSocket.Core.Protocol;
 using SunSocket.Server.Interface;
@@ -13,18 +14,18 @@ using System.Threading;
 
 namespace SunSocket.Server
 {
-    public class UdpAsyncServer : IUdpAsyncServer
+    public class UdpServer : IUdpServer
     {
         List<SocketAsyncEventArgs> receives;
         IPool<SocketAsyncEventArgs> sendArgsPool;
         int port, bufferSize,maxThread;
         static int shortByteLength = sizeof(short),intByteLength=sizeof(int);
         static int checkLenght;
-        static UdpAsyncServer()
+        static UdpServer()
         {
             checkLenght = shortByteLength + intByteLength;
         }
-        public UdpAsyncServer(int port,int maxThread,int bufferSize)
+        public UdpServer(int port,int maxThread,int bufferSize)
         {
             receives = new List<SocketAsyncEventArgs>(maxThread);
             this.maxThread = maxThread;
@@ -83,9 +84,8 @@ namespace SunSocket.Server
             if (e.BytesTransferred > 0 && e.SocketError == SocketError.Success)
             {
                 int lenght = BitConverter.ToInt32(e.Buffer, 0);
-                short cmdId = BitConverter.ToInt16(e.Buffer, intByteLength);
                 byte[] data = new byte[lenght];
-                System.Buffer.BlockCopy(e.Buffer, checkLenght, data, 0, lenght);
+                Buffer.BlockCopy(e.Buffer, checkLenght, data, 0, lenght);
                 UdpSession session = new UdpSession(e.RemoteEndPoint, this);
 
                 ThreadPool.QueueUserWorkItem(_ =>

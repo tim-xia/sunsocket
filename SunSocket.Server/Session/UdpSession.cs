@@ -13,7 +13,7 @@ namespace SunSocket.Server.Session
 {
     public class UdpSession : IUdpSession
     {
-        public UdpSession(EndPoint remoteEndPoint,IUdpAsyncServer server)
+        public UdpSession(EndPoint remoteEndPoint,IUdpServer server)
         {
             RemoteEndPoint = remoteEndPoint;
             Server = server;
@@ -24,14 +24,14 @@ namespace SunSocket.Server.Session
             get;set;
         }
 
-        public IUdpAsyncServer Server
+        public IUdpServer Server
         {
             get;set;
         }
 
-        public void SendAsync(SendData cmd)
+        public void SendAsync(byte[] data)
         {
-            Server.SendAsync(RemoteEndPoint, cmd);
+            Server.SendAsync(RemoteEndPoint, new SendData() { Data = data });
         }
     }
 }

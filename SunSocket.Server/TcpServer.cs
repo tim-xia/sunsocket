@@ -11,10 +11,10 @@ namespace SunSocket.Server
 {
     public class TcpServer : ITcpServer
     {
-        private ITcpSessionPool<long, ITcpSession> sessionPool;
+        private ITcpSessionPool sessionPool;
         private IPEndPoint endPoint;
         public Socket ListenerSocket { get; set; }
-        public ConcurrentDictionary<long, ITcpSession> OnlineList
+        public ConcurrentDictionary<uint, ITcpSession> OnlineList
         {
             get {
                 return sessionPool.ActiveList;
@@ -30,7 +30,7 @@ namespace SunSocket.Server
             this.Loger = loger;
         }
         public TcpServerConfig Config { get; set; }
-        public long ServerId { get { return Config.ServerId; } }
+        public uint ServerId { get { return Config.ServerId; } }
         public string ServerName { get { return Config.Name; } }
         public ILoger Loger { get; set; }
         public void Start()

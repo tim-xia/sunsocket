@@ -17,7 +17,7 @@ namespace SunSocket.Client
         ILoger loger;
         EndPoint remoteEndPoint;
         SessionId sessionId;
-        public TcpClientSessionPool(long serverId,EndPoint remoteEndPoint, int bufferSize,int fixedBufferPoolSize, int maxSessions, ILoger loger)
+        public TcpClientSessionPool(uint serverId,EndPoint remoteEndPoint, int bufferSize,int fixedBufferPoolSize, int maxSessions, ILoger loger)
         {
             this.bufferSize = bufferSize;
             this.maxSessions = maxSessions;

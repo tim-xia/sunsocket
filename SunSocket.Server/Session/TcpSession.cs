@@ -31,7 +31,7 @@ namespace SunSocket.Server.Session
                 ReceiveEventArgs.SetBuffer(receiveBuffer, 0, receiveBuffer.Length);
             }
         }
-        public long SessionId{get; set;}
+        public uint SessionId {get; set;}
         /// <summary>
         /// 连接时间
         /// </summary>
@@ -84,7 +84,7 @@ namespace SunSocket.Server.Session
             get;set;
         }
 
-        public ITcpSessionPool<long, ITcpSession> Pool
+        public ITcpSessionPool Pool
         {
             get;
             set;

@@ -8,6 +8,7 @@ namespace SunSocket.Core.Protocol
 {
     public class SendData
     {
+        public uint Id { get; set; }
         public byte[] Data { get; set; }
         public int Offset { get; set; }
     }

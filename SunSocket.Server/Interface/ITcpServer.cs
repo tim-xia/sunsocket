@@ -18,7 +18,7 @@ namespace SunSocket.Server.Interface
         /// 配置信息
         /// </summary>
         TcpServerConfig Config { get; set; }
-        long ServerId { get;}
+        uint ServerId { get;}
         string ServerName { get; }
         /// <summary>
         /// 日志处理器
@@ -31,7 +31,7 @@ namespace SunSocket.Server.Interface
         /// <summary>
         /// 在线列表
         /// </summary>
-        ConcurrentDictionary<long, ITcpSession> OnlineList { get;}
+        ConcurrentDictionary<uint, ITcpSession> OnlineList { get;}
         /// <summary>
         /// 启动监听
         /// </summary>

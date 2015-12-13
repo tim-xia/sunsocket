@@ -14,7 +14,7 @@ namespace SunSocket.UdpClient
     {
         static void Main(string[] args)
         {
-            UdpAsyncServer server = new UdpAsyncServer(8879, 10, 4 * 1024);
+            UdpServer server = new UdpServer(8879, 10, 4 * 1024);
             server.OnReceived += ReceiveCompleted;
             server.Start();
             Console.ReadLine();

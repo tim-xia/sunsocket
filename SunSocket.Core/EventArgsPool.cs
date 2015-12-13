@@ -8,7 +8,7 @@ using System.Collections.Concurrent;
 using SunSocket.Core.Interface;
 using System.Net.Sockets;
 
-namespace SunSocket.Server
+namespace SunSocket.Core
 {
     public class EventArgsPool : IPool<SocketAsyncEventArgs>
     {

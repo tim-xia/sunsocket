@@ -2,13 +2,14 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Net;
 using System.Threading.Tasks;
 using SunSocket.Server.Session;
 using SunSocket.Core.Interface;
 
 namespace SunSocket.Server.Interface
 {
-    public interface ITcpSessionPool:IMonitorPool<uint, ITcpSession>
+    public interface IRUdpSessionPool: IMonitorPool<EndPoint, IRUdpSession>
     {
         /// <summary>
         /// 内存池
@@ -17,6 +18,6 @@ namespace SunSocket.Server.Interface
         /// <summary>
         /// 池所属的Server
         /// </summary>
-        ITcpServer TcpServer { get; set; }
+        IRUdpServer TcpServer { get; set; }
     }
 }

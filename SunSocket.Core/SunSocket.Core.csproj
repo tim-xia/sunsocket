@@ -43,11 +43,13 @@
     <Compile Include="Buffer\DynamicBuffer.cs" />
     <Compile Include="Buffer\FixedBuffer.cs" />
     <Compile Include="Buffer\FixedBufferPool.cs" />
+    <Compile Include="EventArgsPool.cs" />
     <Compile Include="Interface\IFixedBuffer.cs" />
     <Compile Include="Interface\IDynamicBuffer.cs" />
     <Compile Include="Interface\ILoger.cs" />
     <Compile Include="Interface\IMonitorPool.cs" />
     <Compile Include="Interface\IPool.cs" />
+    <Compile Include="PackageId.cs" />
     <Compile Include="Protocol\SendData.cs" />
     <Compile Include="Interface\ICmdOperation.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
