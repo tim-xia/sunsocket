@@ -4,15 +4,18 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{1C5A17AA-3FBE-4C65-B148-28A2BFD35C21}</ProjectGuid>
-    <OutputType>Library</OutputType>
+    <ProjectGuid>{93ACA88B-3276-49AE-8596-6B7FD21D56BF}</ProjectGuid>
+    <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>SunSocket.Server</RootNamespace>
-    <AssemblyName>SunSocket.Server</AssemblyName>
+    <RootNamespace>Rudp.Server</RootNamespace>
+    <AssemblyName>Rudp.Server</AssemblyName>
     <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
@@ -22,6 +25,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
@@ -40,38 +44,22 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Config\RUdpServerConfig.cs" />
-    <Compile Include="Interface\IRUdpServer.cs" />
-    <Compile Include="Interface\IRUdpSession.cs" />
-    <Compile Include="Interface\IRUdpSessionPool.cs" />
-    <Compile Include="Interface\IRUdpPacketProtocol.cs" />
-    <Compile Include="Protocol\RUdpPacketProtocol.cs" />
-    <Compile Include="RUdpServer.cs" />
-    <Compile Include="Session\RUdpSession.cs" />
-    <Compile Include="Session\RUdpSessionPool.cs" />
-    <Compile Include="TcpServer.cs" />
-    <Compile Include="Config\MonitorConfig.cs" />
-    <Compile Include="Config\TcpServerConfig.cs" />
-    <Compile Include="Interface\ITcpServer.cs" />
-    <Compile Include="Interface\IMonitor.cs" />
-    <Compile Include="Interface\ITcpPacketProtocol.cs" />
-    <Compile Include="Interface\ITcpSession.cs" />
-    <Compile Include="Interface\ITcpSessionPool.cs" />
-    <Compile Include="Interface\IUdpServer.cs" />
-    <Compile Include="Interface\IUdpSession.cs" />
-    <Compile Include="TcpMonitor.cs" />
+    <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Protocol\TcpPacketProtocol.cs" />
-    <Compile Include="Session\TcpSession.cs" />
-    <Compile Include="Session\TcpSessionPool.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\SunSocket.Core\SunSocket.Core.csproj">
+    <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\SunSocket.Core\SunSocket.Core.csproj">
       <Project>{4f79dd3a-608b-4422-8689-f36849978477}</Project>
       <Name>SunSocket.Core</Name>
     </ProjectReference>
+    <ProjectReference Include="..\..\SunSocket.Server\SunSocket.Server.csproj">
+      <Project>{1c5a17aa-3fbe-4c65-b148-28a2bfd35c21}</Project>
+      <Name>SunSocket.Server</Name>
+    </ProjectReference>
   </ItemGroup>
-  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

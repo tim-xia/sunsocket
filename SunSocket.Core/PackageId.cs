@@ -9,42 +9,41 @@ namespace SunSocket.Core
 {
    public class PackageId
     {
-        private static uint timeMask = 0xfff00000;
-        private static uint idMask = 0xfffff;
+        private static uint timeMask = 0xffffc000;
+        private static uint idMask = 0x3fff;
         private int id = 0;
         private DateTime now;
         private int time;
-        private CancellationTokenSource cancelToken;
+        private CancellationTokenSource tokenSource;
         public void Init()
         {
             this.now = DateTime.Now;
             time = int.Parse(now.ToString("HHmmss"));
-            cancelToken = new CancellationTokenSource();
-            Timer(cancelToken.Token);
+            tokenSource = new CancellationTokenSource();
+            Timer(tokenSource);
         }
-        public async Task Timer(CancellationToken token)
+        public async Task Timer(CancellationTokenSource tokenSource)
         {
             while (true)
             {
+                if (tokenSource.Token.IsCancellationRequested)
+                    break;
                 await Task.Delay(1000);
                 now = now.AddSeconds(1);
                 time = int.Parse(now.ToString("HHmmss"));
                 Interlocked.Exchange(ref id, 1);
-                if (token.IsCancellationRequested) break;
             }
         }
         public uint NewId()
         {
             int newId = Interlocked.Increment(ref id);
-            if (newId > 1048575) throw new Exception("获取id太快");
-            long result = ((time << 20) & timeMask) | (newId & idMask);
+            long result = ((time << 14) & timeMask) | (newId & idMask);
             return (uint)result;
         }
 
         public void Stop()
         {
-            cancelToken.Cancel();
-            cancelToken.Dispose();
+            tokenSource.Cancel();
         }
     }
 }

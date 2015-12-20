@@ -258,9 +258,9 @@ namespace SunSocket.Client.Protocol
             }
             if (surplus < SendBuffer.Buffer.Length)
             {
-                Session.SendEventArgs.SetBuffer(SendBuffer.Buffer, 0, SendBuffer.DataSize);
                 if (Session.ConnectSocket != null)
                 {
+                    Session.SendEventArgs.SetBuffer(SendBuffer.Buffer, 0, SendBuffer.DataSize);
                     bool willRaiseEvent = Session.ConnectSocket.SendAsync(Session.SendEventArgs);
                     if (!willRaiseEvent)
                     {

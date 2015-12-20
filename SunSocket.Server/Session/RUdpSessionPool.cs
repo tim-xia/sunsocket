@@ -39,15 +39,8 @@ namespace SunSocket.Server.Session
 
         public IPool<IFixedBuffer> FixedBufferPool
         {
-            get
-            {
-                throw new NotImplementedException();
-            }
-
-            set
-            {
-                throw new NotImplementedException();
-            }
+            get;
+            set;
         }
 
         public int FreeCount
@@ -58,7 +51,7 @@ namespace SunSocket.Server.Session
             }
         }
         private IRUdpServer server;
-        public IRUdpServer TcpServer
+        public IRUdpServer RUdpServer
         {
             get
             {
@@ -68,12 +61,29 @@ namespace SunSocket.Server.Session
             {
                 server = value;
                 sessionId = new SessionId(value.ServerId);
+                FixedBufferPool = new FixedBufferPool(value.Config.MaxFixedBufferPoolSize, value.Config.BufferSize);
             }
         }
 
         public IRUdpSession Pop()
         {
-            throw new NotImplementedException();
+            IRUdpSession session;
+            if (!pool.TryDequeue(out session))
+            {
+                if (Interlocked.Increment(ref count) <= RUdpServer.Config.MaxConnections)
+                {
+                    session = new RUdpSession();
+                    session.SessionId = sessionId.NewId();
+                    session.Pool = this;
+                    session.PacketProtocol = RUdpServer.GetProtocol();
+                    session.PacketProtocol.Session = session;
+                }
+                else
+                {
+                    RUdpServer.Loger.Warning("session count attain maxnum");
+                }
+            }
+            return session;
         }
 
         public void Push(IRUdpSession item)

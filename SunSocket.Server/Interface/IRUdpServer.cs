@@ -18,13 +18,20 @@ namespace SunSocket.Server.Interface
         /// 配置信息
         /// </summary>
         RUdpServerConfig Config { get; set; }
+        ILoger Loger { get; set; }
         /// <summary>
-        /// 发送数据
+        /// 监听socket
         /// </summary>
-        /// <param name="endPoint"></param>
-        /// <param name="cmd"></param>
-        void SendAsync(EndPoint endPoint, SendData cmd);
-
+        Socket ListenerSocket { get; set; }
+        void SendAsync(EndPoint endPoint, byte[] data);
+        void SendAsync(EndPoint endPoint, byte[] data, int offset, int count);
+        IRUdpSessionPool SessionPool { get; set; }
         IPool<SocketAsyncEventArgs> SocketArgsPool { get; set; }
+        IPool<IFixedBuffer> BufferPool { get; set; }
+        IRUdpPacketProtocol GetProtocol();
+        void OnReceived(IRUdpSession session, IDynamicBuffer dataBuffer);
+        void OnConnected(IRUdpSession session);
+        //断开连接事件
+        void OnDisConnect(IRUdpSession session);
     }
 }

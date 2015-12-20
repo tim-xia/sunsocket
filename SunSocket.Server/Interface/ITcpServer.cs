@@ -28,6 +28,7 @@ namespace SunSocket.Server.Interface
         /// 监听socket
         /// </summary>
         Socket ListenerSocket { get; set; }
+        ITcpSessionPool SessionPool { get; }
         /// <summary>
         /// 在线列表
         /// </summary>

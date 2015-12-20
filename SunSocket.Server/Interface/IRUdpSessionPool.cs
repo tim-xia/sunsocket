@@ -18,6 +18,6 @@ namespace SunSocket.Server.Interface
         /// <summary>
         /// 池所属的Server
         /// </summary>
-        IRUdpServer TcpServer { get; set; }
+        IRUdpServer RUdpServer { get; set; }
     }
 }

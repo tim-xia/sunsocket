@@ -14,12 +14,6 @@ namespace SunSocket.Server
         private ITcpSessionPool sessionPool;
         private IPEndPoint endPoint;
         public Socket ListenerSocket { get; set; }
-        public ConcurrentDictionary<uint, ITcpSession> OnlineList
-        {
-            get {
-                return sessionPool.ActiveList;
-            }
-        }
         //构造函数
         public TcpServer(TcpServerConfig config, ILoger loger)
         {
@@ -32,6 +26,14 @@ namespace SunSocket.Server
         public TcpServerConfig Config { get; set; }
         public uint ServerId { get { return Config.ServerId; } }
         public string ServerName { get { return Config.Name; } }
+        public ITcpSessionPool SessionPool { get { return sessionPool; } }
+        public ConcurrentDictionary<uint, ITcpSession> OnlineList
+        {
+            get
+            {
+                return sessionPool.ActiveList;
+            }
+        }
         public ILoger Loger { get; set; }
         public void Start()
         {

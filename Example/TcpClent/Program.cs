@@ -72,8 +72,11 @@ namespace TcpClient
             loger = new Loger();
             var endPoint = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 8088);
             QClient = new QueryClient(endPoint, loger);
+            //client = new MyClient(endPoint, loger);
+            //client.PacketProtocol = new TcpClientPacketProtocol(1024, 1024 * 4);
             QClient.PacketProtocol = new TcpClientPacketProtocol(1024, 1024 * 4);
             QClient.Connect();
+           // client.Connect();
             Stopwatch sw = new Stopwatch();
             Console.WriteLine("连接服务器成功");
             int i = 0;
@@ -84,8 +87,9 @@ namespace TcpClient
             while (i <= allCount)
             {
                 i++;
-                var data = Encoding.UTF8.GetBytes("测试数据kjfl发送大法师大法是大法师大法是否阿斯发达说法是否大是大非阿斯顿飞啊的方式阿斯顿飞阿凡达是啊发送到啊发送方啊发送的发送方啊是否啊第三方啊是否啊是否的萨芬啊是否啊是否阿飞大师傅kdsfjlkasjdflkjasdfljaslkfdjlkasdfjlkajsdlk" + i);
-                var t = QClient.QueryAsync(data);
+                var data = Encoding.UTF8.GetBytes("测试数据kjfl发送大法师大法是大法师大法是否阿斯发达说" + i);
+               var t = QClient.QueryAsync(data);
+               // client.SendAsync(data);
                 t.Wait();
                 //if (t.IsCompleted)
                 //    Console.WriteLine(Encoding.UTF8.GetString(t.Result));

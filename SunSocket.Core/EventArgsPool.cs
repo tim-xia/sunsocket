@@ -13,13 +13,10 @@ namespace SunSocket.Core
     public class EventArgsPool : IPool<SocketAsyncEventArgs>
     {
         private ConcurrentStack<SocketAsyncEventArgs> pool = new ConcurrentStack<SocketAsyncEventArgs>();
-        int maxCount, bufferSize,allCount=0;
-        EventHandler<SocketAsyncEventArgs> completedCallBack;
-        public EventArgsPool(int maxCount,int bufferSize,EventHandler<SocketAsyncEventArgs> completedCallBack)
+        int maxCount,allCount=0;
+        public EventArgsPool(int maxCount)
         {
             this.maxCount = maxCount;
-            this.bufferSize = bufferSize;
-            this.completedCallBack = completedCallBack;
         }
         public int Count
         {
@@ -45,8 +42,6 @@ namespace SunSocket.Core
                 if (Interlocked.Increment(ref allCount) <= maxCount)
                 {
                     result = new SocketAsyncEventArgs();
-                    result.SetBuffer(new byte[bufferSize], 0, bufferSize);
-                    result.Completed += completedCallBack;
                 }
             }
             return result;

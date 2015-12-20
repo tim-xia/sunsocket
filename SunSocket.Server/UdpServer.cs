@@ -31,7 +31,7 @@ namespace SunSocket.Server
             this.maxThread = maxThread;
             this.port = port;
             this.bufferSize = bufferSize;
-            sendArgsPool = new EventArgsPool(1000, bufferSize, SendCompleted);
+            sendArgsPool = new EventArgsPool(1000);
         }
         public Socket ListenerSocket
         {
@@ -98,6 +98,7 @@ namespace SunSocket.Server
 
         private void SendCompleted(object sender, SocketAsyncEventArgs e)
         {
+            e.RemoteEndPoint = null;
             sendArgsPool.Push(e);
         }
         public void Stop()
@@ -108,11 +109,14 @@ namespace SunSocket.Server
         public void SendAsync(EndPoint endPoint, SendData cmd)
         {
             var args = sendArgsPool.Pop();
+            args.Completed += SendCompleted;
             if (args == null)
             {
+                SpinWait spinWait = new SpinWait();
                 while (args != null)
                 {
-                    args= sendArgsPool.Pop();
+                    args = sendArgsPool.Pop();
+                    spinWait.SpinOnce();
                 }
             }
             if (cmd.Data.Length + checkLenght > args.Buffer.Length)
@@ -120,11 +124,9 @@ namespace SunSocket.Server
             else
             {
                 args.RemoteEndPoint = endPoint;
-                byte[] length = BitConverter.GetBytes(cmd.Data.Length);
-                System.Buffer.BlockCopy(length, 0, args.Buffer, 0, length.Length);
-                System.Buffer.BlockCopy(cmd.Data, 0, args.Buffer,checkLenght, cmd.Data.Length);
-                args.SetBuffer(0, cmd.Data.Length + checkLenght);
-                if (!this.ListenerSocket.SendToAsync(args)) SendCompleted(null,args);
+                System.Buffer.BlockCopy(cmd.Data, 0, args.Buffer, 0, cmd.Data.Length);
+                args.SetBuffer(0, cmd.Data.Length);
+                if (!this.ListenerSocket.SendToAsync(args)) SendCompleted(null, args);
             }
         }
     }

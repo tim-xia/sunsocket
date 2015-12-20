@@ -2,6 +2,8 @@
 using SunSocket.Core.Session;
 using System.Net.Sockets;
 using System.Net;
+using System.Threading;
+using System.Threading.Tasks;
 using SunSocket.Core;
 using SunSocket.Core.Protocol;
 using SunSocket.Server.Interface;
@@ -11,13 +13,13 @@ namespace SunSocket.Server.Session
 {
     public class RUdpSession : IRUdpSession
     {
-        PackageId idGenerator;
-        public RUdpSession(EndPoint remoteEndPoint,IRUdpServer server)
+        static int intByteLength = sizeof(int);
+        static int dbIntByteLength=intByteLength*2;
+        public RUdpSession()
         {
-            this.idGenerator = new PackageId();
-            endPoint = remoteEndPoint;
-            Server = server;
+            SessionData = new DataContainer();
         }
+        public uint SessionId { get; set; }
         private EndPoint endPoint;
         public EndPoint EndPoint
         {
@@ -25,8 +27,24 @@ namespace SunSocket.Server.Session
                 return endPoint;
             }
             set {
-                idGenerator.Init();
-                endPoint = value;
+                if (value != null)
+                {
+                    endPoint = value;
+                    if (SendEventArgs == null)
+                    {
+                        SpinWait spin = new SpinWait();
+                        while (SendEventArgs == null)
+                        {
+                            SendEventArgs = Pool.RUdpServer.SocketArgsPool.Pop();
+                            spin.SpinOnce();
+                        }
+                        SendEventArgs.Completed += packetProtocol.SendCompleted;
+                    }
+                    SendEventArgs.RemoteEndPoint = value;
+                    Pool.ActiveList.TryAdd(value, this);
+                    ConnectDateTime = DateTime.Now;
+                    ActiveDateTime = DateTime.Now;
+                }
             }
         }
         public IRUdpSessionPool Pool
@@ -37,10 +55,6 @@ namespace SunSocket.Server.Session
         public DataContainer SessionData
         {
             get; set;
-        }
-        public IRUdpServer Server
-        {
-            get;set;
         }
 
         public DateTime? ConnectDateTime
@@ -54,28 +68,47 @@ namespace SunSocket.Server.Session
             get;
             set;
         }
-
+        IRUdpPacketProtocol packetProtocol;
+        //包接收发送处理器
+        public IRUdpPacketProtocol PacketProtocol
+        {
+            get
+            {
+                return packetProtocol;
+            }
+            set
+            {
+                packetProtocol = value;
+                packetProtocol.Session = this;
+            }
+        }
+        /// <summary>
+        /// 发送数据
+        /// </summary>
+        public SocketAsyncEventArgs SendEventArgs { get; set; }
         public void SendAsync(byte[] data)
         {
-            Server.SendAsync(EndPoint, new SendData() {Id=idGenerator.NewId(),Data = data });
+            PacketProtocol.SendAsync(data);
         }
-        public void SendSucess(uint packageId)
-        {
-
-        }
+       
         object closeLock = new object();
         public void DisConnect()
         {
-            if (ConnectDateTime != null)
+            if (endPoint != null)
             {
                 lock (closeLock)
                 {
-                    if (ConnectDateTime != null)
+                    if (endPoint != null)
                     {
+                        ConnectDateTime = null;
+                        endPoint = null;
                         if (Pool != null)
                         {
-                            Clear();
+                            SendEventArgs.Completed -= PacketProtocol.SendCompleted;
+                            Pool.RUdpServer.SocketArgsPool.Push(SendEventArgs);
+                            SendEventArgs = null;
                             Pool.Push(this);
+                            Clear();
                         }
                         else
                         {
@@ -85,11 +118,33 @@ namespace SunSocket.Server.Session
                 }
             }
         }
+        public void ReceiveCompleted(object sender, SocketAsyncEventArgs e)
+        {
+            if (e.BytesTransferred > 0 && e.SocketError == SocketError.Success)
+            {
+                ActiveDateTime = DateTime.Now;
+                try
+                {
+                    if (!PacketProtocol.Receive(e))
+                    { //如果处理数据返回失败，则断开连接
+                        DisConnect();
+                    }
+                }
+                catch (Exception exception)
+                {
+                    DisConnect();
+                    Pool.RUdpServer.Loger.Error(exception);
+                }
+            }
+            else
+            {
+                DisConnect();
+            }
+        }
         public void Clear()
         {
-            endPoint = null;
+            PacketProtocol.Clear();
             SessionData.Clear();//清理session数据
-            idGenerator.Stop();
         }
         public void Dispose()
         {
