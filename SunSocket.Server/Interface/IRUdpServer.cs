@@ -23,8 +23,6 @@ namespace SunSocket.Server.Interface
         /// 监听socket
         /// </summary>
         Socket ListenerSocket { get; set; }
-        void SendAsync(EndPoint endPoint, byte[] data);
-        void SendAsync(EndPoint endPoint, byte[] data, int offset, int count);
         IRUdpSessionPool SessionPool { get; set; }
         IPool<SocketAsyncEventArgs> SocketArgsPool { get; set; }
         IPool<IFixedBuffer> BufferPool { get; set; }

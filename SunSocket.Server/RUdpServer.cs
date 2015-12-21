@@ -111,11 +111,6 @@ namespace SunSocket.Server
             }
             //需全部入队操作
         }
-        private void SendCompleted(object sender, SocketAsyncEventArgs e)
-        {
-            e.RemoteEndPoint = null;
-            SocketArgsPool.Push(e);
-        }
         private void ReceiveCompleted(object sender, SocketAsyncEventArgs e)
         {
             if (e.BytesTransferred > 0 && e.SocketError == SocketError.Success)
@@ -129,27 +124,6 @@ namespace SunSocket.Server
                 session.ReceiveCompleted(sender, e);
             }
             this.BeginReceive(e);
-        }
-        public void SendAsync(EndPoint endPoint, byte[] data)
-        {
-            SendAsync(endPoint, data, 0, data.Length);
-        }
-        public void SendAsync(EndPoint endPoint, byte[] data, int offset, int count)
-        {
-            var args = SocketArgsPool.Pop();
-            args.Completed += SendCompleted;
-            if (args == null)
-            {
-                SpinWait spinWait = new SpinWait();
-                while (args != null)
-                {
-                    args = SocketArgsPool.Pop();
-                    spinWait.SpinOnce();
-                }
-            }
-            args.RemoteEndPoint = endPoint;
-            args.SetBuffer(data, offset, count);
-            if (!this.ListenerSocket.SendToAsync(args)) SendCompleted(null, args);
         }
         public virtual IRUdpPacketProtocol GetProtocol()
         {

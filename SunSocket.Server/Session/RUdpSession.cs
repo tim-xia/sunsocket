@@ -90,7 +90,32 @@ namespace SunSocket.Server.Session
         {
             PacketProtocol.SendAsync(data);
         }
-       
+        public void CommonSendAsync(byte[] data)
+        {
+            CommonSendAsync( data, 0, data.Length);
+        }
+        public void CommonSendAsync(byte[] data, int offset, int count)
+        {
+            var args =Pool.RUdpServer.SocketArgsPool.Pop();
+            args.Completed += SendCompleted;
+            if (args == null)
+            {
+                SpinWait spinWait = new SpinWait();
+                while (args != null)
+                {
+                    args = Pool.RUdpServer.SocketArgsPool.Pop();
+                    spinWait.SpinOnce();
+                }
+            }
+            args.RemoteEndPoint = EndPoint;
+            args.SetBuffer(data, offset, count);
+            if (!Pool.RUdpServer.ListenerSocket.SendToAsync(args)) SendCompleted(null, args);
+        }
+        private void SendCompleted(object sender, SocketAsyncEventArgs e)
+        {
+            e.RemoteEndPoint = null;
+            Pool.RUdpServer.SocketArgsPool.Push(e);
+        }
         object closeLock = new object();
         public void DisConnect()
         {

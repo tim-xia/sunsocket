@@ -75,7 +75,7 @@ namespace SunSocket.Server.Protocol
                     {
                         if (packageId > prePackageId || prePackageId - packageId > 983040000)
                         {
-                            Session.Pool.RUdpServer.SendAsync(Session.EndPoint, BitConverter.GetBytes(packageId));//发送接收成功通知
+                            Session.CommonSendAsync(BitConverter.GetBytes(packageId));//发送接收成功通知
                             RUdpBuffer receiveBufferObj = new RUdpBuffer();
                             receiveBufferObj.FixedBuffer = e.UserToken as IFixedBuffer;
                             receiveBufferObj.Offset = offset;
@@ -371,7 +371,7 @@ namespace SunSocket.Server.Protocol
             var r = await sendTask.Task;
             if (r)
             {
-                await Task.Delay(10);
+                await Task.Delay(5);
                 if (!isSendSucess)
                 {
                     while (true)
