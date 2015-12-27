@@ -20,7 +20,7 @@ namespace SunSocket.Server
     {
         static int intByteLength = sizeof(int);
         static int dbIntByteLength = intByteLength * 2;
-        List<SocketAsyncEventArgs> receiveEventArgsList=new List<SocketAsyncEventArgs>();
+        List<SocketAsyncEventArgs> receiveEventArgsList;
         public ILoger Loger { get; set; }
         public RUdpServer(RUdpServerConfig config, ILoger loger)
         {
@@ -28,6 +28,7 @@ namespace SunSocket.Server
             Loger = loger;
             SessionPool = new RUdpSessionPool();
             SessionPool.RUdpServer = this;
+            receiveEventArgsList = new List<SocketAsyncEventArgs>(config.ListenerThreads);
             SocketArgsPool = new EventArgsPool(config.MaxSendEventArgs);
             BufferPool = new FixedBufferPool(config.MaxFixedBufferPoolSize, config.BufferSize);
         }

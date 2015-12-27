@@ -46,7 +46,8 @@ namespace SunSocket.Server
                     }
                     foreach (var session in clearList)
                     {
-                        session.DisConnect();
+                        if (OnTimeOut(session))
+                            session.DisConnect();
                     }
                 }
             }

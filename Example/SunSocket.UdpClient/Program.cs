@@ -26,7 +26,6 @@ namespace SunSocket.UdpClient
         }
         static void ReceiveCompleted(object sender, byte[] data)
         {
-            IUdpSession session = sender as IUdpSession;
             Console.WriteLine(Encoding.UTF8.GetString(data));
         }
     }

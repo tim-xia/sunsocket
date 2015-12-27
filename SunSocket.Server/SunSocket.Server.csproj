@@ -41,6 +41,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Config\RUdpServerConfig.cs" />
+    <Compile Include="Config\UdpConfig.cs" />
     <Compile Include="Interface\IRUdpServer.cs" />
     <Compile Include="Interface\IRUdpSession.cs" />
     <Compile Include="Interface\IRUdpSessionPool.cs" />
@@ -58,12 +59,12 @@
     <Compile Include="Interface\ITcpSession.cs" />
     <Compile Include="Interface\ITcpSessionPool.cs" />
     <Compile Include="Interface\IUdpServer.cs" />
-    <Compile Include="Interface\IUdpSession.cs" />
     <Compile Include="TcpMonitor.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Protocol\TcpPacketProtocol.cs" />
     <Compile Include="Session\TcpSession.cs" />
     <Compile Include="Session\TcpSessionPool.cs" />
+    <Compile Include="UdpServer.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\SunSocket.Core\SunSocket.Core.csproj">

@@ -8,6 +8,8 @@ using SunSocket.Core.Session;
 using SunSocket.Core.Protocol;
 using System.Net.Sockets;
 using System.Net;
+using SunSocket.Core.Interface;
+using SunSocket.Server.Config;
 
 namespace SunSocket.Server.Interface
 {
@@ -21,6 +23,8 @@ namespace SunSocket.Server.Interface
         /// 监听socket
         /// </summary>
         Socket ListenerSocket { get; set; }
+        UdpConfig Config { get; set; }
+        IPool<IFixedBuffer> BufferPool { get; set; }
         /// <summary>
         /// 开始接收数据
         /// </summary>
@@ -29,10 +33,8 @@ namespace SunSocket.Server.Interface
         /// 接收数据
         /// </summary>
         void Stop();
-        void SendAsync(EndPoint endPoint, SendData cmd);
-        /// <summary>
-        /// 数据包提取完成事件
-        /// </summary>
-        event EventHandler<byte[]> OnReceived;
+        void SendAsync(EndPoint endPoint, byte[] data);
+        void SendAsync(EndPoint endPoint, byte[] data, int offset, int count);
+        Task OnReceived(EndPoint point, byte[] data);
     }
 }
