@@ -4,13 +4,14 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{4F79DD3A-608B-4422-8689-F36849978477}</ProjectGuid>
+    <ProjectGuid>{33C5624E-C82C-40AF-A105-AE6E008E5212}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>SunSocket.Core</RootNamespace>
-    <AssemblyName>SunSocket.Core</AssemblyName>
+    <RootNamespace>SunRpc.Server</RootNamespace>
+    <AssemblyName>SunRpc.Server</AssemblyName>
     <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -30,6 +31,14 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Autofac, Version=3.5.0.0, Culture=neutral, PublicKeyToken=17863af14b0044da, processorArchitecture=MSIL">
+      <HintPath>..\packages\Autofac.3.5.2\lib\net40\Autofac.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="MsgPack, Version=0.6.0.0, Culture=neutral, PublicKeyToken=a2625990d5dc0167, processorArchitecture=MSIL">
+      <HintPath>..\packages\MsgPack.Cli.0.6.7\lib\net45\MsgPack.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -40,25 +49,28 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Buffer\DynamicBuffer.cs" />
-    <Compile Include="Buffer\FixedBuffer.cs" />
-    <Compile Include="Buffer\FixedBufferPool.cs" />
-    <Compile Include="EventArgsPool.cs" />
-    <Compile Include="Interface\IFixedBuffer.cs" />
-    <Compile Include="Interface\IDynamicBuffer.cs" />
-    <Compile Include="Interface\ILoger.cs" />
-    <Compile Include="Interface\IMonitorPool.cs" />
-    <Compile Include="Interface\IPool.cs" />
-    <Compile Include="PackageId.cs" />
-    <Compile Include="Protocol\SendData.cs" />
-    <Compile Include="Interface\ICmdOperation.cs" />
+    <Compile Include="Controller\ControllerBase.cs" />
+    <Compile Include="Controller\IController.cs" />
+    <Compile Include="Ioc\AutofacExtensions.cs" />
+    <Compile Include="Ioc\CoreIoc.cs" />
+    <Compile Include="Ioc\RPCAttribute.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Protocol\RUdpPackage.cs" />
-    <Compile Include="RpcTransEntity.cs" />
-    <Compile Include="SessionId.cs" />
-    <Compile Include="Session\DataContainer.cs" />
+    <Compile Include="RpcServer.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup />
+  <ItemGroup>
+    <ProjectReference Include="..\SunSocket.Core\SunSocket.Core.csproj">
+      <Project>{4f79dd3a-608b-4422-8689-f36849978477}</Project>
+      <Name>SunSocket.Core</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\SunSocket.Server\SunSocket.Server.csproj">
+      <Project>{1c5a17aa-3fbe-4c65-b148-28a2bfd35c21}</Project>
+      <Name>SunSocket.Server</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

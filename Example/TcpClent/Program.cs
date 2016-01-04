@@ -6,7 +6,6 @@ using System.Collections.Concurrent;
 using System.Net;
 using SunSocket.Client;
 using SunSocket.Core.Interface;
-using SunSocket.Core.Protocol;
 using SunSocket.Client.Interface;
 using SunSocket.Client.Protocol;
 using MsgPack.Serialization;
@@ -61,7 +60,7 @@ namespace TcpClient
         static QueryClient QClient;
         static Loger loger;
         static int receiveCount = 0;
-        static int allCount = 10000;
+        static int allCount = 100000;
         static Stopwatch sb = new Stopwatch();
         static void Main(string[] args)
         {

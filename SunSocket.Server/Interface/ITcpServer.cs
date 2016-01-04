@@ -9,6 +9,7 @@ using System.Threading;
 using System.Collections.Concurrent;
 using SunSocket.Core.Session;
 using SunSocket.Core.Interface;
+using SunSocket.Server.Config;
 
 namespace SunSocket.Server.Interface
 {

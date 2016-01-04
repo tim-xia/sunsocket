@@ -4,15 +4,18 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{4F79DD3A-608B-4422-8689-F36849978477}</ProjectGuid>
-    <OutputType>Library</OutputType>
+    <ProjectGuid>{47366247-D196-4E3C-943C-1A8A7FF7DBD0}</ProjectGuid>
+    <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>SunSocket.Core</RootNamespace>
-    <AssemblyName>SunSocket.Core</AssemblyName>
+    <RootNamespace>Rpc.Server</RootNamespace>
+    <AssemblyName>Rpc.Server</AssemblyName>
     <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
@@ -22,6 +25,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
@@ -40,25 +44,27 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Buffer\DynamicBuffer.cs" />
-    <Compile Include="Buffer\FixedBuffer.cs" />
-    <Compile Include="Buffer\FixedBufferPool.cs" />
-    <Compile Include="EventArgsPool.cs" />
-    <Compile Include="Interface\IFixedBuffer.cs" />
-    <Compile Include="Interface\IDynamicBuffer.cs" />
-    <Compile Include="Interface\ILoger.cs" />
-    <Compile Include="Interface\IMonitorPool.cs" />
-    <Compile Include="Interface\IPool.cs" />
-    <Compile Include="PackageId.cs" />
-    <Compile Include="Protocol\SendData.cs" />
-    <Compile Include="Interface\ICmdOperation.cs" />
+    <Compile Include="Controller\Caculator.cs" />
+    <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Protocol\RUdpPackage.cs" />
-    <Compile Include="RpcTransEntity.cs" />
-    <Compile Include="SessionId.cs" />
-    <Compile Include="Session\DataContainer.cs" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\SunRpc.Server\SunRpc.Server.csproj">
+      <Project>{33c5624e-c82c-40af-a105-ae6e008e5212}</Project>
+      <Name>SunRpc.Server</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\SunSocket.Core\SunSocket.Core.csproj">
+      <Project>{4f79dd3a-608b-4422-8689-f36849978477}</Project>
+      <Name>SunSocket.Core</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\SunSocket.Server\SunSocket.Server.csproj">
+      <Project>{1c5a17aa-3fbe-4c65-b148-28a2bfd35c21}</Project>
+      <Name>SunSocket.Server</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

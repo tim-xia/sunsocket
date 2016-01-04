@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using SunSocket.Server.Config;
 
-namespace SunSocket.Server
+namespace SunSocket.Server.Config
 {
     public class TcpServerConfig
     {

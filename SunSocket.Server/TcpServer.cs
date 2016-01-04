@@ -6,6 +6,7 @@ using System.Collections.Concurrent;
 using SunSocket.Server.Interface;
 using SunSocket.Server.Session;
 using SunSocket.Server.Protocol;
+using SunSocket.Server.Config;
 
 namespace SunSocket.Server
 {
