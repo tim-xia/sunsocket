@@ -9,9 +9,9 @@ using SunSocket.Client;
 using SunSocket.Core.Interface;
 using SunSocket.Client.Interface;
 using SunSocket.Client.Protocol;
-using MsgPack.Serialization;
 using SunSocket.Core;
 using System.IO;
+using MsgPack.Serialization;
 
 namespace SunRpc.Client
 {
@@ -29,16 +29,26 @@ namespace SunRpc.Client
             Buffer.BlockCopy(dataBuffer.Buffer, 0, result, 0, dataBuffer.DataSize);
             tSource.SetResult(result);
         }
+        static MessagePackSerializer<RpcTransData> serializer = SerializationContext.Default.GetSerializer<RpcTransData>();
         public async Task<T> Invoke<T>(string controller, string action, params object[] arguments)
         {
-            RpcTransEntity transData = new RpcTransEntity() { Controller = controller, Action = action, Arguments =arguments };
+            RpcTransData transData = new RpcTransData() { Controller = controller, Action = action, Arguments = new List<byte[]>() };
             MemoryStream ms = new MemoryStream();
-            var serializer = SerializationContext.Default.GetSerializer<RpcTransEntity>();
-            var returnSerializer = SerializationContext.Default.GetSerializer<T>();
+            foreach (var arg in arguments)
+            {
+                SerializationContext.Default.GetSerializer(arg.GetType()).Pack(ms, arg);
+                //Serializer.Serialize(ms, arg);
+                transData.Arguments.Add(ms.ToArray());
+                ms.Position = 0;
+            }
             serializer.Pack(ms, transData);
-            var data = await QueryAsync(ms.GetBuffer());
-            var result = returnSerializer.Unpack(new MemoryStream(data));
-            ms.Close();
+            //Serializer.Serialize(ms, transData);
+            var data = await QueryAsync(ms.ToArray());
+            ms.Dispose();
+            ms=new MemoryStream(data, 0, data.Length);
+            //var result = Serializer.Deserialize<T>(ms); SerializationContext.Default.GetSerializer<T>().Unpack(ms);
+            var result= SerializationContext.Default.GetSerializer<T>().Unpack(ms);
+            ms.Dispose();
             return result;
         }
         public async Task<byte[]> QueryAsync(byte[] data)

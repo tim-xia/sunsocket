@@ -54,7 +54,7 @@
     <Compile Include="Interface\ICmdOperation.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Protocol\RUdpPackage.cs" />
-    <Compile Include="RpcTransEntity.cs" />
+    <Compile Include="RpcTransData.cs" />
     <Compile Include="SessionId.cs" />
     <Compile Include="Session\DataContainer.cs" />
   </ItemGroup>

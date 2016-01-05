@@ -25,30 +25,55 @@ namespace SunRpc.Server
         { }
         public override void OnReceived(ITcpSession session, IDynamicBuffer dataBuffer)
         {
-            var serializer = SerializationContext.Default.GetSerializer<RpcTransEntity>();
+            var serializer = SerializationContext.Default.GetSerializer<RpcTransData>();
             MemoryStream ms = new MemoryStream(dataBuffer.Buffer, 0, dataBuffer.DataSize);
-            RpcTransEntity data = serializer.Unpack(ms);
+            RpcTransData data = serializer.Unpack(ms);
             ms.Dispose();
             IController controller = CoreIoc.Container.ResolveNamed<IController>(data.Controller);
             try
             {
-                var method = GetMethod(data);
-                var result = method.Invoke(controller,new object[] { 100,100});
+                string key = (data.Controller + ":" + data.Action).ToLower();
+                var method = GetMethod(key);
+                List<object> args = new List<object>();
+                if (data.Arguments.Count > 0)
+                {
+                    var types = GetParaTypeList(key);
+                    for (int i = 0; i < data.Arguments.Count; i++)
+                    {
+                        var arg = data.Arguments[i];
+                        ms=new MemoryStream(arg, 0, arg.Length);
+                        var obj=SerializationContext.Default.GetSerializer(types[i]).Unpack(ms);
+                        args.Add(obj);
+                        ms.Dispose();
+                    }
+                }
+                var result = method.Invoke(controller, args.ToArray());
                 var returnSerializer = SerializationContext.Default.GetSerializer(method.ReturnType);
-                MemoryStream rms = new MemoryStream();
-                returnSerializer.Pack(rms, result);
-                session.SendAsync(rms.GetBuffer());
-                rms.Dispose();
+                ms = new MemoryStream();
+                returnSerializer.Pack(ms, result);
+                ms.Dispose();
+                session.SendAsync(ms.ToArray());
             }
             catch (Exception e)
             {
                 session.SendAsync(Encoding.UTF8.GetBytes(e.Message));
             }
         }
-        private MethodInfo GetMethod(RpcTransEntity transData)
+        public ConcurrentDictionary<string, List<Type>> methodParasDict = new ConcurrentDictionary<string, List<Type>>();
+        public List<Type> GetParaTypeList(string key)
+        {
+            List<Type> result;
+            if (!methodParasDict.TryGetValue(key, out result))
+            {
+                result = GetMethod(key).GetParameters().Select(p => p.ParameterType).ToList();
+                methodParasDict.TryAdd(key, result);
+            }
+            return result;
+        }
+        private MethodInfo GetMethod(string key)
         {
             MethodInfo method;
-            if (!methodDict.TryGetValue((transData.Controller + ":" + transData.Action).ToLower(), out method))
+            if (!methodDict.TryGetValue(key, out method))
             {
                 throw new Exception("Action不存在");
             }

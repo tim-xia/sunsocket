@@ -6,10 +6,10 @@ using System.Threading.Tasks;
 
 namespace SunSocket.Core
 {
-    public class RpcTransEntity
+    public class RpcTransData
     {
         public string Controller { get; set; }
         public string Action { get; set; }
-        public object[] Arguments { get; set; }
+        public List<byte[]> Arguments { get; set; }
     }
 }
