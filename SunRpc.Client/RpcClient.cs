@@ -11,7 +11,7 @@ using SunSocket.Client.Interface;
 using SunSocket.Client.Protocol;
 using SunSocket.Core;
 using System.IO;
-using MsgPack.Serialization;
+using ProtoBuf;
 
 namespace SunRpc.Client
 {
@@ -29,25 +29,22 @@ namespace SunRpc.Client
             Buffer.BlockCopy(dataBuffer.Buffer, 0, result, 0, dataBuffer.DataSize);
             tSource.SetResult(result);
         }
-        static MessagePackSerializer<RpcTransData> serializer = SerializationContext.Default.GetSerializer<RpcTransData>();
         public async Task<T> Invoke<T>(string controller, string action, params object[] arguments)
         {
             RpcTransData transData = new RpcTransData() { Controller = controller, Action = action, Arguments = new List<byte[]>() };
             MemoryStream ms = new MemoryStream();
             foreach (var arg in arguments)
             {
-                SerializationContext.Default.GetSerializer(arg.GetType()).Pack(ms, arg);
-                //Serializer.Serialize(ms, arg);
+                Serializer.Serialize(ms, arg);
                 transData.Arguments.Add(ms.ToArray());
                 ms.Position = 0;
             }
-            serializer.Pack(ms, transData);
-            //Serializer.Serialize(ms, transData);
+            Serializer.Serialize(ms, transData);
             var data = await QueryAsync(ms.ToArray());
             ms.Dispose();
             ms=new MemoryStream(data, 0, data.Length);
-            //var result = Serializer.Deserialize<T>(ms); SerializationContext.Default.GetSerializer<T>().Unpack(ms);
-            var result= SerializationContext.Default.GetSerializer<T>().Unpack(ms);
+            var result = Serializer.Deserialize<T>(ms);// SerializationContext.Default.GetSerializer<T>().Unpack(ms);
+            //var result= SerializationContext.Default.GetSerializer<T>().Unpack(ms);
             ms.Dispose();
             return result;
         }

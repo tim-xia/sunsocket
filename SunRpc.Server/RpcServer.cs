@@ -11,7 +11,7 @@ using SunSocket.Core.Interface;
 using SunSocket.Server.Interface;
 using SunSocket.Server.Config;
 using SunSocket.Server;
-using MsgPack.Serialization;
+using ProtoBuf;
 using SunRpc.Server.Ioc;
 using SunSocket.Core;
 using SunRpc.Server.Controller;
@@ -25,9 +25,9 @@ namespace SunRpc.Server
         { }
         public override void OnReceived(ITcpSession session, IDynamicBuffer dataBuffer)
         {
-            var serializer = SerializationContext.Default.GetSerializer<RpcTransData>();
+            //var serializer = SerializationContext.Default.GetSerializer<RpcTransData>();
             MemoryStream ms = new MemoryStream(dataBuffer.Buffer, 0, dataBuffer.DataSize);
-            RpcTransData data = serializer.Unpack(ms);
+            RpcTransData data = Serializer.Deserialize<RpcTransData>(ms);// serializer.Unpack(ms);
             ms.Dispose();
             IController controller = CoreIoc.Container.ResolveNamed<IController>(data.Controller);
             try
@@ -42,15 +42,17 @@ namespace SunRpc.Server
                     {
                         var arg = data.Arguments[i];
                         ms=new MemoryStream(arg, 0, arg.Length);
-                        var obj=SerializationContext.Default.GetSerializer(types[i]).Unpack(ms);
+                        //var obj=SerializationContext.Default.GetSerializer(types[i]).Unpack(ms);
+                        var obj = Serializer.Deserialize(types[i], ms);
                         args.Add(obj);
                         ms.Dispose();
                     }
                 }
                 var result = method.Invoke(controller, args.ToArray());
-                var returnSerializer = SerializationContext.Default.GetSerializer(method.ReturnType);
+                //var returnSerializer = SerializationContext.Default.GetSerializer(method.ReturnType);
                 ms = new MemoryStream();
-                returnSerializer.Pack(ms, result);
+                //returnSerializer.Pack(ms, result);
+                Serializer.Serialize(ms, result);
                 ms.Dispose();
                 session.SendAsync(ms.ToArray());
             }
