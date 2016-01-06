@@ -43,8 +43,7 @@ namespace SunRpc.Client
             var data = await QueryAsync(ms.ToArray());
             ms.Dispose();
             ms=new MemoryStream(data, 0, data.Length);
-            var result = Serializer.Deserialize<T>(ms);// SerializationContext.Default.GetSerializer<T>().Unpack(ms);
-            //var result= SerializationContext.Default.GetSerializer<T>().Unpack(ms);
+            var result = Serializer.Deserialize<T>(ms);
             ms.Dispose();
             return result;
         }

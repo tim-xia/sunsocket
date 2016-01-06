@@ -25,33 +25,30 @@ namespace SunRpc.Server
         { }
         public override void OnReceived(ITcpSession session, IDynamicBuffer dataBuffer)
         {
-            //var serializer = SerializationContext.Default.GetSerializer<RpcTransData>();
             MemoryStream ms = new MemoryStream(dataBuffer.Buffer, 0, dataBuffer.DataSize);
-            RpcTransData data = Serializer.Deserialize<RpcTransData>(ms);// serializer.Unpack(ms);
+            RpcTransData data = Serializer.Deserialize<RpcTransData>(ms);
             ms.Dispose();
             IController controller = CoreIoc.Container.ResolveNamed<IController>(data.Controller);
             try
             {
                 string key = (data.Controller + ":" + data.Action).ToLower();
                 var method = GetMethod(key);
-                List<object> args = new List<object>();
-                if (data.Arguments.Count > 0)
+                object[] args =null;
+                if (data.Arguments != null && data.Arguments.Count > 0)
                 {
+                    args = new object[data.Arguments.Count];
                     var types = GetParaTypeList(key);
                     for (int i = 0; i < data.Arguments.Count; i++)
                     {
                         var arg = data.Arguments[i];
-                        ms=new MemoryStream(arg, 0, arg.Length);
-                        //var obj=SerializationContext.Default.GetSerializer(types[i]).Unpack(ms);
+                        ms = new MemoryStream(arg, 0, arg.Length);
                         var obj = Serializer.Deserialize(types[i], ms);
-                        args.Add(obj);
+                        args[i] = obj;
                         ms.Dispose();
                     }
                 }
-                var result = method.Invoke(controller, args.ToArray());
-                //var returnSerializer = SerializationContext.Default.GetSerializer(method.ReturnType);
+                var result = method.Invoke(controller, args);
                 ms = new MemoryStream();
-                //returnSerializer.Pack(ms, result);
                 Serializer.Serialize(ms, result);
                 ms.Dispose();
                 session.SendAsync(ms.ToArray());
@@ -83,7 +80,6 @@ namespace SunRpc.Server
         }
         public void Init()
         {
-            CoreIoc.Register(b => b.RegisterTypeFromDirectory(null, AppDomain.CurrentDomain.BaseDirectory));
             LoadMehodFromDirectory(AppDomain.CurrentDomain.BaseDirectory);
             CoreIoc.Build();
         }
@@ -100,25 +96,48 @@ namespace SunRpc.Server
                 }
             }
         }
+        static Type rpcBaseType = typeof(ControllerBase);
+        static Type rpcInterfaceType = typeof(IController);
         void LoadMehodFromFile(string fileFullName)
         {
             var assembly = Assembly.LoadFile(fileFullName);
             assembly = AppDomain.CurrentDomain.Load(assembly.GetName());
             var allClass = from types in assembly.GetExportedTypes()
-                           where types.IsClass
+                           where types.IsClass && (types.BaseType.Equals(rpcBaseType)||types.GetInterfaces().Contains(rpcInterfaceType))
                            select types;
             foreach (var c in allClass)
             {
-                var exportAttrs = c.GetCustomAttributes(typeof(RPCAttribute), true);
-                if (exportAttrs.Length > 0)
+                var controllerAttributes = c.GetCustomAttributes(typeof(RPCAttribute), true);
+                string controllerName = c.Name;
+                bool singleInstance = true;
+                if (controllerAttributes.Length > 0)
                 {
-                    var list = c.GetMethods();
-                    foreach (var method in list)
+                    RPCAttribute controllerAttribute = controllerAttributes[0] as RPCAttribute;
+                    if (!string.IsNullOrEmpty(controllerAttribute.ControllerName))
+                        controllerName = controllerAttribute.ControllerName;
+                    singleInstance = controllerAttribute.SingleInstance;
+                }
+                CoreIoc.Register(ioc=> {
+                    if (singleInstance)
+                        ioc.RegisterType(c).Named(controllerName, rpcInterfaceType).SingleInstance();
+                    else
+                        ioc.RegisterType(c).Named(controllerName, rpcInterfaceType);
+                });
+                var list = c.GetMethods();
+                foreach (var method in list)
+                {
+                    var methodAttributes = method.GetCustomAttributes(typeof(RPCAttribute), true);
+                    string methodName = method.Name;
+                    if (methodAttributes.Length > 0)
                     {
-                        if (!methodDict.TryAdd((c.Name + ":" + method.Name).ToLower(), method))
-                        {
-                            throw new Exception("Rpc方法不允许重载");
-                        }
+                        ActionAttribute actionAttribute = methodAttributes[0] as ActionAttribute;
+                        if (!string.IsNullOrEmpty(actionAttribute.ActionName))
+                            methodName = actionAttribute.ActionName;
+                    }
+
+                    if (!methodDict.TryAdd((controllerName + ":" + methodName).ToLower(), method))
+                    {
+                        throw new Exception("Rpc方法不允许重名");
                     }
                 }
             }

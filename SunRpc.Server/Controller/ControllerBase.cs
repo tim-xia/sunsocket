@@ -13,9 +13,5 @@ namespace SunRpc.Server.Controller
         {
             
         }
-        protected virtual void Initialize(ITcpSession session)
-        {
-
-        }
     }
 }

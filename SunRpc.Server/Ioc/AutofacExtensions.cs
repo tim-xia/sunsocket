@@ -61,9 +61,9 @@ namespace SunRpc.Server.Ioc
                     var exportAttr = exportAttrs[0] as RPCAttribute;
                     var controllerType = typeof(IController);
                     if (exportAttr.SingleInstance)
-                        builder.RegisterType(c).Named(exportAttr.ContractName, controllerType).SingleInstance();
+                        builder.RegisterType(c).Named(exportAttr.ControllerName, controllerType).SingleInstance();
                     else
-                        builder.RegisterType(c).Named(exportAttr.ContractName, controllerType);
+                        builder.RegisterType(c).Named(exportAttr.ControllerName, controllerType);
                 }
             }
         }

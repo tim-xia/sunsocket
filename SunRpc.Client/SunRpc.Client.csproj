@@ -31,10 +31,6 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="MsgPack, Version=0.6.0.0, Culture=neutral, PublicKeyToken=a2625990d5dc0167, processorArchitecture=MSIL">
-      <HintPath>..\packages\MsgPack.Cli.0.6.7\lib\net45\MsgPack.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
     <Reference Include="protobuf-net">
       <HintPath>..\library\protobuf-net.dll</HintPath>
     </Reference>
@@ -60,9 +56,6 @@
       <Project>{4f79dd3a-608b-4422-8689-f36849978477}</Project>
       <Name>SunSocket.Core</Name>
     </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

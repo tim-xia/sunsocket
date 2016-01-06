@@ -9,12 +9,12 @@ namespace SunRpc.Server.Ioc
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = false)]
     public class RPCAttribute:Attribute
     {
-        public RPCAttribute(string contractName,bool singleInstance=true)
+        public RPCAttribute(string controllerName=null,bool singleInstance=true)
         {
-            this.ContractName = contractName;
+            this.ControllerName = controllerName;
             this.SingleInstance = singleInstance;
         }
-        public string ContractName { get; set; }
+        public string ControllerName { get; set; }
         public bool SingleInstance { get; set; }
     }
 }

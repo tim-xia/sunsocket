@@ -25,7 +25,7 @@ namespace Rpc.Client
             sw.Start();
             for (int i = 0; i < count; i++)
             {
-                var t = client.Invoke<int>("Caculator", "Add", 5, 5);
+                var t = client.Invoke<List<string>>("Caculator", "GetList");
                 var data = t.Result;
             }
             sw.Stop();
