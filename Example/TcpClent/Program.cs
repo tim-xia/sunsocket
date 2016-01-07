@@ -64,7 +64,7 @@ namespace TcpClient
         static Stopwatch sb = new Stopwatch();
         static void Main(string[] args)
         {
-            AnswerTest();
+            CommonTest();
         }
         public static void AnswerTest()
         {
@@ -100,7 +100,7 @@ namespace TcpClient
             Console.WriteLine("{0}次同步查询完成，运行时间：{1} 秒{2}毫秒", i, sw.Elapsed.Seconds, sw.Elapsed.Milliseconds);
             Console.ReadLine();
         }
-        public void CommonTest()
+        public static void CommonTest()
         {
             loger = new Loger();
             var endPoint = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 8088);
@@ -133,7 +133,7 @@ namespace TcpClient
         }
         public static void ReceiveCommond(object sender, IDynamicBuffer data)
         {
-            if (Interlocked.Increment(ref receiveCount) > allCount)
+            if (Interlocked.Increment(ref receiveCount) >= allCount)
             {
                 sb.Stop();
                 Console.WriteLine("接收{0}次数据完成，运行时间：{1} 秒{2}毫秒", allCount, sb.Elapsed.Seconds, sb.Elapsed.Milliseconds);

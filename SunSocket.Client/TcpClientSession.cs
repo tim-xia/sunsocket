@@ -73,7 +73,7 @@ namespace SunSocket.Client
             get;set;
         }
 
-        public long SessionId
+        public uint SessionId
         {
             get;set;
         }

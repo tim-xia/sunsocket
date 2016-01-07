@@ -16,21 +16,56 @@ namespace Rpc.Client
         {
             var loger = new Loger();
             var endPoint = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 8088);
-            var client = new RpcClient(endPoint, loger);
+            var config = new ClientConfig();
+            config.Server = endPoint;
+            config.Loger = loger;
+            SingleTest(config);
+        }
+        public static void proxyTest(ClientConfig config)
+        {
+            ProxyFactory fac = new ProxyFactory(config);
+            var proxy = fac.GetProxy(typeof(ICaculator), "Caculator");
+            ICaculator obj = proxy.GetTransparentProxy() as ICaculator;
+            while (true)
+            {
+
+                Console.ReadLine();
+                int count = 10000;
+                Stopwatch sw = new Stopwatch();
+                sw.Start();
+                Parallel.For(0, count, i =>
+                {
+                    var r = obj.Add(3, 4);
+                });
+                sw.Stop();
+                Console.WriteLine("RPC完成{0}次调用，运行时间：{1} 秒{2}毫秒", count, sw.Elapsed.Seconds, sw.Elapsed.Milliseconds);
+            }
+        }
+        public static void SingleTest(ClientConfig config)
+        {
+            var client = new Connect(config);
             client.Connect();
             Console.WriteLine("连接成功");
-            Console.ReadLine();
-            int count = 10000;
-            Stopwatch sw = new Stopwatch();
-            sw.Start();
-            for (int i = 0; i < count; i++)
+            while (true)
             {
-                var t = client.Invoke<List<string>>("Caculator", "GetList");
-                var data = t.Result;
+                Console.ReadLine();
+                int count = 10000;
+                Stopwatch sw = new Stopwatch();
+                //List<Task<object>> list = new List<Task<object>>();
+                sw.Start();
+                //for (int i = 0; i < count; i++)
+                //{
+                //    var t = client.Invoke<List<string>>("Caculator", "GetList");
+                //    list.Add(t);
+                //}
+                Parallel.For(0, count, i =>
+                {
+                    var t = client.Invoke<List<string>>("Caculator", "GetList");
+                });
+                //Task.WaitAll(list.ToArray());
+                sw.Stop();
+                Console.WriteLine("RPC完成{0}次调用，运行时间：{1} 秒{2}毫秒", count, sw.Elapsed.Seconds, sw.Elapsed.Milliseconds);
             }
-            sw.Stop();
-            Console.WriteLine("RPC完成{0}次调用，运行时间：{1} 秒{2}毫秒",count, sw.Elapsed.Seconds, sw.Elapsed.Milliseconds);
-            Console.ReadLine();
         }
     }
     public class Loger : ILoger

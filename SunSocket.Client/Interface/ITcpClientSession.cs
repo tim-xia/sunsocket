@@ -8,7 +8,7 @@ namespace SunSocket.Client.Interface
 {
     public interface ITcpClientSession :IDisposable
     {
-        long SessionId { get; set; }
+        uint SessionId { get; set; }
         /// <summary>
         /// 所在池
         /// </summary>
