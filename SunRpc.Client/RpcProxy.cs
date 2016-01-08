@@ -53,8 +53,8 @@ namespace SunRpc.Client
             Type returnType;
             if (returnTypeDict.TryGetValue(ctorMsg.MethodName, out returnType))
             {
-               var t=GetConnect().Invoke(returnType, ImpName, ctorMsg.MethodName, ctorMsg.Args);
-                return new ReturnMessage(t.Result, null,0, null, null);
+                var t = GetConnect().Invoke(returnType, ImpName, ctorMsg.MethodName, ctorMsg.Args);
+                return new ReturnMessage(t.Result, null, 0, null, null);
             }
             return null;
         }

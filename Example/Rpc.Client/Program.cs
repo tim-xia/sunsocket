@@ -34,10 +34,10 @@ namespace Rpc.Client
                 int count = 10000;
                 Stopwatch sw = new Stopwatch();
                 sw.Start();
-                Parallel.For(0, count, i =>
+                for (int i = 0; i < count; i++)
                 {
-                    var r = obj.Add(1,i);
-                });
+                    var r = obj.Add(1,-100);
+                };
                 sw.Stop();
                 Console.WriteLine("RPC完成{0}次调用，运行时间：{1} 秒{2}毫秒", count, sw.Elapsed.Seconds, sw.Elapsed.Milliseconds);
             }

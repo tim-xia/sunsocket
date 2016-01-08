@@ -20,10 +20,12 @@ namespace SunRpc.Client
     {
         public ConcurrentDictionary<int, TaskCompletionSource<List<byte[]>>> taskDict = new ConcurrentDictionary<int, TaskCompletionSource<List<byte[]>>>();
         private QueryId idGenerator;
+        ClientConfig config;
         public Connect(ClientConfig config) : base(config.Server, config.BufferSize, config.Loger)
         {
             PacketProtocol = new TcpClientPacketProtocol(config.BufferSize, config.FixBufferPoolSize);
             idGenerator = new QueryId();
+            this.config = config;
         }
         public override void OnReceived(ITcpClientSession session, IDynamicBuffer dataBuffer)
         {
@@ -67,7 +69,7 @@ namespace SunRpc.Client
             }
             Serializer.Serialize(ms, transData);
             base.SendAsync(ms.ToArray());
-            var cancelSource = new CancellationTokenSource(3000);
+            var cancelSource = new CancellationTokenSource(config.Timeout);
             tSource.Task.Wait(cancelSource.Token);
             var data = await tSource.Task;
             ms.Dispose();
