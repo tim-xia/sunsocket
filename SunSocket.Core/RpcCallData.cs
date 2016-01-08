@@ -6,8 +6,9 @@ using System.Threading.Tasks;
 
 namespace SunSocket.Core
 {
-    public class RpcTransData
+    public class RpcCallData
     {
+        public int Id { get; set; }
         public string Controller { get; set; }
         public string Action { get; set; }
         public List<byte[]> Arguments { get; set; }

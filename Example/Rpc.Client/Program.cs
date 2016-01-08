@@ -19,7 +19,8 @@ namespace Rpc.Client
             var config = new ClientConfig();
             config.Server = endPoint;
             config.Loger = loger;
-            SingleTest(config);
+            // SingleTest(config);
+            proxyTest(config);
         }
         public static void proxyTest(ClientConfig config)
         {
@@ -35,7 +36,7 @@ namespace Rpc.Client
                 sw.Start();
                 Parallel.For(0, count, i =>
                 {
-                    var r = obj.Add(3, 4);
+                    var r = obj.Add(1,i);
                 });
                 sw.Stop();
                 Console.WriteLine("RPC完成{0}次调用，运行时间：{1} 秒{2}毫秒", count, sw.Elapsed.Seconds, sw.Elapsed.Milliseconds);

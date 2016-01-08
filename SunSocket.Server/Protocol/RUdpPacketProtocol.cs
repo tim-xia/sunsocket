@@ -269,13 +269,11 @@ namespace SunSocket.Server.Protocol
                         isSend = true;
                         if (Session.EndPoint != null)
                         {
-                            idGenerator.Init();
                             SendProcess();
                         }
                         else
                         {
                             Session.DisConnect();
-                            idGenerator.Stop();
                         }
                     }
                 }
@@ -353,7 +351,6 @@ namespace SunSocket.Server.Protocol
             }
             else
             {
-                idGenerator.Stop();
                 isSend = false;
             }
         }
@@ -434,7 +431,6 @@ namespace SunSocket.Server.Protocol
                         }
                     }
                 }
-                idGenerator.Stop();
                 if (InterimPacketBuffer != null)
                 {
                     Session.Pool.FixedBufferPool.Push(InterimPacketBuffer);

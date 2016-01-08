@@ -26,14 +26,18 @@ namespace SunRpc.Server
         public override void OnReceived(ITcpSession session, IDynamicBuffer dataBuffer)
         {
             MemoryStream ms = new MemoryStream(dataBuffer.Buffer, 0, dataBuffer.DataSize);
-            RpcTransData data = Serializer.Deserialize<RpcTransData>(ms);
+            RpcCallData data = Serializer.Deserialize<RpcCallData>(ms);
             ms.Dispose();
+            CallProcess(session, data);
+        }
+        protected async Task CallProcess(ITcpSession session, RpcCallData data)
+        {
             IController controller = CoreIoc.Container.ResolveNamed<IController>(data.Controller);
             try
             {
                 string key = (data.Controller + ":" + data.Action).ToLower();
                 var method = GetMethod(key);
-                object[] args =null;
+                object[] args = null;
                 if (data.Arguments != null && data.Arguments.Count > 0)
                 {
                     args = new object[data.Arguments.Count];
@@ -41,17 +45,25 @@ namespace SunRpc.Server
                     for (int i = 0; i < data.Arguments.Count; i++)
                     {
                         var arg = data.Arguments[i];
-                        ms = new MemoryStream(arg, 0, arg.Length);
-                        var obj = Serializer.Deserialize(types[i], ms);
+                        MemoryStream stream = new MemoryStream(arg, 0, arg.Length);
+                        var obj = Serializer.Deserialize(types[i], stream);
                         args[i] = obj;
-                        ms.Dispose();
+                        stream.Dispose();
                     }
                 }
-                var result = method.Invoke(controller, args);
-                ms = new MemoryStream();
+                RpcReturnData result = new RpcReturnData() { Id = data.Id,Values=new List<byte[]>() };
+                object returnValue=null;
+                await Task.Factory.StartNew(() =>
+                {
+                    returnValue = method.Invoke(controller, args);
+                });
+                var ms = new MemoryStream();
+                Serializer.Serialize(ms, returnValue);
+                result.Values.Add(ms.ToArray());
+                ms.Position = 0;
                 Serializer.Serialize(ms, result);
-                ms.Dispose();
                 session.SendAsync(ms.ToArray());
+                ms.Dispose();
             }
             catch (Exception e)
             {
@@ -83,7 +95,7 @@ namespace SunRpc.Server
             LoadMehodFromDirectory(AppDomain.CurrentDomain.BaseDirectory);
             CoreIoc.Build();
         }
-        static ConcurrentDictionary<string, MethodInfo> methodDict = new ConcurrentDictionary<string, MethodInfo>();
+        ConcurrentDictionary<string, MethodInfo> methodDict = new ConcurrentDictionary<string, MethodInfo>();
         void LoadMehodFromDirectory(params string[] directoryPaths)
         {
             foreach (var dpath in directoryPaths)

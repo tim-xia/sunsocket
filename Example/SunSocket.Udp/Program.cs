@@ -20,7 +20,6 @@ namespace SunSocket.Udp
             //server.Start();
 
             PackageId pId = new PackageId();
-            pId.Init();
             ConcurrentDictionary<uint, uint> dict = new ConcurrentDictionary<uint, uint>();
             int i = 5;
             while (i>0)
