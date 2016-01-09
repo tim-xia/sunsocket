@@ -29,12 +29,38 @@ namespace SunRpc.Client
         }
         public override void OnReceived(ITcpClientSession session, IDynamicBuffer dataBuffer)
         {
-            TaskCompletionSource<byte[]> tSource;
-            MemoryStream ms = new MemoryStream(dataBuffer.Buffer, 0, dataBuffer.DataSize);
-            var data = Serializer.Deserialize<RpcReturnData>(ms);
-            if (taskDict.TryRemove(data.Id, out tSource))
+            MemoryStream ms = new MemoryStream();
+            ms.Write(dataBuffer.Buffer, 0, 2);
+            ms.Position = 0;
+            int cmd = Serializer.Deserialize<int>(ms);
+            ms.Write(dataBuffer.Buffer, 2, dataBuffer.DataSize - 2);
+            ms.Position = 2;
+            switch (cmd)
             {
-                tSource.SetResult(data.Value);
+                case 1:
+                    {
+                        //ms.Write(dataBuffer.Buffer, 1, dataBuffer.DataSize - 1);
+                        //RpcCallData data = Serializer.Deserialize<RpcCallData>(ms);
+                        //ms.Dispose();
+                        //CallProcess(session, data);
+                    }
+                    break;
+                case 2:
+                    {
+                        TaskCompletionSource<byte[]> tSource;
+                        var data = Serializer.Deserialize<RpcReturnData>(ms);
+                        ms.Dispose();
+                        if (taskDict.TryRemove(data.Id, out tSource))
+                        {
+                            tSource.SetResult(data.Value);
+                        }
+                    }
+                    break;
+                default:
+                    {
+
+                    }
+                    break;
             }
         }
         public async Task<T> Invoke<T>(string controller, string action, params object[] arguments)
@@ -72,13 +98,16 @@ namespace SunRpc.Client
                 }
             }
             RpcCallData transData = new RpcCallData() { Id = id, Controller = controller, Action = action, Arguments = new List<byte[]>() };
-            MemoryStream ms = new MemoryStream();
+            
             foreach (var arg in arguments)
             {
-                Serializer.Serialize(ms, arg);
-                transData.Arguments.Add(ms.ToArray());
-                ms.Position = 0;
+                MemoryStream ams = new MemoryStream();
+                Serializer.Serialize(ams, arg);
+                transData.Arguments.Add(ams.ToArray());
+                ams.Dispose();
             }
+            MemoryStream ms = new MemoryStream();
+            Serializer.Serialize(ms, 1);
             Serializer.Serialize(ms, transData);
             base.SendAsync(ms.ToArray());
             ms.Dispose();

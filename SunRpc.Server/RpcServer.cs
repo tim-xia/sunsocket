@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.IO;
 using System.Dynamic;
@@ -21,14 +22,39 @@ namespace SunRpc.Server
 {
     public class RpcServer : TcpServer
     {
-        public RpcServer(TcpServerConfig config, ILoger loger) : base(config, loger)
-        { }
+        int invokeTimeOut;
+        public RpcServer(TcpServerConfig config, ILoger loger,int timeOut=3000) : base(config, loger)
+        {
+            this.invokeTimeOut = timeOut;
+        }
         public override void OnReceived(ITcpSession session, IDynamicBuffer dataBuffer)
         {
-            MemoryStream ms = new MemoryStream(dataBuffer.Buffer, 0, dataBuffer.DataSize);
-            RpcCallData data = Serializer.Deserialize<RpcCallData>(ms);
-            ms.Dispose();
-            CallProcess(session, data);
+            MemoryStream ms = new MemoryStream();
+            ms.Write(dataBuffer.Buffer, 0, 2);
+            ms.Position = 0;
+            int cmd = Serializer.Deserialize<int>(ms);
+            ms.Write(dataBuffer.Buffer, 2, dataBuffer.DataSize - 2);
+            ms.Position = 2;
+            switch (cmd)
+            {
+                case 1:
+                    {
+                        RpcCallData data = Serializer.Deserialize<RpcCallData>(ms);
+                        ms.Dispose();
+                        CallProcess(session, data);
+                    }
+                    break;
+                case 2:
+                    {
+
+                    }
+                    break;
+                default:
+                    {
+
+                    }
+                    break;
+            }
         }
         protected async Task CallProcess(ITcpSession session, RpcCallData data)
         {
@@ -52,22 +78,40 @@ namespace SunRpc.Server
                     }
                 }
                 RpcReturnData result = new RpcReturnData() { Id = data.Id};
-                object returnValue=null;
+                object value=null;
+                var cancelSource = new CancellationTokenSource(invokeTimeOut);//超时处理
                 await Task.Factory.StartNew(() =>
                 {
-                    returnValue = method.Invoke(controller, args);
-                });
-                var ms = new MemoryStream();
-                Serializer.Serialize(ms, returnValue);
-                result.Value = ms.ToArray();
-                ms.Position = 0;
-                Serializer.Serialize(ms, result);
-                session.SendAsync(ms.ToArray());
-                ms.Dispose();
+                    value = method.Invoke(controller, args);
+                },cancelSource.Token);
+                if (value != null)
+                {
+                    var ms = new MemoryStream();
+                    Serializer.Serialize(ms, value);
+                    result.Value = ms.ToArray();
+                    ms.Dispose();
+                    ms = new MemoryStream();
+                    Serializer.Serialize(ms, 2);
+                    Serializer.Serialize(ms, result);
+                    session.SendAsync(ms.ToArray());
+                    ms.Dispose();
+                }
+                else
+                {
+                    var ms = new MemoryStream();
+                    Serializer.Serialize(ms,0);
+                    var msgBytes = Encoding.UTF8.GetBytes("invoke timeout");
+                    ms.Write(msgBytes,0,msgBytes.Length);
+                    session.SendAsync(ms.ToArray());
+                }
             }
             catch (Exception e)
             {
-                session.SendAsync(Encoding.UTF8.GetBytes(e.Message));
+                var ms = new MemoryStream();
+                Serializer.Serialize(ms,0);
+                var msgBytes = Encoding.UTF8.GetBytes(e.Message);
+                ms.Write(msgBytes, 0, msgBytes.Length);
+                session.SendAsync(ms.ToArray());
             }
         }
         public ConcurrentDictionary<string, List<Type>> methodParasDict = new ConcurrentDictionary<string, List<Type>>();
