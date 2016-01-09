@@ -18,7 +18,7 @@ namespace SunRpc.Client
 {
     public class Connect : TcpClientSession
     {
-        public ConcurrentDictionary<int, TaskCompletionSource<List<byte[]>>> taskDict = new ConcurrentDictionary<int, TaskCompletionSource<List<byte[]>>>();
+        public ConcurrentDictionary<int, TaskCompletionSource<byte[]>> taskDict = new ConcurrentDictionary<int, TaskCompletionSource<byte[]>>();
         private QueryId idGenerator;
         ClientConfig config;
         public Connect(ClientConfig config) : base(config.Server, config.BufferSize, config.Loger)
@@ -29,22 +29,34 @@ namespace SunRpc.Client
         }
         public override void OnReceived(ITcpClientSession session, IDynamicBuffer dataBuffer)
         {
-            TaskCompletionSource<List<byte[]>> tSource;
+            TaskCompletionSource<byte[]> tSource;
             MemoryStream ms = new MemoryStream(dataBuffer.Buffer, 0, dataBuffer.DataSize);
             var data = Serializer.Deserialize<RpcReturnData>(ms);
             if (taskDict.TryRemove(data.Id, out tSource))
             {
-                tSource.SetResult(data.Values);
+                tSource.SetResult(data.Value);
             }
         }
-        public async Task<object> Invoke<T>(string controller, string action, params object[] arguments)
+        public async Task<T> Invoke<T>(string controller, string action, params object[] arguments)
         {
-            return await Invoke(typeof(T), controller, action, arguments);
+            var data = await Call(controller, action, arguments);
+            var ms = new MemoryStream(data, 0, data.Length);
+            var result = Serializer.Deserialize<T>(ms);
+            ms.Dispose();
+            return result;
         }
         public async Task<object> Invoke(Type returnType, string controller, string action, params object[] arguments)
         {
+            var data = await Call(controller, action, arguments);
+            var ms = new MemoryStream(data, 0, data.Length);
+            var result = Serializer.Deserialize(returnType, ms);
+            ms.Dispose();
+            return result;
+        }
+        private async Task<byte[]> Call(string controller, string action, params object[] arguments)
+        {
             int id = idGenerator.NewId();
-            var tSource = new TaskCompletionSource<List<byte[]>>();
+            var tSource = new TaskCompletionSource<byte[]>();
             if (!taskDict.TryAdd(id, tSource))
             {
                 id = idGenerator.NewId();
@@ -69,14 +81,10 @@ namespace SunRpc.Client
             }
             Serializer.Serialize(ms, transData);
             base.SendAsync(ms.ToArray());
+            ms.Dispose();
             var cancelSource = new CancellationTokenSource(config.Timeout);
             tSource.Task.Wait(cancelSource.Token);
-            var data = await tSource.Task;
-            ms.Dispose();
-            ms = new MemoryStream(data[0], 0, data[0].Length);
-            var result = Serializer.Deserialize(returnType, ms);
-            ms.Dispose();
-            return result;
+            return await tSource.Task;
         }
         public override void OnDisConnect(ITcpClientSession session)
         {

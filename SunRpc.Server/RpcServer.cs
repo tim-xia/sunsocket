@@ -51,7 +51,7 @@ namespace SunRpc.Server
                         stream.Dispose();
                     }
                 }
-                RpcReturnData result = new RpcReturnData() { Id = data.Id,Values=new List<byte[]>() };
+                RpcReturnData result = new RpcReturnData() { Id = data.Id};
                 object returnValue=null;
                 await Task.Factory.StartNew(() =>
                 {
@@ -59,7 +59,7 @@ namespace SunRpc.Server
                 });
                 var ms = new MemoryStream();
                 Serializer.Serialize(ms, returnValue);
-                result.Values.Add(ms.ToArray());
+                result.Value = ms.ToArray();
                 ms.Position = 0;
                 Serializer.Serialize(ms, result);
                 session.SendAsync(ms.ToArray());

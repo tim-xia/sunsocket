@@ -9,6 +9,6 @@ namespace SunSocket.Core
     public class RpcReturnData
     {
         public int Id { get; set; }
-        public List<byte[]> Values { get; set; }
+        public byte[] Value { get; set; }
     }
 }

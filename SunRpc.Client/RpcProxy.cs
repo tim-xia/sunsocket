@@ -58,5 +58,9 @@ namespace SunRpc.Client
             }
             return null;
         }
+        public async Task<T> invoke<T>(string actionName, params object[] arguments)
+        {
+            return await GetConnect().Invoke<T>(ImpName, actionName, arguments);
+        }
     }
 }
