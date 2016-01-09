@@ -36,7 +36,8 @@ namespace Rpc.Client
                 sw.Start();
                 for (int i = 0; i < count; i++)
                 {
-                    var r = obj.Add(1,-100);
+                    var t = proxy.invoke<int>("Add", 1, -100);
+                    // var r = obj.Add(1,-100);
                 };
                 sw.Stop();
                 Console.WriteLine("RPC完成{0}次调用，运行时间：{1} 秒{2}毫秒", count, sw.Elapsed.Seconds, sw.Elapsed.Milliseconds);
