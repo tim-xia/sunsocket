@@ -94,12 +94,15 @@ namespace SunRpc.Client
                 object value = method.Invoke(controller, args);
                 var ms = new MemoryStream();
                 Serializer.Serialize(ms, value);
-                result.Value = ms.ToArray();
-                ms.Dispose();
-                ms = new MemoryStream();
+                byte[] bytes = new byte[ms.Position];
+                Buffer.BlockCopy(ms.GetBuffer(), 0, bytes, 0, bytes.Length);
+                result.Value = bytes;
+                ms.Position = 0;
                 ms.WriteByte(2);
                 Serializer.Serialize(ms, result);
-                SendAsync(ms.ToArray());
+                byte[] rBytes = new byte[ms.Position];
+                Buffer.BlockCopy(ms.GetBuffer(), 0, rBytes, 0, rBytes.Length);
+                SendAsync(rBytes);
                 ms.Dispose();
             }
             catch (Exception e)
@@ -164,19 +167,22 @@ namespace SunRpc.Client
                 }
             }
             RpcCallData transData = new RpcCallData() { Id = id, Controller = controller, Action = action, Arguments = new List<byte[]>() };
-            
+            MemoryStream ams = new MemoryStream();
             foreach (var arg in arguments)
             {
-                MemoryStream ams = new MemoryStream();
                 Serializer.Serialize(ams, arg);
-                transData.Arguments.Add(ams.ToArray());
-                ams.Dispose();
+                byte[] argBytes = new byte[ams.Position];
+                Buffer.BlockCopy(ams.GetBuffer(), 0, argBytes, 0, argBytes.Length);
+                transData.Arguments.Add(argBytes);
+                ams.Position = 0;
             }
-            MemoryStream ms = new MemoryStream();
-            ms.WriteByte(1);
-            Serializer.Serialize(ms, transData);
-            base.SendAsync(ms.ToArray());
-            ms.Dispose();
+            ams.Position = 0;
+            ams.WriteByte(1);
+            Serializer.Serialize(ams, transData);
+            byte[] bytes = new byte[ams.Position];
+            Buffer.BlockCopy(ams.GetBuffer(), 0, bytes, 0, bytes.Length);
+            base.SendAsync(bytes);
+            ams.Dispose();
             var cancelSource = new CancellationTokenSource(config.RemoteInvokeTimeout);
             tSource.Task.Wait(cancelSource.Token);
             return await tSource.Task;

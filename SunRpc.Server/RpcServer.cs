@@ -102,12 +102,15 @@ namespace SunRpc.Server
                 RpcReturnData result = new RpcReturnData() { Id = data.Id };
                 var ms = new MemoryStream();
                 Serializer.Serialize(ms, value);
-                result.Value = ms.ToArray();
-                ms.Dispose();
-                ms = new MemoryStream();
+                byte[] bytes = new byte[ms.Position];
+                Buffer.BlockCopy(ms.GetBuffer(), 0, bytes, 0, bytes.Length);
+                result.Value = bytes;
+                ms.Position = 0;
                 ms.WriteByte(2);
                 Serializer.Serialize(ms, result);
-                session.SendAsync(ms.ToArray());
+                byte[] rBytes = new byte[ms.Position];
+                Buffer.BlockCopy(ms.GetBuffer(), 0, rBytes, 0, rBytes.Length);
+                session.SendAsync(rBytes);
                 ms.Dispose();
             }
             catch (Exception e)

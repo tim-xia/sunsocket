@@ -23,8 +23,8 @@ namespace Rpc.Client
             config.Loger = loger;
             config.BinPath = AppDomain.CurrentDomain.BaseDirectory;
             // SingleTest(config);
-            //proxyTest(config);
-            MessageTest(config);
+            proxyTest(config);
+            //MessageTest(config);
         }
         public static void MessageTest(ClientConfig config)
         {

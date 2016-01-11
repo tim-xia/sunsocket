@@ -75,19 +75,22 @@ namespace SunRpc.Server
                 }
             }
             RpcCallData transData = new RpcCallData() { Id = id, Controller = controller, Action = action, Arguments = new List<byte[]>() };
-
+            MemoryStream ams = new MemoryStream();
             foreach (var arg in arguments)
             {
-                MemoryStream ams = new MemoryStream();
                 Serializer.Serialize(ams, arg);
-                transData.Arguments.Add(ams.ToArray());
-                ams.Dispose();
+                byte[] argBytes = new byte[ams.Position];
+                Buffer.BlockCopy(ams.GetBuffer(), 0, argBytes, 0, argBytes.Length);
+                transData.Arguments.Add(argBytes);
+                ams.Position = 0;
             }
-            MemoryStream ms = new MemoryStream();
-            ms.WriteByte(1);
-            Serializer.Serialize(ms, transData);
-            Session.SendAsync(ms.ToArray());
-            ms.Dispose();
+            ams.Position = 0;
+            ams.WriteByte(1);
+            Serializer.Serialize(ams, transData);
+            byte[] bytes = new byte[ams.Position];
+            Buffer.BlockCopy(ams.GetBuffer(), 0, bytes, 0, bytes.Length);
+            Session.SendAsync(bytes);
+            ams.Dispose();
             var cancelsource = new CancellationTokenSource(invokeTimeOut);
             tSource.Task.Wait(cancelsource.Token);
             return await tSource.Task;
