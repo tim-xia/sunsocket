@@ -193,10 +193,6 @@ namespace SunSocket.Server.Protocol
                         {
                             SendProcess();
                         }
-                        else
-                        {
-                            Session.DisConnect();
-                        }
                     }
                 }
             }

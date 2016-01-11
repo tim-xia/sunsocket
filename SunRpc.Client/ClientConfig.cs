@@ -20,6 +20,7 @@ namespace SunRpc.Client
             get;
             set;
         }
+        public string BinPath { get; set; }
         private int bufferSize = 1024;
         public int BufferSize
         {
@@ -57,7 +58,7 @@ namespace SunRpc.Client
             }
         }
         private int timeOut = 3000;
-        public int Timeout
+        public int RemoteInvokeTimeout
         {
             get
             {
@@ -66,6 +67,18 @@ namespace SunRpc.Client
             set
             {
                 timeOut = value;
+            }
+        }
+        int localInvokeTimeOut = 3000;
+        public int LocalInvokeTimeout
+        {
+            get
+            {
+                return localInvokeTimeOut;
+            }
+            set
+            {
+                localInvokeTimeOut = value;
             }
         }
     }

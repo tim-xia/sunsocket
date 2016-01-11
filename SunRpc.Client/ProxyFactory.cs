@@ -1,33 +1,37 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Concurrent;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using SunRpc.Core.Ioc;
+using SunSocket.Core;
 
 namespace SunRpc.Client
 {
     public class ProxyFactory
     {
+        IocContainer<IClentController> iocContainer;
         public ProxyFactory(ClientConfig config)
         {
             this.Config = config;
-            ConnPool = new ConnectPool(config);
+            iocContainer = new IocContainer<IClentController>();
+            iocContainer.Load(config.BinPath);
+            sessionId = new SessionId(1);
         }
-        public ConnectPool ConnPool
-        {
-            get;
-            set;
-        }
+        SessionId sessionId;
         public ClientConfig Config
         {
             get;
             set;
         }
-        public RpcProxy GetProxy(Type type, string impName)
+        public Connect GetConnect()
         {
-            var proxy = new RpcProxy(type, impName);
-            proxy.Factory = this;
-            return proxy;
+            var connect = new Connect(Config);
+            connect.SessionId = sessionId.NewId();
+            connect.Connect();
+            connect.TypeContainer = iocContainer;
+            return connect;
         }
     }
 }

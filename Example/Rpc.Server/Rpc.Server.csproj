@@ -25,7 +25,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
+    <PlatformTarget>x64</PlatformTarget>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
@@ -45,6 +45,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Controller\Caculator.cs" />
+    <Compile Include="IClient\ICaculator.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
@@ -52,6 +53,10 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\SunRpc.Core\SunRpc.Core.csproj">
+      <Project>{cb98ca9d-3503-42b0-bcc0-812f49e5b098}</Project>
+      <Name>SunRpc.Core</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\SunRpc.Server\SunRpc.Server.csproj">
       <Project>{33c5624e-c82c-40af-a105-ae6e008e5212}</Project>
       <Name>SunRpc.Server</Name>

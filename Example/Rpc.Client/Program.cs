@@ -19,28 +19,34 @@ namespace Rpc.Client
             var config = new ClientConfig();
             config.Server = endPoint;
             config.Loger = loger;
+            config.BinPath = AppDomain.CurrentDomain.BaseDirectory;
             // SingleTest(config);
             proxyTest(config);
         }
         public static void proxyTest(ClientConfig config)
         {
             ProxyFactory fac = new ProxyFactory(config);
-            var proxy = fac.GetProxy(typeof(ICaculator), "Caculator");
-            ICaculator obj = proxy.GetTransparentProxy() as ICaculator;
+            Connect conn = fac.GetConnect();
+            ICaculator obj = conn.GetInstance<ICaculator>("Caculator");
             while (true)
             {
-
-                Console.ReadLine();
-                int count = 10000;
+                var c= Console.ReadLine();
+                int count = 20;
+                if (!string.IsNullOrEmpty(c))
+                    count = Convert.ToInt32(c);
                 Stopwatch sw = new Stopwatch();
                 sw.Start();
-                Parallel.For(0, count, i =>
-                {
+                //Parallel.For(0, count, i =>
+                //{
                     //var t = proxy.invoke<int>("Add", 1, -100);
-                    var r = obj.Add(1,-100);
-                });
+                    //var r = obj.Add(1, -100);
+                //});
+                for (int i = 0; i < count; i++)
+                {
+                    var r = obj.Add(1, -100);
+                }
                 sw.Stop();
-                Console.WriteLine("RPC完成{0}次调用，运行时间：{1} 秒{2}毫秒", count, sw.Elapsed.Seconds, sw.Elapsed.Milliseconds);
+                Console.WriteLine("RPC完成{0}次递归调用(c=>s=>c=>s=>return算一次)，运行时间：{1} 秒{2}毫秒", count, sw.Elapsed.Seconds, sw.Elapsed.Milliseconds);
             }
         }
         public static void SingleTest(ClientConfig config)
@@ -51,7 +57,7 @@ namespace Rpc.Client
             while (true)
             {
                 Console.ReadLine();
-                int count = 10000;
+                int count = 100;
                 Stopwatch sw = new Stopwatch();
                 //List<Task<object>> list = new List<Task<object>>();
                 sw.Start();

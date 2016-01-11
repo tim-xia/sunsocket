@@ -7,10 +7,18 @@ using System.Threading.Tasks;
 
 namespace SunSocket.Core
 {
-    public class QueryId
+    public class LoopId
     {
+        public LoopId(int maxId = 60000)
+        {
+            this.maxId = maxId;
+        }
+        public void Init()
+        {
+            id = 0;
+        }
         int id = 0;
-        int maxId = 60000;
+        int maxId;
         object lockObj = new object();
         public int NewId()
         {

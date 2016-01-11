@@ -1,13 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
-using System.Reflection;
 using System.Runtime.Remoting.Proxies;
 using System.Runtime.Remoting.Messaging;
 
-namespace SunRpc.Client
+namespace SunRpc.Core
 {
     public class RpcProxy : RealProxy
     {
@@ -29,21 +26,11 @@ namespace SunRpc.Client
         /// </summary>
         public Type IType { get; set; }
 
-        public ProxyFactory Factory
+        public Dictionary<string, Type> returnTypeDict = new Dictionary<string, Type>();
+        public IRpcInvoke RpcInvoke
         {
             get;
             set;
-        }
-        public Dictionary<string, Type> returnTypeDict = new Dictionary<string, Type>();
-        private static Connect conn;
-        private Connect GetConnect()
-        {
-            if (conn == null)
-            {
-                conn = Factory.ConnPool.Pop();
-                conn.Connect();
-            }
-            return conn;
         }
         public override IMessage Invoke(IMessage msg)
         {
@@ -53,14 +40,20 @@ namespace SunRpc.Client
             Type returnType;
             if (returnTypeDict.TryGetValue(ctorMsg.MethodName, out returnType))
             {
-                var t = GetConnect().Invoke(returnType, ImpName, ctorMsg.MethodName, ctorMsg.Args);
-                return new ReturnMessage(t.Result, null, 0, null, null);
+                var t = RpcInvoke.Invoke(returnType, ImpName, ctorMsg.MethodName, ctorMsg.Args);
+                if (t == null)
+                    return new ReturnMessage(t, null, 0, null, null);
+                else
+                {
+                    var r = t.Result;
+                    return new ReturnMessage(r, null, 0, null, null);
+                }
             }
             return null;
         }
         public async Task<T> invoke<T>(string actionName, params object[] arguments)
         {
-            return await GetConnect().Invoke<T>(ImpName, actionName, arguments);
+            return await RpcInvoke.Invoke<T>(ImpName, actionName, arguments);
         }
     }
 }

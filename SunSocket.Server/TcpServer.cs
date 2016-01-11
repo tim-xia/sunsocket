@@ -36,7 +36,7 @@ namespace SunSocket.Server
             }
         }
         public ILoger Loger { get; set; }
-        public void Start()
+        public virtual void Start()
         {
             ListenerSocket = new Socket(endPoint.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
             ListenerSocket.Bind(endPoint);
@@ -44,7 +44,7 @@ namespace SunSocket.Server
             StartAccept(null);
         }
 
-        public void Stop()
+        public virtual void Stop()
         {
             if (ListenerSocket != null)
             {

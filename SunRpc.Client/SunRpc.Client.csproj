@@ -45,13 +45,17 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ClientConfig.cs" />
-    <Compile Include="ConnectPool.cs" />
+    <Compile Include="ClientController.cs" />
+    <Compile Include="IClentController.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Connect.cs" />
     <Compile Include="ProxyFactory.cs" />
-    <Compile Include="RpcProxy.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\SunRpc.Core\SunRpc.Core.csproj">
+      <Project>{cb98ca9d-3503-42b0-bcc0-812f49e5b098}</Project>
+      <Name>SunRpc.Core</Name>
+    </ProjectReference>
     <ProjectReference Include="..\SunSocket.Client\SunSocket.Client.csproj">
       <Project>{4f9abb08-20fd-4592-a1fd-c8b99b5a850a}</Project>
       <Name>SunSocket.Client</Name>

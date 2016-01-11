@@ -3,9 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using SunRpc.Server;
+using SunSocket.Server;
 using SunSocket.Core.Interface;
 using SunSocket.Server.Config;
+using SunRpc.Server;
 
 namespace Rpc.Server
 {
@@ -14,9 +15,9 @@ namespace Rpc.Server
         static Loger loger = new Loger();
         static void Main(string[] args)
         {
-            TcpServerConfig configOne = new TcpServerConfig { ServerId = 1, Name = "one", IP = "127.0.0.1", Port = 8088, BufferSize = 1024, MaxFixedBufferPoolSize = 1024 * 4, MaxConnections = 8000 };
+            RpcServerConfig configOne = new RpcServerConfig { ServerId = 1, Name = "one", IP = "127.0.0.1", Port = 8088, BufferSize = 1024, MaxFixedBufferPoolSize = 1024 * 4, MaxConnections = 8000 };
+            configOne.BinPath = AppDomain.CurrentDomain.BaseDirectory;
             RpcServer listener = new RpcServer(configOne, loger);
-            listener.Init();
             listener.Start();
             Console.WriteLine("服务区启动成功");
             Console.ReadLine();

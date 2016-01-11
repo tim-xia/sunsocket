@@ -54,9 +54,7 @@
     <Compile Include="Interface\ICmdOperation.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Protocol\RUdpPackage.cs" />
-    <Compile Include="QueryId.cs" />
-    <Compile Include="RpcCallData.cs" />
-    <Compile Include="RpcReturnData.cs" />
+    <Compile Include="LoopId.cs" />
     <Compile Include="SessionId.cs" />
     <Compile Include="Session\DataContainer.cs" />
   </ItemGroup>

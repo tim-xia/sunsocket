@@ -4,18 +4,16 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{26383AF8-C41A-4880-BDD2-6E5C020B2FB4}</ProjectGuid>
-    <OutputType>Exe</OutputType>
+    <ProjectGuid>{CB98CA9D-3503-42B0-BCC0-812F49E5B098}</ProjectGuid>
+    <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Rpc.Client</RootNamespace>
-    <AssemblyName>Rpc.Client</AssemblyName>
+    <RootNamespace>SunRpc.Core</RootNamespace>
+    <AssemblyName>SunRpc.Core</AssemblyName>
     <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
-    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <PlatformTarget>x64</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
@@ -25,7 +23,6 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <PlatformTarget>x64</PlatformTarget>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
@@ -34,6 +31,10 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Autofac, Version=3.5.0.0, Culture=neutral, PublicKeyToken=17863af14b0044da, processorArchitecture=MSIL">
+      <HintPath>..\packages\Autofac.3.5.2\lib\net40\Autofac.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -44,31 +45,28 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Controller\Caculator.cs" />
-    <Compile Include="ICaculator.cs" />
-    <Compile Include="Program.cs" />
+    <Compile Include="Controller\ActionAttribute.cs" />
+    <Compile Include="Controller\ControllerAttribute.cs" />
+    <Compile Include="Ioc\IocContainer.cs" />
+    <Compile Include="Ioc\CoreIoc.cs" />
+    <Compile Include="IRpcInvoke.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RpcCallData.cs" />
+    <Compile Include="RpcProxy.cs" />
+    <Compile Include="RpcReturnData.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="App.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\..\SunRpc.Client\SunRpc.Client.csproj">
-      <Project>{aec010b1-1ce6-4f89-949a-0a81015ef995}</Project>
-      <Name>SunRpc.Client</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\SunRpc.Core\SunRpc.Core.csproj">
-      <Project>{cb98ca9d-3503-42b0-bcc0-812f49e5b098}</Project>
-      <Name>SunRpc.Core</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\SunSocket.Client\SunSocket.Client.csproj">
-      <Project>{4f9abb08-20fd-4592-a1fd-c8b99b5a850a}</Project>
-      <Name>SunSocket.Client</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\SunSocket.Core\SunSocket.Core.csproj">
+    <ProjectReference Include="..\SunSocket.Core\SunSocket.Core.csproj">
       <Project>{4f79dd3a-608b-4422-8689-f36849978477}</Project>
       <Name>SunSocket.Core</Name>
     </ProjectReference>
+    <ProjectReference Include="..\SunSocket.Server\SunSocket.Server.csproj">
+      <Project>{1c5a17aa-3fbe-4c65-b148-28a2bfd35c21}</Project>
+      <Name>SunSocket.Server</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

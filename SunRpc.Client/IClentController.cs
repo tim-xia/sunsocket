@@ -4,11 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SunSocket.Core
+namespace SunRpc.Client
 {
-    public class RpcReturnData
+    public interface IClentController
     {
-        public int Id { get; set; }
-        public byte[] Value { get; set; }
     }
 }

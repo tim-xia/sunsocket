@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Autofac;
 
-namespace SunRpc.Server.Ioc
+namespace SunRpc.Core.Ioc
 {
     public class CoreIoc
     {

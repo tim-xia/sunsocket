@@ -5,64 +5,85 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.IO;
-using System.Dynamic;
 using System.Reflection;
 using System.Collections.Concurrent;
 using SunSocket.Core.Interface;
 using SunSocket.Server.Interface;
 using SunSocket.Server.Config;
-using SunSocket.Server;
 using ProtoBuf;
-using SunRpc.Server.Ioc;
-using SunSocket.Core;
-using SunRpc.Server.Controller;
-using Autofac;
+using SunSocket.Server;
+using SunRpc.Core.Ioc;
+using SunRpc.Core;
 
 namespace SunRpc.Server
 {
+    public class CallStatus
+    {
+        public ITcpSession Session { get; set; }
+        public RpcCallData Data { get; set; }
+    }
     public class RpcServer : TcpServer
     {
-        int invokeTimeOut;
-        public RpcServer(TcpServerConfig config, ILoger loger,int timeOut=3000) : base(config, loger)
+        IocContainer<IServerController> iocContainer;
+        ProxyFactory RpcFactory;
+        RpcServerConfig rpcConfig;
+        public RpcServer(RpcServerConfig config, ILoger loger) : base(config, loger)
         {
-            this.invokeTimeOut = timeOut;
+            rpcConfig = config;
+            iocContainer = new IocContainer<IServerController>();
+            RpcFactory = new ProxyFactory(config);
+        }
+        public override void Start()
+        {
+            base.Start();
+            iocContainer.Load(rpcConfig.BinPath);
         }
         public override void OnReceived(ITcpSession session, IDynamicBuffer dataBuffer)
         {
-            MemoryStream ms = new MemoryStream();
-            ms.Write(dataBuffer.Buffer, 0, 2);
-            ms.Position = 0;
-            int cmd = Serializer.Deserialize<int>(ms);
-            ms.Write(dataBuffer.Buffer, 2, dataBuffer.DataSize - 2);
-            ms.Position = 2;
+            int cmd = dataBuffer.Buffer[0];
             switch (cmd)
             {
                 case 1:
                     {
+                        MemoryStream ms = new MemoryStream(dataBuffer.Buffer, 1, dataBuffer.DataSize - 1);
                         RpcCallData data = Serializer.Deserialize<RpcCallData>(ms);
                         ms.Dispose();
-                        CallProcess(session, data);
+                        ThreadPool.QueueUserWorkItem(CallFunc, new CallStatus() { Session = session, Data = data });
                     }
                     break;
                 case 2:
                     {
-
+                        MemoryStream ms = new MemoryStream(dataBuffer.Buffer, 1, dataBuffer.DataSize - 1);
+                        var data = Serializer.Deserialize<RpcReturnData>(ms);
+                        ms.Dispose();
+                        RpcFactory.GetInvoke(session.SessionId).ReturnData(data);
                     }
                     break;
                 default:
                     {
-
+                        var d = 6;
+                        var b = d;
                     }
                     break;
             }
         }
-        protected async Task CallProcess(ITcpSession session, RpcCallData data)
+        public void CallFunc(object status)
         {
-            IController controller = CoreIoc.Container.ResolveNamed<IController>(data.Controller);
+            CallStatus callData = status as CallStatus;
+            CallProcess(callData.Session, callData.Data);
+        }
+        protected void CallProcess(ITcpSession session, RpcCallData data)
+        {
+            IServerController controller = iocContainer.GetController(data.Controller);
+            if (!controller.SingleInstance)
+            {
+                controller.Session =session;
+                controller.RpcFactory = RpcFactory;
+            }
             try
             {
                 string key = (data.Controller + ":" + data.Action).ToLower();
-                var method = GetMethod(key);
+                var method = iocContainer.GetMethod(key);
                 object[] args = null;
                 if (data.Arguments != null && data.Arguments.Count > 0)
                 {
@@ -77,38 +98,26 @@ namespace SunRpc.Server
                         stream.Dispose();
                     }
                 }
-                RpcReturnData result = new RpcReturnData() { Id = data.Id};
-                object value=null;
-                var cancelSource = new CancellationTokenSource(invokeTimeOut);//超时处理
-                await Task.Factory.StartNew(() =>
-                {
-                    value = method.Invoke(controller, args);
-                },cancelSource.Token);
-                if (value != null)
-                {
-                    var ms = new MemoryStream();
-                    Serializer.Serialize(ms, value);
-                    result.Value = ms.ToArray();
-                    ms.Dispose();
-                    ms = new MemoryStream();
-                    Serializer.Serialize(ms, 2);
-                    Serializer.Serialize(ms, result);
-                    session.SendAsync(ms.ToArray());
-                    ms.Dispose();
-                }
-                else
-                {
-                    var ms = new MemoryStream();
-                    Serializer.Serialize(ms,0);
-                    var msgBytes = Encoding.UTF8.GetBytes("invoke timeout");
-                    ms.Write(msgBytes,0,msgBytes.Length);
-                    session.SendAsync(ms.ToArray());
-                }
+                //var cancelSource = new CancellationTokenSource(rpcConfig.LocalInvokeTimeout);//超时处理
+                //object value= await Task.Factory.StartNew<object>(() =>
+                //{
+                object value = method.Invoke(controller, args);
+                //}, cancelSource.Token);
+                RpcReturnData result = new RpcReturnData() { Id = data.Id };
+                var ms = new MemoryStream();
+                Serializer.Serialize(ms, value);
+                result.Value = ms.ToArray();
+                ms.Dispose();
+                ms = new MemoryStream();
+                ms.WriteByte(2);
+                Serializer.Serialize(ms, result);
+                session.SendAsync(ms.ToArray());
+                ms.Dispose();
             }
             catch (Exception e)
             {
                 var ms = new MemoryStream();
-                Serializer.Serialize(ms,0);
+                ms.WriteByte(0);
                 var msgBytes = Encoding.UTF8.GetBytes(e.Message);
                 ms.Write(msgBytes, 0, msgBytes.Length);
                 session.SendAsync(ms.ToArray());
@@ -120,83 +129,15 @@ namespace SunRpc.Server
             List<Type> result;
             if (!methodParasDict.TryGetValue(key, out result))
             {
-                result = GetMethod(key).GetParameters().Select(p => p.ParameterType).ToList();
+                result = iocContainer.GetMethod(key).GetParameters().Select(p => p.ParameterType).ToList();
                 methodParasDict.TryAdd(key, result);
             }
             return result;
         }
-        private MethodInfo GetMethod(string key)
+        public override void OnConnected(ITcpSession session)
         {
-            MethodInfo method;
-            if (!methodDict.TryGetValue(key, out method))
-            {
-                throw new Exception("Action不存在");
-            }
-            return method;
-        }
-        public void Init()
-        {
-            LoadMehodFromDirectory(AppDomain.CurrentDomain.BaseDirectory);
-            CoreIoc.Build();
-        }
-        ConcurrentDictionary<string, MethodInfo> methodDict = new ConcurrentDictionary<string, MethodInfo>();
-        void LoadMehodFromDirectory(params string[] directoryPaths)
-        {
-            foreach (var dpath in directoryPaths)
-            {
-                DirectoryInfo dInfo = new DirectoryInfo(dpath);
-                var files = dInfo.GetFiles("*", SearchOption.AllDirectories).Where(f=>f.Name.EndsWith(".dll")|| f.Name.EndsWith(".exe"));
-                foreach (var file in files)
-                {
-                    LoadMehodFromFile(file.FullName);
-                }
-            }
-        }
-        static Type rpcBaseType = typeof(ControllerBase);
-        static Type rpcInterfaceType = typeof(IController);
-        void LoadMehodFromFile(string fileFullName)
-        {
-            var assembly = Assembly.LoadFile(fileFullName);
-            assembly = AppDomain.CurrentDomain.Load(assembly.GetName());
-            var allClass = from types in assembly.GetExportedTypes()
-                           where types.IsClass && (types.BaseType.Equals(rpcBaseType)||types.GetInterfaces().Contains(rpcInterfaceType))
-                           select types;
-            foreach (var c in allClass)
-            {
-                var controllerAttributes = c.GetCustomAttributes(typeof(RPCAttribute), true);
-                string controllerName = c.Name;
-                bool singleInstance = true;
-                if (controllerAttributes.Length > 0)
-                {
-                    RPCAttribute controllerAttribute = controllerAttributes[0] as RPCAttribute;
-                    if (!string.IsNullOrEmpty(controllerAttribute.ControllerName))
-                        controllerName = controllerAttribute.ControllerName;
-                    singleInstance = controllerAttribute.SingleInstance;
-                }
-                CoreIoc.Register(ioc=> {
-                    if (singleInstance)
-                        ioc.RegisterType(c).Named(controllerName, rpcInterfaceType).SingleInstance();
-                    else
-                        ioc.RegisterType(c).Named(controllerName, rpcInterfaceType);
-                });
-                var list = c.GetMethods();
-                foreach (var method in list)
-                {
-                    var methodAttributes = method.GetCustomAttributes(typeof(RPCAttribute), true);
-                    string methodName = method.Name;
-                    if (methodAttributes.Length > 0)
-                    {
-                        ActionAttribute actionAttribute = methodAttributes[0] as ActionAttribute;
-                        if (!string.IsNullOrEmpty(actionAttribute.ActionName))
-                            methodName = actionAttribute.ActionName;
-                    }
-
-                    if (!methodDict.TryAdd((controllerName + ":" + methodName).ToLower(), method))
-                    {
-                        throw new Exception("Rpc方法不允许重名");
-                    }
-                }
-            }
+            var invoke = new RpcInvoke(session, rpcConfig.RemoteInvokeTimeout);
+            RpcFactory.invokeDict.TryAdd(session.SessionId, invoke);
         }
     }
 }

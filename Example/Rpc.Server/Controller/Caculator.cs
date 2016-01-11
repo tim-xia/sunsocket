@@ -3,15 +3,24 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using SunRpc.Server.Ioc;
-using SunRpc.Server.Controller;
+using SunRpc.Server;
+using Rpc.Server.IClient;
 
 namespace Rpc.Server.Controller
 {
-    public class Caculator:ControllerBase
+    public class Caculator:ServerController
     {
+        public override bool SingleInstance
+        {
+            get
+            {
+                return base.SingleInstance;
+            }
+        }
         public int Add(int a, int b)
         {
+            var r = RpcFactory.GetInstance<ICaculator>(Session, "Caculator");
+            var d = r.Add(a, b);
             return a + b;
         }
         public List<string> GetList()
