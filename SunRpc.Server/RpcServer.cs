@@ -98,11 +98,7 @@ namespace SunRpc.Server
                         stream.Dispose();
                     }
                 }
-                //var cancelSource = new CancellationTokenSource(rpcConfig.LocalInvokeTimeout);//超时处理
-                //object value= await Task.Factory.StartNew<object>(() =>
-                //{
                 object value = method.Invoke(controller, args);
-                //}, cancelSource.Token);
                 RpcReturnData result = new RpcReturnData() { Id = data.Id };
                 var ms = new MemoryStream();
                 Serializer.Serialize(ms, value);

@@ -21,7 +21,7 @@ namespace Rpc.Server.Controller
         {
             var r = RpcFactory.GetInstance<ICaculator>(Session, "Caculator");
             var d = r.Add(a, b);
-            return a + b;
+            return a + b+d;
         }
         public List<string> GetList()
         {

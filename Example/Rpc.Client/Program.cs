@@ -31,22 +31,47 @@ namespace Rpc.Client
             while (true)
             {
                 var c= Console.ReadLine();
-                int count = 20;
+                int count = 10000;
                 if (!string.IsNullOrEmpty(c))
                     count = Convert.ToInt32(c);
                 Stopwatch sw = new Stopwatch();
                 sw.Start();
                 //Parallel.For(0, count, i =>
                 //{
-                    //var t = proxy.invoke<int>("Add", 1, -100);
-                    //var r = obj.Add(1, -100);
+                //var t = proxy.invoke<int>("Add", 1, -100);
+                //var r = obj.Add(1, -100);
                 //});
-                for (int i = 0; i < count; i++)
+                var t1= Task.Run(() =>
                 {
-                    var r = obj.Add(1, -100);
-                }
+                    for (int i = 0; i < count; i++)
+                    {
+                        var r = obj.Add(1, -100);
+                    }
+                });
+               var t2=  Task.Run(() =>
+                {
+                    for (int i = 0; i < count; i++)
+                    {
+                        var r = obj.Add(1, -100);
+                    }
+                });
+                var t3 = Task.Run(() =>
+                {
+                    for (int i = 0; i < count; i++)
+                    {
+                        var r = obj.Add(1, -100);
+                    }
+                });
+                var t4 = Task.Run(() =>
+                {
+                    for (int i = 0; i < count; i++)
+                    {
+                        var r = obj.Add(1, -100);
+                    }
+                });
+                Task.WaitAll(t1,t2,t3,t4);
                 sw.Stop();
-                Console.WriteLine("RPC完成{0}次递归调用(c=>s=>c=>s=>return算一次)，运行时间：{1} 秒{2}毫秒", count, sw.Elapsed.Seconds, sw.Elapsed.Milliseconds);
+                Console.WriteLine("RPC完成{0}次递归调用(c=>s=>c=>s=>return算一次)，运行时间：{1} 秒{2}毫秒", count*4, sw.Elapsed.Seconds, sw.Elapsed.Milliseconds);
             }
         }
         public static void SingleTest(ClientConfig config)

@@ -45,7 +45,7 @@ namespace SunRpc.Client
                     {
                         RpcCallData data = Serializer.Deserialize<RpcCallData>(ms);
                         ms.Dispose();
-                        CallProcess(data);
+                        ThreadPool.QueueUserWorkItem(CallFunc,data);
                     }
                     break;
                 case 2:
@@ -65,7 +65,11 @@ namespace SunRpc.Client
                     break;
             }
         }
-        protected async Task CallProcess(RpcCallData data)
+        public void CallFunc(object status)
+        {
+            CallProcess((RpcCallData)status);
+        }
+        protected void CallProcess(RpcCallData data)
         {
             try
             {
@@ -87,11 +91,7 @@ namespace SunRpc.Client
                     }
                 }
                 RpcReturnData result = new RpcReturnData() { Id = data.Id };
-                var cancelSource = new CancellationTokenSource(config.LocalInvokeTimeout);//超时处理
-                object value = await Task.Factory.StartNew<object>(() =>
-                  {
-                      return method.Invoke(controller, args);
-                  }, cancelSource.Token);
+                object value = method.Invoke(controller, args);
                 var ms = new MemoryStream();
                 Serializer.Serialize(ms, value);
                 result.Value = ms.ToArray();
