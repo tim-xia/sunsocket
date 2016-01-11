@@ -51,7 +51,7 @@ namespace SunRpc.Server
             if (returnType == voidType)
                 return null;
             var ms = new MemoryStream(data, 0, data.Length);
-            var result = Serializer.Deserialize(returnType, ms);
+            var result = Serializer.NonGeneric.Deserialize(returnType, ms);
             ms.Dispose();
             return result;
         }

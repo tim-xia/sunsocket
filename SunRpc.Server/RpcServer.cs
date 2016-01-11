@@ -93,7 +93,7 @@ namespace SunRpc.Server
                     {
                         var arg = data.Arguments[i];
                         MemoryStream stream = new MemoryStream(arg, 0, arg.Length);
-                        var obj = Serializer.Deserialize(types[i], stream);
+                        var obj = Serializer.NonGeneric.Deserialize(types[i], stream);
                         args[i] = obj;
                         stream.Dispose();
                     }

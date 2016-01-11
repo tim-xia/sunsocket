@@ -85,7 +85,7 @@ namespace SunRpc.Client
                     {
                         var arg = data.Arguments[i];
                         MemoryStream stream = new MemoryStream(arg, 0, arg.Length);
-                        var obj = Serializer.Deserialize(types[i], stream);
+                        var obj = Serializer.NonGeneric.Deserialize(types[i], stream);
                         args[i] = obj;
                         stream.Dispose();
                     }
@@ -141,7 +141,7 @@ namespace SunRpc.Client
             if (returnType == voidType)
                 return null;
             var ms = new MemoryStream(data, 0, data.Length);
-            var result = Serializer.Deserialize(returnType, ms);
+            var result = Serializer.NonGeneric.Deserialize(returnType, ms);
             ms.Dispose();
             return result;
         }

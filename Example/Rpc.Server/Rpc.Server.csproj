@@ -45,7 +45,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Controller\Caculator.cs" />
-    <Compile Include="IClient\ICaculator.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
@@ -68,6 +67,10 @@
     <ProjectReference Include="..\..\SunSocket.Server\SunSocket.Server.csproj">
       <Project>{1c5a17aa-3fbe-4c65-b148-28a2bfd35c21}</Project>
       <Name>SunSocket.Server</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Rpc.Interface\Rpc.Interface.csproj">
+      <Project>{758d0781-9325-4f18-a6ff-f333b2c2bf29}</Project>
+      <Name>Rpc.Interface</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

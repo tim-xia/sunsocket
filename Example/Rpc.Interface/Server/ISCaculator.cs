@@ -4,10 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Rpc.Client
+namespace Rpc.Interface.Server
 {
-    public interface ICaculator
+    public interface ISCaculator
     {
         int Add(int a, int b);
+        void BroadCast(string message);
     }
 }

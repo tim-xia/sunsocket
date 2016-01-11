@@ -7,6 +7,8 @@ using System.Net;
 using SunSocket.Core.Interface;
 using SunRpc.Client;
 using System.Diagnostics;
+using Rpc.Interface.Server;
+using System.IO;
 
 namespace Rpc.Client
 {
@@ -21,13 +23,28 @@ namespace Rpc.Client
             config.Loger = loger;
             config.BinPath = AppDomain.CurrentDomain.BaseDirectory;
             // SingleTest(config);
-            proxyTest(config);
+            //proxyTest(config);
+            MessageTest(config);
+        }
+        public static void MessageTest(ClientConfig config)
+        {
+            ProxyFactory fac = new ProxyFactory(config);
+            Connect conn = fac.GetConnect();
+            ISCaculator obj = conn.GetInstance<ISCaculator>("Caculator");
+            while (true)
+            {
+                string c = Console.ReadLine();
+                if (!string.IsNullOrEmpty(c))
+                {
+                    obj.BroadCast("给大家来个广播");
+                }
+            }
         }
         public static void proxyTest(ClientConfig config)
         {
             ProxyFactory fac = new ProxyFactory(config);
             Connect conn = fac.GetConnect();
-            ICaculator obj = conn.GetInstance<ICaculator>("Caculator");
+            ISCaculator obj = conn.GetInstance<ISCaculator>("Caculator");
             while (true)
             {
                 var c= Console.ReadLine();
@@ -36,11 +53,6 @@ namespace Rpc.Client
                     count = Convert.ToInt32(c);
                 Stopwatch sw = new Stopwatch();
                 sw.Start();
-                //Parallel.For(0, count, i =>
-                //{
-                //var t = proxy.invoke<int>("Add", 1, -100);
-                //var r = obj.Add(1, -100);
-                //});
                 var t1= Task.Run(() =>
                 {
                     for (int i = 0; i < count; i++)
