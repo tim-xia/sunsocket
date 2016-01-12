@@ -32,6 +32,14 @@ namespace SunRpc.Server
                 tSource.SetResult(data.Value);
             }
         }
+        public void ReturnError(RpcErrorInfo info)
+        {
+            TaskCompletionSource<byte[]> tSource;
+            if (taskDict.TryRemove(info.Id, out tSource))
+            {
+                tSource.SetException(new Exception(info.Message));
+            }
+        }
         static Type voidType = typeof(void);
         public async Task<T> Invoke<T>(string controller, string action, params object[] arguments)
         {

@@ -44,14 +44,12 @@ namespace SunRpc.Client
                 case 1:
                     {
                         RpcCallData data = Serializer.Deserialize<RpcCallData>(ms);
-                        ms.Dispose();
-                        ThreadPool.QueueUserWorkItem(CallFunc,data);
+                        ThreadPool.QueueUserWorkItem(CallFunc, data);
                     }
                     break;
                 case 2:
                     {
                         var data = Serializer.Deserialize<RpcReturnData>(ms);
-                        ms.Dispose();
                         TaskCompletionSource<byte[]> tSource;
                         if (taskDict.TryRemove(data.Id, out tSource))
                         {
@@ -61,9 +59,16 @@ namespace SunRpc.Client
                     break;
                 default:
                     {
+                        var info = Serializer.Deserialize<RpcErrorInfo>(ms);
+                        TaskCompletionSource<byte[]> tSource;
+                        if (taskDict.TryRemove(info.Id, out tSource))
+                        {
+                            tSource.SetException(new Exception(info.Message));
+                        }
                     }
                     break;
             }
+            ms.Dispose();
         }
         public void CallFunc(object status)
         {
@@ -107,11 +112,14 @@ namespace SunRpc.Client
             }
             catch (Exception e)
             {
+                RpcErrorInfo error = new RpcErrorInfo() { Id = data.Id, Message = e.Message };
                 var ms = new MemoryStream();
                 ms.WriteByte(0);
-                var msgBytes = Encoding.UTF8.GetBytes(e.Message);
-                ms.Write(msgBytes, 0, msgBytes.Length);
-                SendAsync(ms.ToArray());
+                Serializer.Serialize(ms, error);
+                byte[] rBytes = new byte[ms.Position];
+                Buffer.BlockCopy(ms.GetBuffer(), 0, rBytes, 0, rBytes.Length);
+                SendAsync(rBytes);
+                ms.Dispose();
             }
         }
         public ConcurrentDictionary<string, List<Type>> methodParasDict = new ConcurrentDictionary<string, List<Type>>();

@@ -41,31 +41,29 @@ namespace SunRpc.Server
         public override void OnReceived(ITcpSession session, IDynamicBuffer dataBuffer)
         {
             int cmd = dataBuffer.Buffer[0];
+            MemoryStream ms = new MemoryStream(dataBuffer.Buffer, 1, dataBuffer.DataSize - 1);
             switch (cmd)
             {
                 case 1:
                     {
-                        MemoryStream ms = new MemoryStream(dataBuffer.Buffer, 1, dataBuffer.DataSize - 1);
                         RpcCallData data = Serializer.Deserialize<RpcCallData>(ms);
-                        ms.Dispose();
                         ThreadPool.QueueUserWorkItem(CallFunc, new CallStatus() { Session = session, Data = data });
                     }
                     break;
                 case 2:
                     {
-                        MemoryStream ms = new MemoryStream(dataBuffer.Buffer, 1, dataBuffer.DataSize - 1);
                         var data = Serializer.Deserialize<RpcReturnData>(ms);
-                        ms.Dispose();
                         RpcFactory.GetInvoke(session.SessionId).ReturnData(data);
                     }
                     break;
                 default:
                     {
-                        var d = 6;
-                        var b = d;
+                        var data = Serializer.Deserialize<RpcErrorInfo>(ms);
+                        RpcFactory.GetInvoke(session.SessionId).ReturnError(data);
                     }
                     break;
             }
+            ms.Dispose();
         }
         public void CallFunc(object status)
         {
@@ -115,11 +113,14 @@ namespace SunRpc.Server
             }
             catch (Exception e)
             {
+                RpcErrorInfo error = new RpcErrorInfo() { Id = data.Id, Message = e.Message };
                 var ms = new MemoryStream();
                 ms.WriteByte(0);
-                var msgBytes = Encoding.UTF8.GetBytes(e.Message);
-                ms.Write(msgBytes, 0, msgBytes.Length);
-                session.SendAsync(ms.ToArray());
+                Serializer.Serialize(ms, error);
+                byte[] rBytes = new byte[ms.Position];
+                Buffer.BlockCopy(ms.GetBuffer(), 0, rBytes, 0, rBytes.Length);
+                session.SendAsync(rBytes);
+                ms.Dispose();
             }
         }
         public ConcurrentDictionary<string, List<Type>> methodParasDict = new ConcurrentDictionary<string, List<Type>>();
