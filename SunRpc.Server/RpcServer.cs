@@ -136,8 +136,15 @@ namespace SunRpc.Server
         }
         public override void OnConnected(ITcpSession session)
         {
-            var invoke = new RpcInvoke(session, rpcConfig.RemoteInvokeTimeout);
-            RpcFactory.invokeDict.TryAdd(session.SessionId, invoke);
+            if (!RpcFactory.invokeDict.ContainsKey(session.SessionId))
+            {
+                var invoke = new RpcInvoke(session, rpcConfig.RemoteInvokeTimeout);
+                RpcFactory.invokeDict.TryAdd(session.SessionId, invoke);
+            }
+        }
+        public override void OnDisConnect(ITcpSession session)
+        {
+            RpcFactory.GetInvoke(session.SessionId).DisConnect();
         }
     }
 }

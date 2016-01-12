@@ -208,7 +208,10 @@ namespace SunRpc.Client
         }
         public override void OnDisConnect(ITcpClientSession session)
         {
-            Console.WriteLine("与服务器断开连接");
+            foreach (var taskSource in taskDict.Values)
+            {
+                taskSource.SetException(new Exception("Disconnected with the server"));
+            }
         }
     }
 }

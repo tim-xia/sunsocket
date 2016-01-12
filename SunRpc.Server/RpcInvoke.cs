@@ -40,6 +40,13 @@ namespace SunRpc.Server
                 tSource.SetException(new Exception(info.Message));
             }
         }
+        public void DisConnect()
+        {
+            foreach (var taskSource in taskDict.Values)
+            {
+                taskSource.SetException(new Exception("Disconnected with the server"));
+            }
+        }
         static Type voidType = typeof(void);
         public async Task<T> Invoke<T>(string controller, string action, params object[] arguments)
         {
