@@ -24,19 +24,19 @@ namespace SunRpc.Server
     }
     public class RpcServer : TcpServer
     {
-        IocContainer<IServerController> iocContainer;
+        RpcContainer<IServerController> rpcContainer;
         ProxyFactory RpcFactory;
         RpcServerConfig rpcConfig;
         public RpcServer(RpcServerConfig config, ILoger loger) : base(config, loger)
         {
             rpcConfig = config;
-            iocContainer = new IocContainer<IServerController>();
+            rpcContainer = new RpcContainer<IServerController>();
             RpcFactory = new ProxyFactory(config);
         }
         public override void Start()
         {
             base.Start();
-            iocContainer.Load(rpcConfig.BinPath);
+            rpcContainer.Load(rpcConfig.BinPath);
         }
         public override void OnReceived(ITcpSession session, IDynamicBuffer dataBuffer)
         {
@@ -72,8 +72,8 @@ namespace SunRpc.Server
         }
         protected void CallProcess(ITcpSession session, RpcCallData data)
         {
-            IServerController controller = iocContainer.GetController(data.Controller);
-            if (!controller.SingleInstance)
+            IServerController controller = rpcContainer.GetController(session.SessionId,data.Controller);
+            if (controller.Session==null)
             {
                 controller.Session =session;
                 controller.RpcFactory = RpcFactory;
@@ -81,7 +81,7 @@ namespace SunRpc.Server
             try
             {
                 string key = (data.Controller + ":" + data.Action).ToLower();
-                var method = iocContainer.GetMethod(key);
+                var method = rpcContainer.GetMethod(key);
                 object[] args = null;
                 if (data.Arguments != null && data.Arguments.Count > 0)
                 {
@@ -129,7 +129,7 @@ namespace SunRpc.Server
             List<Type> result;
             if (!methodParasDict.TryGetValue(key, out result))
             {
-                result = iocContainer.GetMethod(key).GetParameters().Select(p => p.ParameterType).ToList();
+                result = rpcContainer.GetMethod(key).GetParameters().Select(p => p.ParameterType).ToList();
                 methodParasDict.TryAdd(key, result);
             }
             return result;
@@ -141,10 +141,12 @@ namespace SunRpc.Server
                 var invoke = new RpcInvoke(session, rpcConfig.RemoteInvokeTimeout);
                 RpcFactory.invokeDict.TryAdd(session.SessionId, invoke);
             }
+            rpcContainer.CreateScope(session.SessionId);
         }
         public override void OnDisConnect(ITcpSession session)
         {
             RpcFactory.GetInvoke(session.SessionId).DisConnect();
+            rpcContainer.DestroyScope(session.SessionId);
         }
     }
 }

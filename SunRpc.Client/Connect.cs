@@ -29,7 +29,7 @@ namespace SunRpc.Client
             idGenerator = new LoopId();
             this.config = config;
         }
-        public IocContainer<IClentController> TypeContainer
+        public RpcContainer<IClentController> RpcContainer
         {
             get;
             set;
@@ -78,9 +78,9 @@ namespace SunRpc.Client
         {
             try
             {
-                IClentController controller = TypeContainer.GetController(data.Controller);
+                IClentController controller = RpcContainer.GetController(SessionId,data.Controller);
                 string key = (data.Controller + ":" + data.Action).ToLower();
-                var method = TypeContainer.GetMethod(key);
+                var method = RpcContainer.GetMethod(key);
                 object[] args = null;
                 if (data.Arguments != null && data.Arguments.Count > 0)
                 {
@@ -128,7 +128,7 @@ namespace SunRpc.Client
             List<Type> result;
             if (!methodParasDict.TryGetValue(key, out result))
             {
-                result = TypeContainer.GetMethod(key).GetParameters().Select(p => p.ParameterType).ToList();
+                result = RpcContainer.GetMethod(key).GetParameters().Select(p => p.ParameterType).ToList();
                 methodParasDict.TryAdd(key, result);
             }
             return result;
@@ -206,8 +206,13 @@ namespace SunRpc.Client
             var proxy = GetProxy<T>(impName);
             return proxy.GetTransparentProxy() as T;
         }
+        public override void OnConnected(ITcpClientSession session)
+        {
+            RpcContainer.CreateScope(session.SessionId);
+        }
         public override void OnDisConnect(ITcpClientSession session)
         {
+            RpcContainer.DestroyScope(session.SessionId);
             foreach (var taskSource in taskDict.Values)
             {
                 taskSource.SetException(new Exception("Disconnected with the server"));

@@ -11,18 +11,15 @@ namespace Rpc.Server.Controller
 {
     public class Caculator:ServerController,ISCaculator
     {
-        public override bool SingleInstance
-        {
-            get
-            {
-                return base.SingleInstance;
-            }
-        }
+        int q = 1;
         public int Add(int a, int b)
         {
-            var r = RpcFactory.GetInstance<ICaculator>(Session, "Caculator");
-            var d = r.Add(a, b);
-            return a + b+d;
+            int d = 10;
+            q = d;
+            //var r = RpcFactory.GetInstance<ICaculator>(Session, "Caculator");
+            //var d = r.Add(a, b);
+            //return a + b+d;
+            return a + b;
         }
 
         public void BroadCast(string message)

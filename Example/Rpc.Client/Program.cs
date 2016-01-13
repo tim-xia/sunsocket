@@ -44,7 +44,7 @@ namespace Rpc.Client
         {
             ProxyFactory fac = new ProxyFactory(config);
             Connect conn = fac.GetConnect();
-            ISCaculator obj = conn.GetInstance<ISCaculator>("Caculator");
+            ISCaculator caculator = conn.GetInstance<ISCaculator>("Caculator");
             while (true)
             {
                 var c= Console.ReadLine();
@@ -53,37 +53,38 @@ namespace Rpc.Client
                     count = Convert.ToInt32(c);
                 Stopwatch sw = new Stopwatch();
                 sw.Start();
-                var t1= Task.Run(() =>
-                {
-                    for (int i = 0; i < count; i++)
-                    {
-                        var r = obj.Add(1, -100);
-                    }
-                });
-               var t2=  Task.Run(() =>
-                {
-                    for (int i = 0; i < count; i++)
-                    {
-                        var r = obj.Add(1, -100);
-                    }
-                });
+                var t1 = Task.Run(() =>
+                 {
+                     for (int i = 0; i < count; i++)
+                     {
+                         var r = caculator.Add(1, -100);
+                     }
+                 });
+                var t2 = Task.Run(() =>
+                 {
+                     for (int i = 0; i < count; i++)
+                     {
+                         var r = caculator.Add(1, -100);
+                     }
+                 });
                 var t3 = Task.Run(() =>
                 {
                     for (int i = 0; i < count; i++)
                     {
-                        var r = obj.Add(1, -100);
+                        var r = caculator.Add(1, -100);
                     }
                 });
                 var t4 = Task.Run(() =>
                 {
                     for (int i = 0; i < count; i++)
                     {
-                        var r = obj.Add(1, -100);
+                        var r = caculator.Add(1, -100);
                     }
                 });
-                Task.WaitAll(t1,t2,t3,t4);
+                Task.WaitAll(t1, t2, t3, t4);
                 sw.Stop();
-                Console.WriteLine("RPC完成{0}次递归调用(c=>s=>c=>s=>return算一次)，运行时间：{1} 秒{2}毫秒", count*4, sw.Elapsed.Seconds, sw.Elapsed.Milliseconds);
+                Console.WriteLine("RPC对服务器完成{0}次单向调用，运行时间：{1} 秒{2}毫秒", count * 4, sw.Elapsed.Seconds, sw.Elapsed.Milliseconds);
+                //Console.WriteLine("RPC对服务器完成{0}次递归调用(服务器方法内部再调用一次客户端的方法)，运行时间：{1} 秒{2}毫秒", count*4, sw.Elapsed.Seconds, sw.Elapsed.Milliseconds);
             }
         }
         public static void SingleTest(ClientConfig config)

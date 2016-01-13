@@ -11,12 +11,12 @@ namespace SunRpc.Client
 {
     public class ProxyFactory
     {
-        IocContainer<IClentController> iocContainer;
+        RpcContainer<IClentController> rpcContainer;
         public ProxyFactory(ClientConfig config)
         {
             this.Config = config;
-            iocContainer = new IocContainer<IClentController>();
-            iocContainer.Load(config.BinPath);
+            rpcContainer = new RpcContainer<IClentController>();
+            rpcContainer.Load(config.BinPath);
             sessionId = new SessionId(1);
         }
         SessionId sessionId;
@@ -30,7 +30,7 @@ namespace SunRpc.Client
             var connect = new Connect(Config);
             connect.SessionId = sessionId.NewId();
             connect.Connect();
-            connect.TypeContainer = iocContainer;
+            connect.RpcContainer = rpcContainer;
             return connect;
         }
     }

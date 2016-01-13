@@ -12,6 +12,5 @@ namespace SunRpc.Server
         void Execute(ITcpSession session);
         ITcpSession Session { get; set; }
         ProxyFactory RpcFactory { get; set; }
-        bool SingleInstance { get; }
     }
 }

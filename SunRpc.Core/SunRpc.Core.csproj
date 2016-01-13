@@ -51,7 +51,8 @@
   <ItemGroup>
     <Compile Include="Controller\ActionAttribute.cs" />
     <Compile Include="Controller\ControllerAttribute.cs" />
-    <Compile Include="Ioc\IocContainer.cs" />
+    <Compile Include="Ioc\InstanceLifeTime.cs" />
+    <Compile Include="Ioc\RpcContainer.cs" />
     <Compile Include="Ioc\CoreIoc.cs" />
     <Compile Include="IRpcInvoke.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

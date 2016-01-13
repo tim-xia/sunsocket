@@ -21,14 +21,6 @@ namespace SunRpc.Server
             set;
         }
 
-        public virtual bool SingleInstance
-        {
-            get
-            {
-                return false;
-            }
-        }
-
         public virtual void Execute(ITcpSession session)
         {
 
