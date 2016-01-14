@@ -5,16 +5,19 @@ using System.Collections.Concurrent;
 using Autofac;
 using System.IO;
 using System.Reflection;
+using SunRpc.Core;
 using SunRpc.Core.Controller;
 
 namespace SunRpc.Core.Ioc
 {
     public class RpcContainer<T> where T :class
     {
-         Type rpcBaseType;
+        Type rpcControllerBaseType;
+        Type rpcInterfaceBaseType;
         public RpcContainer()
         {
-            this.rpcBaseType = typeof(T);
+            this.rpcControllerBaseType = typeof(T);
+            this.rpcInterfaceBaseType = typeof(IBase);
         }
         public void Load(string fullName)
         {
@@ -65,46 +68,95 @@ namespace SunRpc.Core.Ioc
                 }
             }
         }
+        static List<string> objectMethodNames = typeof(object).GetMethods().Select(m=>m.Name).ToList();
         void LoadMehodFromFile(string fileFullName)
         {
             var assembly = Assembly.LoadFile(fileFullName);
             assembly = AppDomain.CurrentDomain.Load(assembly.GetName());
-            var allClass = from types in assembly.GetExportedTypes()
-                           where types.IsClass && types.GetInterfaces().Contains(rpcBaseType)
-                           select types;
+            var allClass = from type in assembly.GetExportedTypes()
+                           where type.IsClass && type.GetInterfaces().Contains(rpcControllerBaseType)
+                           select type;
             foreach (var c in allClass)
             {
                 var controllerAttributes = c.GetCustomAttributes(typeof(RPCAttribute), true);
-                string controllerName = c.Name;
+                string controllerName=null;
                 InstanceLifeTime lifeTime = InstanceLifeTime.PerConnect;
                 if (controllerAttributes.Length > 0)
                 {
                     RPCAttribute controllerAttribute = controllerAttributes[0] as RPCAttribute;
                     if (!string.IsNullOrEmpty(controllerAttribute.ControllerName))
-                        controllerName = controllerAttribute.ControllerName;
+                        controllerName = controllerAttribute.ControllerName.ToLower();
                     lifeTime = controllerAttribute.LifeTime;
                 }
+                var types = c.GetInterfaces().Where(t => t.GetInterfaces().Contains(rpcInterfaceBaseType));
                 switch (lifeTime)
                 {
-                    case InstanceLifeTime.Single: CoreIoc.IocBuilder.RegisterType(c).Named(controllerName, rpcBaseType).SingleInstance();break;
-                    case InstanceLifeTime.PerGet: CoreIoc.IocBuilder.RegisterType(c).Named(controllerName, rpcBaseType); break;
-                    default: CoreIoc.IocBuilder.RegisterType(c).Named(controllerName, rpcBaseType).InstancePerLifetimeScope(); break;
+                    case InstanceLifeTime.Single: {
+                            if (controllerName != null)
+                                CoreIoc.IocBuilder.RegisterType(c).Named(controllerName, rpcControllerBaseType).SingleInstance();
+                            else
+                            {
+                                foreach (var type in types)
+                                {
+                                    CoreIoc.IocBuilder.RegisterType(c).Named(type.Name.ToLower(), rpcControllerBaseType).SingleInstance();
+                                }
+                            }
+                        };break;
+                    case InstanceLifeTime.PerGet:
+                        {
+                            if (controllerName != null)
+                                CoreIoc.IocBuilder.RegisterType(c).Named(controllerName, rpcControllerBaseType);
+                            else
+                            {
+                                foreach (var type in types)
+                                {
+                                    CoreIoc.IocBuilder.RegisterType(c).Named(type.Name.ToLower(), rpcControllerBaseType);
+                                }
+                            }
+                        }; break;
+                    default:
+                        {
+                            if (controllerName != null)
+                                CoreIoc.IocBuilder.RegisterType(c).Named(controllerName, rpcControllerBaseType).InstancePerLifetimeScope();
+                            else
+                            {
+                                foreach (var type in types)
+                                {
+                                    CoreIoc.IocBuilder.RegisterType(c).Named(type.Name.ToLower(), rpcControllerBaseType).InstancePerLifetimeScope();
+                                }
+                            }
+                        }; break;
                 }
-                var list = c.GetMethods();
+                var list = c.GetMethods().Where(m=>!objectMethodNames.Contains(m.Name));
                 foreach (var method in list)
                 {
-                    var methodAttributes = method.GetCustomAttributes(typeof(RPCAttribute), true);
-                    string methodName = method.Name;
+                    var methodAttributes = method.GetCustomAttributes(typeof(ActionAttribute), true);
                     if (methodAttributes.Length > 0)
                     {
+                        string methodName = method.Name;
                         ActionAttribute actionAttribute = methodAttributes[0] as ActionAttribute;
                         if (!string.IsNullOrEmpty(actionAttribute.ActionName))
                             methodName = actionAttribute.ActionName;
-                    }
-
-                    if (!methodDict.TryAdd((controllerName + ":" + methodName).ToLower(), method))
-                    {
-                        throw new Exception("Rpc方法不允许重名");
+                        if (controllerName != null)
+                        {
+                            if (!methodDict.TryAdd((controllerName + ":" + methodName).ToLower(), method))
+                            {
+                                throw new Exception("Rpc方法不允许重名");
+                            }
+                        }
+                        else
+                        {
+                            foreach (var type in types)
+                            {
+                                if (type.GetMethods().Select(m => m.Name).Contains(methodName))
+                                {
+                                    if (!methodDict.TryAdd((type.Name + ":" + methodName).ToLower(), method))
+                                    {
+                                        throw new Exception("Rpc方法不允许重名");
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
             }

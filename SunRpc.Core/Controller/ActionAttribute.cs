@@ -9,7 +9,7 @@ namespace SunRpc.Core.Controller
     [AttributeUsage(AttributeTargets.Method, AllowMultiple = false, Inherited = false)]
     public class ActionAttribute:Attribute
     {
-        public ActionAttribute(string actionName)
+        public ActionAttribute(string actionName=null)
         {
             this.ActionName = actionName;
         }

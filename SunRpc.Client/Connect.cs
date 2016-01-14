@@ -78,7 +78,7 @@ namespace SunRpc.Client
         {
             try
             {
-                IClentController controller = RpcContainer.GetController(SessionId,data.Controller);
+                IClentController controller = RpcContainer.GetController(SessionId,data.Controller.ToLower());
                 string key = (data.Controller + ":" + data.Action).ToLower();
                 var method = RpcContainer.GetMethod(key);
                 object[] args = null;
@@ -195,13 +195,14 @@ namespace SunRpc.Client
             tSource.Task.Wait(cancelSource.Token);
             return await tSource.Task;
         }
-        public RpcProxy GetProxy<T>(string impName) where T : class
+        public RpcProxy GetProxy<T>(string impName=null) where T : class
         {
+            if (string.IsNullOrEmpty(impName)) impName = typeof(T).Name;
             var proxy = new RpcProxy(typeof(T), impName);
             proxy.RpcInvoke = this;
             return proxy;
         }
-        public T GetInstance<T>(string impName) where T : class
+        public T GetInstance<T>(string impName=null) where T : class
         {
             var proxy = GetProxy<T>(impName);
             return proxy.GetTransparentProxy() as T;

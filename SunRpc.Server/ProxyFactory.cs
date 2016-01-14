@@ -24,18 +24,5 @@ namespace SunRpc.Server
             invokeDict.TryGetValue(SessionId, out invoke);
             return invoke;
         }
-        public RpcProxy GetProxy<T>(ITcpSession session,string impName) where T : class
-        {
-            if (session == null) throw new Exception("session Can't be empty");
-            var proxy = new RpcProxy(typeof(T), impName);
-            proxy.RpcInvoke = GetInvoke(session.SessionId);
-            return proxy;
-        }
-        public T GetInstance<T>(ITcpSession session, string impName) where T : class
-        {
-            if (session == null) throw new Exception("session Can't be empty");
-            var proxy = GetProxy<T>(session, impName);
-            return proxy.GetTransparentProxy() as T;
-        }
     }
 }

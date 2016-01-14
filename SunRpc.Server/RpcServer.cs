@@ -72,11 +72,10 @@ namespace SunRpc.Server
         }
         protected void CallProcess(ITcpSession session, RpcCallData data)
         {
-            IServerController controller = rpcContainer.GetController(session.SessionId,data.Controller);
+            IServerController controller = rpcContainer.GetController(session.SessionId,data.Controller.ToLower());
             if (controller.Session==null)
             {
                 controller.Session =session;
-                controller.RpcFactory = RpcFactory;
             }
             try
             {
@@ -141,6 +140,7 @@ namespace SunRpc.Server
                 var invoke = new RpcInvoke(session, rpcConfig.RemoteInvokeTimeout);
                 RpcFactory.invokeDict.TryAdd(session.SessionId, invoke);
             }
+            session.SessionData.Set("proxyfactory",RpcFactory);
             rpcContainer.CreateScope(session.SessionId);
         }
         public override void OnDisConnect(ITcpSession session)

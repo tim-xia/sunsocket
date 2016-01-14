@@ -9,12 +9,6 @@ namespace SunRpc.Server
 {
     public abstract class ServerController : IServerController
     {
-        public ProxyFactory RpcFactory
-        {
-            get;
-            set;
-        }
-
         public ITcpSession Session
         {
             get;

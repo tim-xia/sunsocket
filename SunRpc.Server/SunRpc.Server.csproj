@@ -52,6 +52,7 @@
     <Compile Include="RpcServer.cs" />
     <Compile Include="RpcServerConfig.cs" />
     <Compile Include="ServerController.cs" />
+    <Compile Include="SessionExtensions.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
