@@ -109,6 +109,10 @@ namespace SunSocket.Server
         {
 
         }
+        public virtual void OnError(ITcpSession seseion, Exception error)
+        {
+
+        }
         //断开连接事件
         public virtual void OnDisConnect(ITcpSession session) {
             

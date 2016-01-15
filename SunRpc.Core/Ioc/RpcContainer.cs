@@ -41,7 +41,7 @@ namespace SunRpc.Core.Ioc
         public void DestroyScope(uint id)
         {
             ILifetimeScope scope;
-            if (iocScopeDict.TryGetValue(id, out scope))
+            if (iocScopeDict.TryRemove(id, out scope))
             {
                 scope.Dispose();
             }
